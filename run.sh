@@ -28,10 +28,18 @@ fi
 
 # 3. Start PostgreSQL Containers
 echo -e "\n${GREEN}[1/5] Spinning up main and sandbox PostgreSQL databases...${NC}"
-if docker compose version &> /dev/null; then
-    docker compose up -d
+
+# Detect if the local user has access to docker socket or if sudo is required
+USE_SUDO=""
+if ! docker ps &> /dev/null; then
+    echo -e "${YELLOW}Docker socket permission denied. Using 'sudo' for Docker commands...${NC}"
+    USE_SUDO="sudo"
+fi
+
+if $USE_SUDO docker compose version &> /dev/null; then
+    $USE_SUDO docker compose up -d
 else
-    docker-compose up -d
+    $USE_SUDO docker-compose up -d
 fi
 
 echo -e "${YELLOW}Waiting 6 seconds for PostgreSQL services to initialize...${NC}"

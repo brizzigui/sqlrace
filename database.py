@@ -109,13 +109,16 @@ def init_db():
         """)
 
         # Seed default admin if not exists
-        cur.execute("SELECT id FROM teams WHERE username = 'admin';")
+        admin_username = os.getenv('ADMIN_USERNAME', 'admin')
+        admin_password = os.getenv('ADMIN_PASSWORD', 'admin123')
+        
+        cur.execute("SELECT id FROM teams WHERE username = %s;", (admin_username,))
         if not cur.fetchone():
-            hashed_pw = generate_password_hash("admin123")
+            hashed_pw = generate_password_hash(admin_password)
             cur.execute("""
             INSERT INTO teams (username, password_hash, is_admin)
-            VALUES ('admin', %s, TRUE);
-            """, (hashed_pw,))
-            print("Default admin account created: admin / admin123")
+            VALUES (%s, %s, TRUE);
+            """, (admin_username, hashed_pw))
+            print(f"Default admin account created: {admin_username} / {admin_password}")
         
     print("Database tables initialized successfully.")

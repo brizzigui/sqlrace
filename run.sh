@@ -63,6 +63,11 @@ python init_db.py
 echo -e "\n${GREEN}[5/5] Launching competitive arena server...${NC}"
 echo -e "${CYAN}----------------------------------------------------${NC}"
 echo -e "${GREEN}Server starting successfully!${NC}"
-echo -e "${CYAN}Open http://localhost:5000 in your browser to access the Arena.${NC}"
+
+# Read PORT from .env, fallback to 5000 if not found
+PORT_VAL=$(grep -E "^PORT=" .env | cut -d= -f2 | tr -d '\r' || echo "5000")
+PORT_VAL=${PORT_VAL:-5000}
+
+echo -e "${CYAN}Open http://localhost:${PORT_VAL} in your browser to access the Arena.${NC}"
 echo -e "${CYAN}----------------------------------------------------${NC}"
 python app.py

@@ -19,6 +19,7 @@ TRANSLATIONS = {
         'auth_join_sub': 'Register your team to participate in SQL challenges',
         'auth_already_team': 'Already have a team?',
         'auth_login_here': 'Log in here',
+        'auth_enter_arena': 'Login',
 
         # Contests List
         'arena_enter_arena': 'Enter Arena',
@@ -148,6 +149,7 @@ TRANSLATIONS = {
         'auth_join_sub': 'Registre sua equipe para participar dos desafios SQL',
         'auth_already_team': 'Já tem uma equipe?',
         'auth_login_here': 'Faça login aqui',
+        'auth_enter_arena': 'Login',
 
         # Contests List
         'arena_enter_arena': 'Entrar na Arena',

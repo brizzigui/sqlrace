@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SQL Race - Competition SQL Judge{% endblock %}</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <!-- Main Style -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="dark-theme">
+    <header class="app-header">
+        <div class="header-container">
+            <a href="/" class="app-logo">
+                <span class="logo-accent">&lt;SQL/&gt;</span> RACE
+            </a>
+            <nav class="app-nav">
+                {% if session.get('team_id') %}
+                    <a href="{{ url_for('contest.contests_list') }}" class="nav-link">Contests</a>
+                    {% if session.get('is_admin') %}
+                        <a href="{{ url_for('admin.admin_dashboard') }}" class="nav-link admin-tag">Admin Dashboard</a>
+                    {% endif %}
+                    <span class="nav-user">Team: <strong>{{ session.get('username') }}</strong></span>
+                    <a href="{{ url_for('auth.logout') }}" class="nav-btn logout-btn">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
+                    <a href="{{ url_for('auth.register') }}" class="nav-btn register-btn">Register Team</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="app-content">
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} fade-in">
+                            <span class="alert-message">{{ message }}</span>
+                            <button class="alert-close" onclick="this.parentElement.remove();">&times;</button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="app-footer">
+        <div class="footer-container">
+            <p>&copy; 2026 SQL Race Judge. Built for premium database competitions.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

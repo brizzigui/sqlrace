@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Editor - {{ question.title }} - SQL Race{% endblock %}
+
+{% block content %}
+<div class="editor-workspace fade-in">
+    <!-- Left Pane: Problem Description and Schema -->
+    <div class="workspace-panel panel-left">
+        <div class="panel-header">
+            <a href="{{ url_for('contest.contest_dashboard', contest_id=contest.id) }}" class="back-link">&larr; Back to Contest</a>
+            <div class="contest-timer-small">
+                Ends in: <span class="contest-timer" data-endtime="{{ contest.end_time }}" data-starttime="{{ contest.start_time }}">...</span>
+            </div>
+        </div>
+        
+        <div class="panel-body scrollable">
+            <div class="problem-intro">
+                <span class="badge points-badge">{{ question.points }} Points</span>
+                <h1>{{ question.title }}</h1>
+            </div>
+            
+            <div class="problem-description">
+                {{ question.description | safe }}
+            </div>
+            
+            <div class="schema-viewer">
+                <h3>Sandbox Database Schema</h3>
+                <p>The sandbox environment initializes the following tables before running your query:</p>
+                <div class="code-container">
+                    <pre><code class="language-sql">{{ question.init_sql }}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Pane: SQL Editor and Output Consoles -->
+    <div class="workspace-panel panel-right">
+        <div class="panel-header">
+            <span class="editor-label">SQL Query Editor</span>
+            <span class="db-indicator">Target DB: <code>sqlrace_sandbox</code></span>
+        </div>
+        
+        <div class="panel-body split-vertical">
+            <!-- Code Editor Section -->
+            <div class="editor-section">
+                <form id="submission-form" data-submiturl="{{ url_for('contest.submit_query', contest_id=contest.id, question_id=question.id) }}">
+                    <div class="textarea-wrapper">
+                        <textarea id="sql-code-editor" name="query" placeholder="-- Write your SQL query here&#10;-- Example: SELECT * FROM users;&#10;" required spellcheck="false" autofocus></textarea>
+                    </div>
+                    <div class="editor-controls">
+                        {% if contest.is_active %}
+                            <button type="submit" id="run-btn" class="btn btn-success">🚀 Run & Submit</button>
+                        {% else %}
+                            <button type="button" class="btn btn-secondary" disabled>Contest Inactive</button>
+                        {% endif %}
+                        <div id="loading-spinner" class="spinner hidden"></div>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Output Console Section -->
+            <div class="console-section">
+                <div class="console-tabs">
+                    <button class="console-tab-btn active" onclick="switchConsoleTab('result')">Console Output</button>
+                    <button class="console-tab-btn" onclick="switchConsoleTab('history')">Submission History ({{ submissions | length }})</button>
+                </div>
+                
+                <div class="console-content-wrapper">
+                    <!-- Tab 1: Live Results -->
+                    <div id="console-tab-result" class="console-tab-content active">
+                        <div id="empty-console-state" class="console-message">
+                            <p>Write your query and click "Run & Submit" to evaluate and view outputs here.</p>
+                        </div>
+                        
+                        <!-- Status Banner -->
+                        <div id="result-status-banner" class="status-banner hidden">
+                            <span class="status-icon"></span>
+                            <span id="result-status-text">Pending</span>
+                        </div>
+                        
+                        <!-- Error Display -->
+                        <div id="result-error-container" class="error-container hidden">
+                            <h4>Runtime Error Details:</h4>
+                            <pre><code id="result-error-text"></code></pre>
+                        </div>
+                        
+                        <!-- Results Table -->
+                        <div id="result-table-container" class="result-table-container hidden">
+                            <h4>Returned Result Set:</h4>
+                            <div class="table-scroll">
+                                <table id="result-data-table" class="data-table">
+                                    <thead>
+                                        <tr id="result-table-header"></tr>
+                                    </thead>
+                                    <tbody id="result-table-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab 2: Submissions History -->
+                    <div id="console-tab-history" class="console-tab-content">
+                        <div class="history-list">
+                            {% if submissions %}
+                                {% for sub in submissions %}
+                                    <div class="history-item">
+                                        <div class="history-item-header">
+                                            <span class="status-badge badge-{{ sub.status | lower }}">{{ sub.status }}</span>
+                                            <span class="history-time">{{ sub.submitted_at }}</span>
+                                        </div>
+                                        <div class="history-query-box">
+                                            <pre><code class="language-sql">{{ sub.query }}</code></pre>
+                                        </div>
+                                        {% if sub.error_message %}
+                                            <div class="history-error">
+                                                <small>Error: {{ sub.error_message }}</small>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="console-message">
+                                    <p>You haven't submitted any queries for this question yet.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

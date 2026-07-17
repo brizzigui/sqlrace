@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db_main:
+    image: postgres:15-alpine
+    container_name: sqlrace_db_main
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mainpassword
+      POSTGRES_DB: sqlrace_main
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_main:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  db_sandbox:
+    image: postgres:15-alpine
+    container_name: sqlrace_db_sandbox
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: sandboxpassword
+      POSTGRES_DB: sqlrace_sandbox
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata_sandbox:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  pgdata_main:
+  pgdata_sandbox:

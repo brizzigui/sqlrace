@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Leaderboard - {{ contest.title }} - SQL Race{% endblock %}
+
+{% block content %}
+<div class="dashboard-container fade-in">
+    <div class="contest-header-bar">
+        <div>
+            <a href="{{ url_for('contest.contest_dashboard', contest_id=contest.id) }}" class="back-link">&larr; Back to Contest Dashboard</a>
+            <h1>🏆 {{ contest.title }} Scoreboard</h1>
+            <p class="contest-subheader">Real-time standings computed using official ICPC tie-breaking rules.</p>
+        </div>
+        <div class="header-right">
+            <div class="timer-box">
+                <span class="timer-label">Time Remaining</span>
+                <div class="contest-timer timer-large" data-endtime="{{ contest.end_time }}" data-starttime="{{ contest.start_time }}">Calculating...</div>
+            </div>
+            <button id="refresh-board-btn" class="btn btn-outline" onclick="refreshLeaderboard({{ contest.id }})">
+                🔄 Live Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Leaderboard Card -->
+    <div class="leaderboard-card">
+        <div class="leaderboard-table-wrapper">
+            <table class="leaderboard-table" id="leaderboard-table-el">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">Rank</th>
+                        <th>Team Name</th>
+                        <th style="width: 100px; text-align: center;">Solved</th>
+                        <th style="width: 120px; text-align: center;">Penalty (min)</th>
+                        {% for q in questions %}
+                            <th class="problem-col-header" title="{{ q.title }}">
+                                <span class="problem-letter">{{ loop.index }}</span>
+                                <small class="problem-short-name">{{ q.title[:15] }}{% if q.title|length > 15 %}...{% endif %}</small>
+                            </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body-el">
+                    {% if leaderboard %}
+                        {% for row in leaderboard %}
+                            <tr class="leaderboard-row {% if session.get('team_id') == row.team_id %}current-team-row{% endif %}">
+                                <td class="rank-col">
+                                    {% if row.rank == 1 %}🥇{% elif row.rank == 2 %}🥈{% elif row.rank == 3 %}🥉{% else %}{{ row.rank }}{% endif %}
+                                </td>
+                                <td class="team-name-col">
+                                    <strong>{{ row.username }}</strong>
+                                    {% if session.get('team_id') == row.team_id %}
+                                        <span class="my-team-label">(You)</span>
+                                    {% endif %}
+                                </td>
+                                <td class="solved-col">{{ row.solved_count }}</td>
+                                <td class="penalty-col">{{ row.total_penalty }}</td>
+                                {% for q in questions %}
+                                    {% set details = row.problems[q.id] %}
+                                    <td class="cell-problem {% if details.solved %}cell-accepted{% elif details.attempts > 0 %}cell-failed{% else %}cell-empty{% endif %}">
+                                        {% if details.solved %}
+                                            <div class="cell-tries">+{{ details.attempts - 1 }}</div>
+                                            <div class="cell-min">{{ details.penalty }}</div>
+                                        {% elif details.attempts > 0 %}
+                                            <div class="cell-tries">-{{ details.attempts }}</div>
+                                            <div class="cell-min">--</div>
+                                        {% else %}
+                                            <span class="cell-dot">&middot;</span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="{{ 4 + questions|length }}" class="text-muted text-center" style="padding: 40px;">
+                                No teams have registered or submitted queries yet.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

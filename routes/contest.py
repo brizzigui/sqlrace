@@ -56,13 +56,13 @@ def contest_dashboard(contest_id):
             return redirect(url_for('contest.contests_list'))
             
         # Fetch questions for this contest
-        cur.execute("SELECT id, title, points FROM questions WHERE contest_id = %s ORDER BY id ASC;", (contest_id,))
+        cur.execute("SELECT id, title FROM questions WHERE contest_id = %s ORDER BY id ASC;", (contest_id,))
         questions = cur.fetchall()
         
         # Check status for each question
         question_list = []
         for q in questions:
-            q_id, q_title, q_points = q
+            q_id, q_title = q
             cur.execute("""
                 SELECT status FROM submissions 
                 WHERE team_id = %s AND question_id = %s 
@@ -81,7 +81,6 @@ def contest_dashboard(contest_id):
             question_list.append({
                 'id': q_id,
                 'title': q_title,
-                'points': q_points,
                 'status': status
             })
             
@@ -121,7 +120,7 @@ def question_details(contest_id, question_id):
             return redirect(url_for('contest.contests_list'))
             
         cur.execute("""
-            SELECT id, title, description, init_sql, points 
+            SELECT id, title, description, init_sql 
             FROM questions 
             WHERE id = %s AND contest_id = %s;
         """, (question_id, contest_id))
@@ -147,8 +146,7 @@ def question_details(contest_id, question_id):
         'id': question[0],
         'title': question[1],
         'description': question[2],
-        'init_sql': question[3],
-        'points': question[4]
+        'init_sql': question[3]
     }
     
     # Format submissions

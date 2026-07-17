@@ -29,6 +29,24 @@ def create_app():
     app.register_blueprint(admin_bp)
     app.register_blueprint(contest_bp)
     app.register_blueprint(leaderboard_bp)
+
+    from flask import session, request
+    from translations import TRANSLATIONS
+
+    @app.context_processor
+    def inject_translation():
+        lang = session.get('lang', 'en')
+        def translate(key):
+            lang_dict = TRANSLATIONS.get(lang, TRANSLATIONS['en'])
+            # Return value or default to key
+            return lang_dict.get(key, TRANSLATIONS['en'].get(key, key))
+        return dict(_=translate, current_lang=lang)
+
+    @app.route('/set_lang/<lang>')
+    def set_lang(lang):
+        if lang in ['en', 'pt']:
+            session['lang'] = lang
+        return redirect(request.referrer or url_for('contest.contests_list'))
     
     @app.route('/')
     def index():

@@ -11,11 +11,11 @@
         </div>
         <div class="header-right">
             <div class="timer-box">
-                <span class="timer-label">Time Remaining</span>
+                <span class="timer-label">{{ _('contest_remaining') }}</span>
                 <div class="contest-timer timer-large" data-endtime="{{ contest.end_time }}" data-starttime="{{ contest.start_time }}">Calculating...</div>
             </div>
             <a href="{{ url_for('leaderboard.show_leaderboard', contest_id=contest.id) }}" class="btn btn-primary btn-icon">
-                🏆 View Scoreboard
+                {{ _('contest_scoreboard') }}
             </a>
         </div>
     </div>
@@ -23,7 +23,7 @@
     <div class="contest-layout">
         <!-- Question List -->
         <div class="question-list-card">
-            <h2>Challenge Problems</h2>
+            <h2>{{ _('contest_problems') }}</h2>
             <div class="question-grid-list">
                 {% if questions %}
                     {% for q in questions %}
@@ -32,16 +32,23 @@
                                 <span class="question-number">#{{ loop.index }}</span>
                                 <div class="question-text-details">
                                     <h3>{{ q.title }}</h3>
-                                    <span class="points-label">{{ q.points }} pts</span>
                                 </div>
                             </div>
                             <div class="question-item-actions">
-                                <span class="status-badge badge-{{ q.status | lower }}">{{ q.status }}</span>
+                                <span class="status-badge badge-{{ q.status | lower }}">
+                                    {% if q.status == 'Accepted' %}
+                                        Accepted
+                                    {% elif q.status == 'Attempted' %}
+                                        Attempted
+                                    {% else %}
+                                        Unattempted
+                                    {% endif %}
+                                </span>
                                 <a href="{{ url_for('contest.question_details', contest_id=contest.id, question_id=q.id) }}" class="btn btn-sm btn-outline">
                                     {% if q.status == 'Accepted' %}
-                                        View Code
+                                        {{ _('contest_view_code') }}
                                     {% else %}
-                                        Solve Challenge
+                                        {{ _('contest_solve') }}
                                     {% endif %}
                                 </a>
                             </div>
@@ -49,7 +56,7 @@
                     {% endfor %}
                 {% else %}
                     <div class="empty-state">
-                        <p>No questions have been added to this contest yet.</p>
+                        <p>{{ _('contest_empty') }}</p>
                     </div>
                 {% endif %}
             </div>
@@ -57,21 +64,13 @@
 
         <!-- Contest Rules Panel -->
         <div class="rules-card">
-            <h2>Competition Scoring Rules</h2>
+            <h2>{{ _('contest_rules_title') }}</h2>
             <div class="rules-content">
                 <ul>
-                    <li>
-                        <strong>ICPC Scoring:</strong> Rankings are decided first by the total number of solved challenges. Ties are broken by the lowest penalty time.
-                    </li>
-                    <li>
-                        <strong>Penalty Time:</strong> Sum of the minutes elapsed from the contest start to each problem's first Accepted submission, plus a 20-minute penalty for every Wrong Answer or Runtime Error prior to the Accepted submission.
-                    </li>
-                    <li>
-                        <strong>Submission Limits:</strong> You can submit as many times as you like during the contest. Once a question is Accepted, further submissions do not affect your penalty.
-                    </li>
-                    <li>
-                        <strong>Unsolved Problems:</strong> Submissions for unsolved problems do not add any penalty points to your total.
-                    </li>
+                    <li>{{ _('contest_rule_1') }}</li>
+                    <li>{{ _('contest_rule_2') }}</li>
+                    <li>{{ _('contest_rule_3') }}</li>
+                    <li>{{ _('contest_rule_4') }}</li>
                 </ul>
             </div>
         </div>

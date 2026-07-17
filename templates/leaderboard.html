@@ -6,17 +6,17 @@
 <div class="dashboard-container fade-in">
     <div class="contest-header-bar">
         <div>
-            <a href="{{ url_for('contest.contest_dashboard', contest_id=contest.id) }}" class="back-link">&larr; Back to Contest Dashboard</a>
-            <h1>🏆 {{ contest.title }} Scoreboard</h1>
-            <p class="contest-subheader">Real-time standings computed using official ICPC tie-breaking rules.</p>
+            <a href="{{ url_for('contest.contest_dashboard', contest_id=contest.id) }}" class="back-link">&larr; {{ _('leaderboard_back') }}</a>
+            <h1>🏆 {{ contest.title }} {{ _('leaderboard_title') }}</h1>
+            <p class="contest-subheader">{{ _('leaderboard_sub') }}</p>
         </div>
         <div class="header-right">
             <div class="timer-box">
-                <span class="timer-label">Time Remaining</span>
+                <span class="timer-label">{{ _('contest_remaining') }}</span>
                 <div class="contest-timer timer-large" data-endtime="{{ contest.end_time }}" data-starttime="{{ contest.start_time }}">Calculating...</div>
             </div>
             <button id="refresh-board-btn" class="btn btn-outline" onclick="refreshLeaderboard({{ contest.id }})">
-                🔄 Live Refresh
+                {{ _('leaderboard_refresh') }}
             </button>
         </div>
     </div>
@@ -27,10 +27,10 @@
             <table class="leaderboard-table" id="leaderboard-table-el">
                 <thead>
                     <tr>
-                        <th style="width: 70px;">Rank</th>
-                        <th>Team Name</th>
-                        <th style="width: 100px; text-align: center;">Solved</th>
-                        <th style="width: 120px; text-align: center;">Penalty (min)</th>
+                        <th style="width: 70px;">{{ _('leaderboard_rank') }}</th>
+                        <th>{{ _('leaderboard_team') }}</th>
+                        <th style="width: 100px; text-align: center;">{{ _('leaderboard_solved') }}</th>
+                        <th style="width: 120px; text-align: center;">{{ _('leaderboard_penalty') }}</th>
                         {% for q in questions %}
                             <th class="problem-col-header" title="{{ q.title }}">
                                 <span class="problem-letter">{{ loop.index }}</span>
@@ -73,7 +73,7 @@
                     {% else %}
                         <tr>
                             <td colspan="{{ 4 + questions|length }}" class="text-muted text-center" style="padding: 40px;">
-                                No teams have registered or submitted queries yet.
+                                {{ _('leaderboard_empty') }}
                             </td>
                         </tr>
                     {% endif %}

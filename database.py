@@ -92,7 +92,6 @@ def init_db():
             description TEXT NOT NULL,
             init_sql TEXT NOT NULL,
             solution_sql TEXT NOT NULL,
-            points INT DEFAULT 100,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """)

@@ -1,97 +1,97 @@
 {% extends 'base.html' %}
 
-{% block title %}Contests - SQL Race{% endblock %}
+{% block title %}{{ _('nav_contests') }} - SQL Race{% endblock %}
 
 {% block content %}
 <div class="dashboard-container fade-in">
     <div class="dashboard-header">
-        <h1>Competitions Arena</h1>
-        <p>Choose an active contest to submit SQL queries, or browse past scoreboard statistics.</p>
+        <h1>{{ _('arena_title') }}</h1>
+        <p>{{ _('arena_sub') }}</p>
     </div>
 
     <!-- Active Contests -->
     <section class="contest-section">
-        <h2 class="section-title active-color">Active Contests</h2>
+        <h2 class="section-title active-color">{{ _('arena_active') }}</h2>
         {% if active %}
             <div class="contest-grid">
                 {% for c in active %}
                     <div class="contest-card active-card">
                         <div class="contest-card-header">
                             <h3>{{ c.title }}</h3>
-                            <span class="badge active-badge">Running</span>
+                            <span class="badge active-badge">{{ _('arena_running') }}</span>
                         </div>
                         <p class="contest-desc">{{ c.description or 'No description provided.' }}</p>
                         <div class="contest-meta">
-                            <div>Ends at: <strong>{{ c.end_formatted }}</strong></div>
+                            <div>{{ _('arena_ends_at') }}: <strong>{{ c.end_formatted }}</strong></div>
                             <div class="contest-timer" data-endtime="{{ c.end_time }}">Calculating time left...</div>
                         </div>
                         <div class="contest-actions">
-                            <a href="{{ url_for('contest.contest_dashboard', contest_id=c.id) }}" class="btn btn-success btn-block">Enter Arena</a>
+                            <a href="{{ url_for('contest.contest_dashboard', contest_id=c.id) }}" class="btn btn-success btn-block">{{ _('arena_enter_arena') }}</a>
                         </div>
                     </div>
                 {% endfor %}
             </div>
         {% else %}
             <div class="empty-state">
-                <p>No contests are currently running. Check the upcoming contests below!</p>
+                <p>{{ _('arena_no_active') }}</p>
             </div>
         {% endif %}
     </section>
 
     <!-- Upcoming Contests -->
     <section class="contest-section">
-        <h2 class="section-title upcoming-color">Upcoming Contests</h2>
+        <h2 class="section-title upcoming-color">{{ _('arena_upcoming') }}</h2>
         {% if upcoming %}
             <div class="contest-grid">
                 {% for c in upcoming %}
                     <div class="contest-card upcoming-card">
                         <div class="contest-card-header">
                             <h3>{{ c.title }}</h3>
-                            <span class="badge upcoming-badge">Starts Soon</span>
+                            <span class="badge upcoming-badge">{{ _('arena_starts_soon') }}</span>
                         </div>
                         <p class="contest-desc">{{ c.description or 'No description provided.' }}</p>
                         <div class="contest-meta">
-                            <div>Starts: <strong>{{ c.start_formatted }}</strong></div>
+                            <div>{{ _('arena_starts_at') }}: <strong>{{ c.start_formatted }}</strong></div>
                             <div class="contest-timer" data-starttime="{{ c.start_time }}">Counting down...</div>
                         </div>
                         <div class="contest-actions">
-                            <button class="btn btn-secondary btn-block" disabled>Locked</button>
+                            <button class="btn btn-secondary btn-block" disabled>{{ _('arena_locked') }}</button>
                         </div>
                     </div>
                 {% endfor %}
             </div>
         {% else %}
             <div class="empty-state">
-                <p>No upcoming contests scheduled at the moment.</p>
+                <p>{{ _('arena_no_upcoming') }}</p>
             </div>
         {% endif %}
     </section>
 
     <!-- Past Contests -->
     <section class="contest-section">
-        <h2 class="section-title past-color">Past Contests</h2>
+        <h2 class="section-title past-color">{{ _('arena_past') }}</h2>
         {% if past %}
             <div class="contest-grid">
                 {% for c in past %}
                     <div class="contest-card past-card">
                         <div class="contest-card-header">
                             <h3>{{ c.title }}</h3>
-                            <span class="badge past-badge">Ended</span>
+                            <span class="badge past-badge">{{ _('arena_ended') }}</span>
                         </div>
                         <p class="contest-desc">{{ c.description or 'No description provided.' }}</p>
                         <div class="contest-meta">
-                            <div>Ended: <strong>{{ c.end_formatted }}</strong></div>
+                            <div>{{ _('arena_ended_at') }}: <strong>{{ c.end_formatted }}</strong></div>
                         </div>
                         <div class="contest-actions">
-                            <a href="{{ url_for('contest.contest_dashboard', contest_id=c.id) }}" class="btn btn-outline btn-block">Review Questions</a>
-                            <a href="{{ url_for('leaderboard.show_leaderboard', contest_id=c.id) }}" class="btn btn-primary btn-block">Leaderboard</a>
+                            <a href="{{ url_for('contest.contest_dashboard', contest_id=c.id) }}" class="btn btn-outline btn-block">{{ _('arena_review') }}</a>
+                            <a href="{{ url_for('leaderboard.show_leaderboard', contest_id=c.id) }}" class="btn btn-primary btn-block">{{ _('arena_leaderboard') }}</a>
                         </div>
                     </div>
                 {% endfor %}
             </div>
         {% else %}
             <div class="empty-state">
-                <p>No past contests found.</p>
+                <p>{{ _('arena_no_past') }}</p>
             </div>
         {% endif %}
     </section>

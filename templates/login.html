@@ -7,22 +7,22 @@
     <div class="auth-card">
         <div class="auth-card-glow"></div>
         <div class="auth-header">
-            <h2>Welcome Back</h2>
-            <p>Log in with your team account to start the race</p>
+            <h2>{{ _('auth_welcome') }}</h2>
+            <p>{{ _('auth_welcome_sub') }}</p>
         </div>
         <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form">
             <div class="form-group">
-                <label for="username">Team Name</label>
-                <input type="text" id="username" name="username" placeholder="Enter your team name" required autocomplete="off">
+                <label for="username">{{ _('auth_team_name') }}</label>
+                <input type="text" id="username" name="username" placeholder="{{ _('auth_team_name') }}" required autocomplete="off">
             </div>
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password">{{ _('auth_password') }}</label>
                 <input type="password" id="password" name="password" placeholder="••••••••" required>
             </div>
-            <button type="submit" class="btn btn-primary auth-submit-btn">Enter Arena</button>
+            <button type="submit" class="btn btn-primary auth-submit-btn">{{ _('auth_enter_arena') }}</button>
         </form>
         <div class="auth-footer">
-            <p>Need to register? <a href="{{ url_for('auth.register') }}">Create a Team Account</a></p>
+            <p>{{ _('auth_need_register') }} <a href="{{ url_for('auth.register') }}">{{ _('auth_create_team') }}</a></p>
         </div>
     </div>
 </div>

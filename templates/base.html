@@ -20,16 +20,22 @@
             </a>
             <nav class="app-nav">
                 {% if session.get('team_id') %}
-                    <a href="{{ url_for('contest.contests_list') }}" class="nav-link">Contests</a>
+                    <a href="{{ url_for('contest.contests_list') }}" class="nav-link">{{ _('nav_contests') }}</a>
                     {% if session.get('is_admin') %}
-                        <a href="{{ url_for('admin.admin_dashboard') }}" class="nav-link admin-tag">Admin Dashboard</a>
+                        <a href="{{ url_for('admin.admin_dashboard') }}" class="nav-link admin-tag">{{ _('nav_admin') }}</a>
                     {% endif %}
-                    <span class="nav-user">Team: <strong>{{ session.get('username') }}</strong></span>
-                    <a href="{{ url_for('auth.logout') }}" class="nav-btn logout-btn">Logout</a>
+                    <span class="nav-user">{{ _('nav_team') }}: <strong>{{ session.get('username') }}</strong></span>
+                    <a href="{{ url_for('auth.logout') }}" class="nav-btn logout-btn">{{ _('nav_logout') }}</a>
                 {% else %}
-                    <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
-                    <a href="{{ url_for('auth.register') }}" class="nav-btn register-btn">Register Team</a>
+                    <a href="{{ url_for('auth.login') }}" class="nav-link">{{ _('nav_login') }}</a>
+                    <a href="{{ url_for('auth.register') }}" class="nav-btn register-btn">{{ _('nav_register_team') }}</a>
                 {% endif %}
+                
+                <div class="lang-selector">
+                    <a href="{{ url_for('set_lang', lang='en') }}" class="lang-link {% if current_lang == 'en' %}active{% endif %}">EN</a>
+                    <span class="lang-divider">|</span>
+                    <a href="{{ url_for('set_lang', lang='pt') }}" class="lang-link {% if current_lang == 'pt' %}active{% endif %}">PT</a>
+                </div>
             </nav>
         </div>
     </header>

@@ -7,22 +7,22 @@
     <div class="auth-card">
         <div class="auth-card-glow"></div>
         <div class="auth-header">
-            <h2>Join the Race</h2>
-            <p>Register your team to participate in SQL challenges</p>
+            <h2>{{ _('auth_join_race') }}</h2>
+            <p>{{ _('auth_join_sub') }}</p>
         </div>
         <form method="POST" action="{{ url_for('auth.register') }}" class="auth-form">
             <div class="form-group">
-                <label for="username">Team Name</label>
-                <input type="text" id="username" name="username" placeholder="Pick a unique name" required autocomplete="off">
+                <label for="username">{{ _('auth_team_name') }}</label>
+                <input type="text" id="username" name="username" placeholder="{{ _('auth_team_name') }}" required autocomplete="off">
             </div>
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password">{{ _('auth_password') }}</label>
                 <input type="password" id="password" name="password" placeholder="••••••••" required>
             </div>
-            <button type="submit" class="btn btn-primary auth-submit-btn">Register Team</button>
+            <button type="submit" class="btn btn-primary auth-submit-btn">{{ _('nav_register_team') }}</button>
         </form>
         <div class="auth-footer">
-            <p>Already have a team? <a href="{{ url_for('auth.login') }}">Log in here</a></p>
+            <p>{{ _('auth_already_team') }} <a href="{{ url_for('auth.login') }}">{{ _('auth_login_here') }}</a></p>
         </div>
     </div>
 </div>

@@ -15,7 +15,7 @@ def admin_dashboard():
         
         # Get questions grouped by contest
         cur.execute("""
-            SELECT q.id, q.title, q.contest_id, c.title as contest_title, q.points 
+            SELECT q.id, q.title, q.contest_id, c.title as contest_title 
             FROM questions q 
             JOIN contests c ON q.contest_id = c.id 
             ORDER BY q.contest_id, q.id;
@@ -83,19 +83,16 @@ def create_question():
     description = request.form.get('description', '').strip()
     init_sql = request.form.get('init_sql', '').strip()
     solution_sql = request.form.get('solution_sql', '').strip()
-    points_str = request.form.get('points', '100').strip()
-    
     if not contest_id or not title or not description or not init_sql or not solution_sql:
         flash('All question fields are required.', 'danger')
         return redirect(url_for('admin.admin_dashboard'))
         
     try:
-        points = int(points_str)
         with get_main_db() as cur:
             cur.execute("""
-                INSERT INTO questions (contest_id, title, description, init_sql, solution_sql, points)
-                VALUES (%s, %s, %s, %s, %s, %s);
-            """, (contest_id, title, description, init_sql, solution_sql, points))
+                INSERT INTO questions (contest_id, title, description, init_sql, solution_sql)
+                VALUES (%s, %s, %s, %s, %s);
+            """, (contest_id, title, description, init_sql, solution_sql))
             
         flash(f"Question '{title}' created successfully!", "success")
     except Exception as e:

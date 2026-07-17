@@ -109,6 +109,35 @@ body {
     gap: 24px;
 }
 
+.lang-selector {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 12px;
+    font-size: 0.9rem;
+}
+
+.lang-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition-smooth);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+}
+
+.lang-link:hover, .lang-link.active {
+    color: var(--primary-color);
+    background: rgba(0, 242, 254, 0.08);
+    border-color: rgba(0, 242, 254, 0.2);
+}
+
+.lang-divider {
+    color: var(--text-muted);
+    opacity: 0.3;
+}
+
 .nav-link {
     color: var(--text-secondary);
     text-decoration: none;
@@ -861,6 +890,14 @@ textarea {
     flex-direction: column;
     border-bottom: 1px solid var(--border-color);
     position: relative;
+    height: 100%;
+}
+
+#submission-form {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
 }
 
 .textarea-wrapper {

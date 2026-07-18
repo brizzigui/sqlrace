@@ -264,9 +264,9 @@ async function handleImageUpload() {
         }
         
         const data = await response.json();
-        const imgTag = `<img src="${data.url}" alt="${fileInput.files[0].name}" style="max-width: 100%; height: auto; border-radius: 6px; margin: 12px 0;" />`;
+        const imgMarkdown = `![${fileInput.files[0].name}](${data.url})`;
         
-        document.getElementById('image-tag-output').value = imgTag;
+        document.getElementById('image-tag-output').value = imgMarkdown;
         document.getElementById('image-upload-result').style.display = 'block';
         btn.disabled = false;
         btn.textContent = originalText;
@@ -282,7 +282,7 @@ function copyImageTag() {
     copyText.select();
     copyText.setSelectionRange(0, 99999);
     navigator.clipboard.writeText(copyText.value);
-    alert('HTML image tag copied to clipboard!');
+    alert('Markdown image tag copied to clipboard!');
 }
 </script>
 {% endblock %}

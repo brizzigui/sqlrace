@@ -42,6 +42,13 @@ def create_app():
             return lang_dict.get(key, TRANSLATIONS['en'].get(key, key))
         return dict(_=translate, current_lang=lang)
 
+    import markdown
+    @app.template_filter('markdown')
+    def render_markdown(text):
+        if not text:
+            return ""
+        return markdown.markdown(text, extensions=['fenced_code', 'tables'])
+
     @app.route('/set_lang/<lang>')
     def set_lang(lang):
         if lang in ['en', 'pt']:

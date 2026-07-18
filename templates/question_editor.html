@@ -29,7 +29,7 @@
             </div>
             
             <div class="problem-description">
-                {{ question.description | safe }}
+                {{ question.description | markdown | safe }}
             </div>
             
             <div class="schema-viewer">

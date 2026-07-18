@@ -102,7 +102,7 @@ TRANSLATIONS = {
         'admin_associate': 'Associate with Contest',
         'admin_select_contest': '-- Select Contest --',
         'admin_question_title': 'Question Title',
-        'admin_statement': 'Problem Statement',
+        'admin_statement': 'Problem Statement (Markdown supported)',
         'admin_init_sql': 'Initialization SQL',
         'admin_solution_sql': 'Solution SQL',
         'admin_create_challenge': 'Create Challenge',
@@ -155,7 +155,7 @@ TRANSLATIONS = {
         'admin_search_contests': 'Search contests by name...',
         'admin_upload_image': 'Inline Image Uploader',
         'admin_upload_btn': 'Upload Image',
-        'admin_copy_tag': 'Copy HTML Tag',
+        'admin_copy_tag': 'Copy Markdown Tag',
         'admin_select_difficulty': '-- Select Difficulty --'
     },
     'pt': {
@@ -261,7 +261,7 @@ TRANSLATIONS = {
         'admin_associate': 'Associar com Competição',
         'admin_select_contest': '-- Selecionar Competição --',
         'admin_question_title': 'Título da Questão',
-        'admin_statement': 'Enunciado do Problema',
+        'admin_statement': 'Enunciado do Problema (suporta Markdown)',
         'admin_init_sql': 'SQL de Inicialização',
         'admin_solution_sql': 'SQL da Solução',
         'admin_create_challenge': 'Criar Desafio',
@@ -314,7 +314,7 @@ TRANSLATIONS = {
         'admin_search_contests': 'Buscar competições por nome...',
         'admin_upload_image': 'Enviador de Imagem Inline',
         'admin_upload_btn': 'Enviar Imagem',
-        'admin_copy_tag': 'Copiar Tag HTML',
+        'admin_copy_tag': 'Copiar Tag Markdown',
         'admin_select_difficulty': '-- Selecionar Dificuldade --'
     }
 }

@@ -1488,6 +1488,20 @@ textarea {
     .admin-grid {
         grid-template-columns: 1fr;
         gap: 24px;
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .admin-grid > div {
+        min-width: 0;
+        max-width: 100%;
+        width: 100%;
+    }
+    
+    .admin-card {
+        min-width: 0;
+        max-width: 100%;
+        width: 100%;
     }
 
     .split-vertical {
@@ -1563,6 +1577,24 @@ textarea {
         gap: 16px;
     }
     
+    .stat-card {
+        padding: 16px;
+    }
+    
+    .stat-card h3 {
+        font-size: 0.8rem;
+        margin-bottom: 4px;
+    }
+    
+    .stat-number {
+        font-size: 1.75rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
     .contest-header-bar {
         flex-direction: column;
         align-items: flex-start;
@@ -1595,9 +1627,32 @@ textarea {
 }
 
 @media (max-width: 576px) {
-    .form-row {
-        flex-direction: column;
-        gap: 12px;
+    .uploader-flex-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+    }
+    
+    .uploader-flex-row input {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    .uploader-flex-row button {
+        width: 100% !important;
+    }
+
+    .stat-card {
+        padding: 12px;
+    }
+    
+    .stat-card h3 {
+        font-size: 0.75rem;
+        margin-bottom: 2px;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
     }
     
     .auth-card {

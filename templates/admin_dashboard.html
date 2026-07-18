@@ -147,13 +147,13 @@
                 <!-- Inline Image Uploader Helper -->
                 <div style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border-color); padding: 12px; border-radius: 6px; margin-bottom: 16px;">
                     <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 6px;">{{ _('admin_upload_image') }}</label>
-                    <div style="display: flex; gap: 8px; align-items: center;">
+                    <div class="uploader-flex-row" style="display: flex; gap: 8px; align-items: center;">
                         <input type="file" id="image-upload-input" accept="image/*" style="flex: 1; border: 1px solid var(--border-color); padding: 4px; border-radius: 4px; background: var(--bg-surface); color: var(--text-secondary); font-size: 0.8rem;">
                         <button type="button" class="btn btn-primary" onclick="handleImageUpload()" style="padding: 6px 12px; font-size: 0.85rem;">{{ _('admin_upload_btn') }}</button>
                     </div>
                     <div id="image-upload-result" style="margin-top: 8px; display: none;">
                         <label style="font-size: 0.75rem; color: var(--text-muted);">{{ _('admin_copy_tag') }}:</label>
-                        <div style="display: flex; gap: 8px; margin-top: 4px;">
+                        <div class="uploader-flex-row" style="display: flex; gap: 8px; margin-top: 4px;">
                             <input type="text" id="image-tag-output" readonly style="flex: 1; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-main); color: var(--primary-color); font-family: var(--font-mono); font-size: 0.8rem;">
                             <button type="button" class="btn btn-outline" onclick="copyImageTag()" style="padding: 4px 10px; font-size: 0.8rem;">Copy</button>
                         </div>

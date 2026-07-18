@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Leaderboard - {{ contest.title }} - SQL Race{% endblock %}
+{% block title %}{{ _('title_contest_dashboard', title=contest.title) }}{% endblock %}
 
 {% block content %}
 <div class="dashboard-container fade-in">
@@ -13,7 +13,7 @@
         <div class="header-right">
             <div class="timer-box">
                 <span class="timer-label">{{ _('contest_remaining') }}</span>
-                <div class="contest-timer timer-large" data-endtime="{{ contest.end_time }}" data-starttime="{{ contest.start_time }}">Calculating...</div>
+                <div class="contest-timer timer-large" data-endtime="{{ contest.end_time }}" data-starttime="{{ contest.start_time }}">{{ _('loading') }}</div>
             </div>
             <button id="refresh-board-btn" class="btn btn-outline" onclick="refreshLeaderboard({{ contest.id }})">
                 {{ _('leaderboard_refresh') }}
@@ -49,7 +49,7 @@
                                 <td class="team-name-col">
                                     <strong>{{ row.username }}</strong>
                                     {% if session.get('team_id') == row.team_id %}
-                                        <span class="my-team-label">(You)</span>
+                                         <span class="my-team-label">({{ _('admin_you') }})</span>
                                     {% endif %}
                                 </td>
                                 <td class="solved-col">{{ row.solved_count }}</td>

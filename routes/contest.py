@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+from translations import translate as _
 from routes.auth import login_required
 from database import get_main_db
 from judge import evaluate_submission
@@ -51,7 +52,7 @@ def contest_dashboard(contest_id):
         cur.execute("SELECT id, title, description, start_time, end_time FROM contests WHERE id = %s;", (contest_id,))
         contest = cur.fetchone()
         if not contest:
-            flash('Contest not found.', 'danger')
+            flash(_('flash_contest_not_found'), 'danger')
             return redirect(url_for('contest.contests_list'))
             
         # Fetch questions for this contest via the join table
@@ -122,7 +123,7 @@ def question_details(contest_id, question_id):
         cur.execute("SELECT id, start_time, end_time FROM contests WHERE id = %s;", (contest_id,))
         contest = cur.fetchone()
         if not contest:
-            flash('Contest not found.', 'danger')
+            flash(_('flash_contest_not_found'), 'danger')
             return redirect(url_for('contest.contests_list'))
             
         # Validate that the question belongs to this contest
@@ -134,7 +135,7 @@ def question_details(contest_id, question_id):
         """, (question_id, contest_id))
         question = cur.fetchone()
         if not question:
-            flash('Question not found in this contest.', 'danger')
+            flash(_('flash_question_not_found'), 'danger')
             return redirect(url_for('contest.contest_dashboard', contest_id=contest_id))
             
         # Fetch team's submissions for this question inside this contest
@@ -193,7 +194,7 @@ def submit_query(contest_id, question_id):
     if not user_query:
         return jsonify({
             'status': 'Runtime Error',
-            'error_message': 'Query cannot be empty.'
+            'error_message': _('error_empty_query')
         }), 400
         
     with get_main_db() as cur:
@@ -201,13 +202,13 @@ def submit_query(contest_id, question_id):
         cur.execute("SELECT start_time, end_time FROM contests WHERE id = %s;", (contest_id,))
         contest = cur.fetchone()
         if not contest:
-            return jsonify({'status': 'Runtime Error', 'error_message': 'Contest not found.'}), 404
+            return jsonify({'status': 'Runtime Error', 'error_message': _('flash_contest_not_found')}), 404
             
         start_time, end_time = contest
         if now < start_time:
-            return jsonify({'status': 'Runtime Error', 'error_message': 'Contest has not started yet.'}), 403
+            return jsonify({'status': 'Runtime Error', 'error_message': _('error_contest_upcoming')}), 403
         if now > end_time:
-            return jsonify({'status': 'Runtime Error', 'error_message': 'Contest has already ended.'}), 403
+            return jsonify({'status': 'Runtime Error', 'error_message': _('error_contest_ended')}), 403
             
         # Get question details associated with contest
         cur.execute("""
@@ -218,7 +219,7 @@ def submit_query(contest_id, question_id):
         """, (question_id, contest_id))
         question = cur.fetchone()
         if not question:
-            return jsonify({'status': 'Runtime Error', 'error_message': 'Question not found in this contest.'}), 404
+            return jsonify({'status': 'Runtime Error', 'error_message': _('flash_question_not_found')}), 404
             
         init_sql, solution_sql = question
 
@@ -293,7 +294,7 @@ def practice_question_details(question_id):
         cur.execute("SELECT id, title, description, init_sql, difficulty FROM questions WHERE id = %s AND visibility = 'public';", (question_id,))
         question = cur.fetchone()
         if not question:
-            flash('Question not found or is restricted.', 'danger')
+            flash(_('flash_question_restricted'), 'danger')
             return redirect(url_for('contest.questions_list'))
             
         # Fetch team's submissions for this question
@@ -340,7 +341,7 @@ def submit_practice_query(question_id):
     if not user_query:
         return jsonify({
             'status': 'Runtime Error',
-            'error_message': 'Query cannot be empty.'
+            'error_message': _('error_empty_query')
         }), 400
         
     with get_main_db() as cur:
@@ -348,7 +349,7 @@ def submit_practice_query(question_id):
         cur.execute("SELECT init_sql, solution_sql FROM questions WHERE id = %s AND visibility = 'public';", (question_id,))
         question = cur.fetchone()
         if not question:
-            return jsonify({'status': 'Runtime Error', 'error_message': 'Question not found.'}), 404
+            return jsonify({'status': 'Runtime Error', 'error_message': _('error_question_not_found')}), 404
             
         init_sql, solution_sql = question
 

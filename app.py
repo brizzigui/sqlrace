@@ -36,10 +36,16 @@ def create_app():
     @app.context_processor
     def inject_translation():
         lang = session.get('lang', 'en')
-        def translate(key):
+        def translate(key, **kwargs):
             lang_dict = TRANSLATIONS.get(lang, TRANSLATIONS['en'])
             # Return value or default to key
-            return lang_dict.get(key, TRANSLATIONS['en'].get(key, key))
+            val = lang_dict.get(key, TRANSLATIONS['en'].get(key, key))
+            if kwargs:
+                try:
+                    return val.format(**kwargs)
+                except Exception:
+                    pass
+            return val
         return dict(_=translate, current_lang=lang)
 
     import markdown

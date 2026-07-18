@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Editor - {{ question.title }} - SQL Race{% endblock %}
+{% block title %}{{ _('title_editor', title=question.title) }}{% endblock %}
 
 {% block content %}
 <div class="editor-workspace fade-in">
@@ -10,12 +10,12 @@
             {% if practice_mode %}
                 <a href="{{ url_for('contest.questions_list') }}" class="back-link">&larr; {{ _('editor_back_questions') }}</a>
                 <div class="contest-timer-small" style="color: var(--text-muted);">
-                    Practice Mode
+                    {{ _('practice_mode_label') }}
                 </div>
             {% else %}
                 <a href="{{ url_for('contest.contest_dashboard', contest_id=contest.id) }}" class="back-link">&larr; {{ _('editor_back') }}</a>
                 <div class="contest-timer-small">
-                    {{ _('editor_ends_in') }}: <span class="contest-timer" data-endtime="{{ contest.end_time }}" data-starttime="{{ contest.start_time }}">...</span>
+                    {{ _('editor_ends_in') }}: <span class="contest-timer" data-endtime="{{ contest.end_time }}" data-starttime="{{ contest.start_time }}">{{ _('loading') }}</span>
                 </div>
             {% endif %}
         </div>
@@ -83,7 +83,7 @@
                         <!-- Status Banner -->
                         <div id="result-status-banner" class="status-banner hidden">
                             <span class="status-icon"></span>
-                            <span id="result-status-text">Pending</span>
+                            <span id="result-status-text">{{ _('loading') }}</span>
                         </div>
                         
                         <!-- Error Display -->
@@ -121,7 +121,7 @@
                                         </div>
                                         {% if sub.error_message %}
                                             <div class="history-error">
-                                                <small>Error: {{ sub.error_message }}</small>
+                                                 <small>{{ _('error_label') }} {{ sub.error_message }}</small>
                                             </div>
                                         {% endif %}
                                     </div>

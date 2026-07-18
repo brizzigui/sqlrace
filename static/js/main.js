@@ -28,14 +28,14 @@ function initTimers() {
             if (start && now < start) {
                 // Upcoming Contest
                 const diffMs = start - now;
-                el.textContent = 'Starts in: ' + formatTimeDelta(diffMs);
+                el.textContent = (window.JS_TRANSLATIONS ? window.JS_TRANSLATIONS.starts_in : 'Starts in: ') + formatTimeDelta(diffMs);
             } else if (now >= start && now <= end) {
                 // Active Contest
                 const diffMs = end - now;
                 el.textContent = formatTimeDelta(diffMs);
             } else {
                 // Ended Contest
-                el.textContent = 'Ended';
+                el.textContent = (window.JS_TRANSLATIONS ? window.JS_TRANSLATIONS.ended : 'Ended');
                 el.style.color = 'var(--text-muted)';
             }
         });
@@ -151,18 +151,18 @@ function initSubmissionHandler() {
             
             if (result.status === 'Accepted') {
                 statusBanner.classList.add('status-banner-accepted');
-                statusText.innerHTML = '🟢 Accepted (AC)';
+                statusText.innerHTML = (window.JS_TRANSLATIONS ? window.JS_TRANSLATIONS.accepted : '🟢 Accepted (AC)');
                 triggerConfetti();
             } else if (result.status === 'Wrong Answer') {
                 statusBanner.classList.add('status-banner-wrong');
-                statusText.innerHTML = '🔴 Wrong Answer (WA)';
+                statusText.innerHTML = (window.JS_TRANSLATIONS ? window.JS_TRANSLATIONS.wrong_answer : '🔴 Wrong Answer (WA)');
                 
                 // Show assertion warning
                 errorContainer.classList.remove('hidden');
-                errorText.textContent = result.error_message || 'The outputs of your query do not match the expected answer.';
+                errorText.textContent = result.error_message || (window.JS_TRANSLATIONS ? window.JS_TRANSLATIONS.empty_answer_mismatch : 'The outputs of your query do not match the expected answer.');
             } else {
                 statusBanner.classList.add('status-banner-runtime');
-                statusText.innerHTML = '⚠️ Runtime Error (RE)';
+                statusText.innerHTML = (window.JS_TRANSLATIONS ? window.JS_TRANSLATIONS.runtime_error : '⚠️ Runtime Error (RE)');
                 
                 // Show syntax error
                 errorContainer.classList.remove('hidden');
@@ -186,7 +186,7 @@ function initSubmissionHandler() {
                     const td = document.createElement('td');
                     td.setAttribute('colspan', result.columns.length);
                     td.className = 'text-center text-muted';
-                    td.textContent = 'Empty set (0 rows returned).';
+                    td.textContent = (window.JS_TRANSLATIONS ? window.JS_TRANSLATIONS.query_empty_set : 'Empty set (0 rows returned).');
                     tr.appendChild(td);
                     tableBody.appendChild(tr);
                 } else {
@@ -209,9 +209,9 @@ function initSubmissionHandler() {
             runBtn.disabled = false;
             spinner.classList.add('hidden');
             statusBanner.className = 'status-banner status-banner-runtime';
-            statusText.innerHTML = '⚠️ System Connection Issue';
+            statusText.innerHTML = (window.JS_TRANSLATIONS ? window.JS_TRANSLATIONS.system_issue : '⚠️ System Connection Issue');
             errorContainer.classList.remove('hidden');
-            errorText.textContent = 'Failed to communicate with the judge endpoint: ' + err.message;
+            errorText.textContent = (window.JS_TRANSLATIONS ? window.JS_TRANSLATIONS.failed_communicate : 'Failed to communicate with the judge endpoint: ') + err.message;
         }
     });
 }
@@ -292,7 +292,7 @@ window.refreshLeaderboard = async function(contestId) {
     if (!btn || !tableBody) return;
 
     btn.disabled = true;
-    btn.textContent = '🔄 Loading...';
+    btn.textContent = (window.JS_TRANSLATIONS ? '🔄 ' + window.JS_TRANSLATIONS.loading : '🔄 Loading...');
 
     try {
         const res = await fetch(`/contest/${contestId}/leaderboard/data`);
@@ -307,7 +307,7 @@ window.refreshLeaderboard = async function(contestId) {
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="${4 + data.questions.length}" class="text-muted text-center" style="padding: 40px;">
-                        No teams have registered or submitted queries yet.
+                        ${window.JS_TRANSLATIONS ? window.JS_TRANSLATIONS.no_teams_registered : 'No teams have registered or submitted queries yet.'}
                     </td>
                 </tr>
             `;
@@ -333,7 +333,7 @@ window.refreshLeaderboard = async function(contestId) {
                 let rankCell = `<td class="rank-col">${rankVal}</td>`;
                 let nameCell = `<td class="team-name-col">
                                     <strong>${escapeHtml(row.username)}</strong>
-                                    ${isMyTeam ? '<span class="my-team-label">(You)</span>' : ''}
+                                    ${isMyTeam ? `<span class="my-team-label">(${window.JS_TRANSLATIONS ? window.JS_TRANSLATIONS.you : 'You'})</span>` : ''}
                                 </td>`;
                 let solvedCell = `<td class="solved-col">${row.solved_count}</td>`;
                 let penaltyCell = `<td class="penalty-col">${row.total_penalty}</td>`;
@@ -369,13 +369,13 @@ window.refreshLeaderboard = async function(contestId) {
         }
 
         btn.disabled = false;
-        btn.textContent = '🔄 Live Refresh';
+        btn.textContent = (window.JS_TRANSLATIONS ? '🔄 ' + window.JS_TRANSLATIONS.live_refresh : '🔄 Live Refresh');
     } catch (err) {
         console.error(err);
         btn.disabled = false;
-        btn.textContent = '⚠️ Refresh Failed';
+        btn.textContent = (window.JS_TRANSLATIONS ? window.JS_TRANSLATIONS.refresh_failed : '⚠️ Refresh Failed');
         setTimeout(() => {
-            btn.textContent = '🔄 Live Refresh';
+            btn.textContent = (window.JS_TRANSLATIONS ? '🔄 ' + window.JS_TRANSLATIONS.live_refresh : '🔄 Live Refresh');
         }, 3000);
     }
 };

@@ -110,6 +110,24 @@
     </footer>
     {% endif %}
 
+    <script>
+        window.JS_TRANSLATIONS = {
+            starts_in: "{{ _('timer_starts_in') }}",
+            ended: "{{ _('timer_ended') }}",
+            accepted: "{{ _('status_accepted_ac') }}",
+            wrong_answer: "{{ _('status_wrong_answer_wa') }}",
+            runtime_error: "{{ _('status_runtime_error_re') }}",
+            system_issue: "{{ _('status_system_issue') }}",
+            query_empty_set: "{{ _('query_empty_set') }}",
+            empty_answer_mismatch: "{{ _('empty_answer_mismatch') }}",
+            failed_communicate: "{{ _('failed_communicate') }}",
+            loading: "{{ _('loading') }}",
+            no_teams_registered: "{{ _('leaderboard_empty') }}",
+            you: "{{ _('admin_you') }}",
+            live_refresh: "{{ _('leaderboard_refresh') }}",
+            refresh_failed: "{{ _('refresh_failed') }}"
+        };
+    </script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block extra_js %}{% endblock %}
 </body>

@@ -17,11 +17,11 @@
             <form action="{{ url_for('admin.create_contest') }}" method="POST" class="admin-form">
                 <div class="form-group">
                     <label for="title">{{ _('admin_contest_title') }}</label>
-                    <input type="text" id="title" name="title" placeholder="e.g., SQL Sprint Round 1" required>
+                    <input type="text" id="title" name="title" placeholder="{{ _('placeholder_contest_title') }}" required>
                 </div>
                 <div class="form-group">
                     <label for="description">{{ _('admin_description') }}</label>
-                    <textarea id="description" name="description" rows="3" placeholder="Contest rules, scope, or details..."></textarea>
+                    <textarea id="description" name="description" rows="3" placeholder="{{ _('placeholder_contest_desc') }}"></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-group">

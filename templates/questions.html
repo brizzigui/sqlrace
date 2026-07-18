@@ -28,11 +28,11 @@
                             <tr class="leaderboard-row">
                                 <td style="text-align: center; vertical-align: middle; padding: 16px 8px;">
                                     {% if q.status == 'Accepted' %}
-                                        <span class="badge active-badge" style="font-weight: 600;">🟢 Accepted</span>
+                                        <span class="badge active-badge" style="font-weight: 600;">🟢 {{ _('status_accepted') }}</span>
                                     {% elif q.status == 'Attempted' %}
-                                        <span class="badge" style="background: var(--color-failed-bg); border: 1px solid var(--color-failed-border); color: var(--color-failed); font-weight: 600; padding: 4px 8px; border-radius: 4px;">🔴 Attempted</span>
+                                        <span class="badge" style="background: var(--color-failed-bg); border: 1px solid var(--color-failed-border); color: var(--color-failed); font-weight: 600; padding: 4px 8px; border-radius: 4px;">🔴 {{ _('status_attempted') }}</span>
                                     {% else %}
-                                        <span class="badge" style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); color: var(--text-muted); font-weight: 500; padding: 4px 8px; border-radius: 4px;">Unattempted</span>
+                                        <span class="badge" style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); color: var(--text-muted); font-weight: 500; padding: 4px 8px; border-radius: 4px;">{{ _('status_unattempted') }}</span>
                                     {% endif %}
                                 </td>
                                 <td style="vertical-align: middle; padding: 16px 8px;">#{{ q.id }}</td>

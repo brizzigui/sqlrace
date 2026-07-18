@@ -20,10 +20,10 @@
                             <h3>{{ c.title }}</h3>
                             <span class="badge active-badge">{{ _('arena_running') }}</span>
                         </div>
-                        <p class="contest-desc">{{ c.description or 'No description provided.' }}</p>
+                        <p class="contest-desc">{{ c.description or _('default_no_description') }}</p>
                         <div class="contest-meta">
                             <div>{{ _('arena_ends_at') }}: <strong>{{ c.end_formatted }}</strong></div>
-                            <div class="contest-timer" data-endtime="{{ c.end_time }}">Calculating time left...</div>
+                            <div class="contest-timer" data-endtime="{{ c.end_time }}">{{ _('loading') }}</div>
                         </div>
                         <div class="contest-actions">
                             <a href="{{ url_for('contest.contest_dashboard', contest_id=c.id) }}" class="btn btn-success btn-block">{{ _('arena_enter_arena') }}</a>
@@ -49,10 +49,10 @@
                             <h3>{{ c.title }}</h3>
                             <span class="badge upcoming-badge">{{ _('arena_starts_soon') }}</span>
                         </div>
-                        <p class="contest-desc">{{ c.description or 'No description provided.' }}</p>
+                        <p class="contest-desc">{{ c.description or _('default_no_description') }}</p>
                         <div class="contest-meta">
                             <div>{{ _('arena_starts_at') }}: <strong>{{ c.start_formatted }}</strong></div>
-                            <div class="contest-timer" data-starttime="{{ c.start_time }}">Counting down...</div>
+                            <div class="contest-timer" data-starttime="{{ c.start_time }}">{{ _('loading') }}</div>
                         </div>
                         <div class="contest-actions">
                             <button class="btn btn-secondary btn-block" disabled>{{ _('arena_locked') }}</button>
@@ -78,7 +78,7 @@
                             <h3>{{ c.title }}</h3>
                             <span class="badge past-badge">{{ _('arena_ended') }}</span>
                         </div>
-                        <p class="contest-desc">{{ c.description or 'No description provided.' }}</p>
+                        <p class="contest-desc">{{ c.description or _('default_no_description') }}</p>
                         <div class="contest-meta">
                             <div>{{ _('arena_ended_at') }}: <strong>{{ c.end_formatted }}</strong></div>
                         </div>

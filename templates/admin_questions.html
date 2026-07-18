@@ -37,12 +37,12 @@
 
                 <div class="form-group">
                     <label for="q_title">{{ _('admin_question_title') }}</label>
-                    <input type="text" id="q_title" name="title" placeholder="e.g., Finding Top Spenders" required>
+                    <input type="text" id="q_title" name="title" placeholder="{{ _('placeholder_question_title') }}" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="q_description">{{ _('admin_statement') }}</label>
-                    <textarea id="q_description" name="description" rows="5" placeholder="Describe the task and the schema structure... (Markdown supported)" required></textarea>
+                    <textarea id="q_description" name="description" rows="5" placeholder="{{ _('placeholder_question_desc') }}" required></textarea>
                 </div>
                 
                 <!-- Inline Image Uploader Widget (Directly under statement textarea) -->
@@ -63,11 +63,11 @@
 
                 <div class="form-group">
                     <label for="init_sql">{{ _('admin_init_sql') }}</label>
-                    <textarea id="init_sql" name="init_sql" rows="6" class="code-textarea" placeholder="CREATE TABLE employees (id INT, salary INT);..." required></textarea>
+                    <textarea id="init_sql" name="init_sql" rows="6" class="code-textarea" placeholder="{{ _('placeholder_init_sql') }}" required></textarea>
                 </div>
                 <div class="form-group">
                     <label for="solution_sql">{{ _('admin_solution_sql') }}</label>
-                    <textarea id="solution_sql" name="solution_sql" rows="4" class="code-textarea" placeholder="SELECT * FROM employees ORDER BY salary DESC LIMIT 1;" required></textarea>
+                    <textarea id="solution_sql" name="solution_sql" rows="4" class="code-textarea" placeholder="{{ _('placeholder_solution_sql') }}" required></textarea>
                 </div>
 
                 <button type="submit" class="btn btn-success">{{ _('admin_publish') }}</button>
@@ -134,7 +134,7 @@
 async function handleImageUpload() {
     const fileInput = document.getElementById('image-upload-input');
     if (fileInput.files.length === 0) {
-        alert('Please select an image file first.');
+        alert("{{ _('js_select_image') }}");
         return;
     }
     
@@ -144,7 +144,7 @@ async function handleImageUpload() {
     const btn = document.querySelector('button[onclick="handleImageUpload()"]');
     const originalText = btn.textContent;
     btn.disabled = true;
-    btn.textContent = 'Uploading...';
+    btn.textContent = "{{ _('js_uploading') }}";
     
     try {
         const response = await fetch("{{ url_for('admin.upload_image') }}", {
@@ -154,7 +154,7 @@ async function handleImageUpload() {
         
         if (!response.ok) {
             const err = await response.json();
-            throw new Error(err.error || 'Upload failed');
+            throw new Error(err.error || "{{ _('js_upload_failed') }}");
         }
         
         const data = await response.json();
@@ -176,7 +176,7 @@ function copyImageTag() {
     copyText.select();
     copyText.setSelectionRange(0, 99999);
     navigator.clipboard.writeText(copyText.value);
-    alert('Markdown image tag copied to clipboard!');
+    alert("{{ _('js_copied') }}");
 }
 
 function filterQuestionList() {

@@ -7,12 +7,12 @@
     <div class="contest-header-bar">
         <div>
             <h1>{{ contest.title }}</h1>
-            <p class="contest-subheader">{{ contest.description or 'Welcome to this competition! Execute queries carefully.' }}</p>
+            <p class="contest-subheader">{{ contest.description or _('default_contest_desc') }}</p>
         </div>
         <div class="header-right">
             <div class="timer-box">
                 <span class="timer-label">{{ _('contest_remaining') }}</span>
-                <div class="contest-timer timer-large" data-endtime="{{ contest.end_time }}" data-starttime="{{ contest.start_time }}">Calculating...</div>
+                <div class="contest-timer timer-large" data-endtime="{{ contest.end_time }}" data-starttime="{{ contest.start_time }}">{{ _('loading') }}</div>
             </div>
             <a href="{{ url_for('leaderboard.show_leaderboard', contest_id=contest.id) }}" class="btn btn-primary btn-icon">
                 {{ _('contest_scoreboard') }}
@@ -38,11 +38,11 @@
                             <div class="question-item-actions">
                                 <span class="status-badge badge-{{ q.status | lower }}">
                                     {% if q.status == 'Accepted' %}
-                                        Accepted
+                                        {{ _('status_accepted') }}
                                     {% elif q.status == 'Attempted' %}
-                                        Attempted
+                                        {{ _('status_attempted') }}
                                     {% else %}
-                                        Unattempted
+                                        {{ _('status_unattempted') }}
                                     {% endif %}
                                 </span>
                                 <a href="{{ url_for('contest.question_details', contest_id=contest.id, question_id=q.id) }}" class="btn btn-sm btn-outline">

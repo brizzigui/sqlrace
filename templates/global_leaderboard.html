@@ -33,7 +33,7 @@
                                 <td class="team-name-col" style="padding: 16px 8px; vertical-align: middle;">
                                     <strong style="font-size: 1.05rem;">{{ row.username }}</strong>
                                     {% if session.get('team_id') == row.team_id %}
-                                        <span class="my-team-label">(You)</span>
+                                        <span class="my-team-label">({{ _('admin_you') }})</span>
                                     {% endif %}
                                 </td>
                                 <td style="text-align: center; font-size: 1.1rem; font-weight: 600; color: var(--color-accepted); padding: 16px 8px; vertical-align: middle;">

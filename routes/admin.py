@@ -1,5 +1,6 @@
 import os
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
+from translations import translate as _
 from werkzeug.utils import secure_filename
 from routes.auth import admin_required
 from database import get_main_db
@@ -83,7 +84,7 @@ def create_contest():
     question_ids = request.form.getlist('question_ids')
     
     if not title or not start_time_raw or not end_time_raw:
-        flash('Contest title, start time, and end time are required.', 'danger')
+        flash(_('flash_contest_fields_required'), 'danger')
         return redirect(url_for('admin.admin_contests'))
         
     try:
@@ -91,7 +92,7 @@ def create_contest():
         end_time = datetime.fromisoformat(end_time_raw)
         
         if end_time <= start_time:
-            flash('End time must be after start time.', 'danger')
+            flash(_('flash_contest_end_after_start'), 'danger')
             return redirect(url_for('admin.admin_contests'))
             
         with get_main_db() as cur:
@@ -108,9 +109,9 @@ def create_contest():
                     VALUES (%s, %s);
                 """, (contest_id, int(q_id)))
             
-        flash(f"Contest '{title}' created successfully!", "success")
+        flash(_('flash_contest_created', title=title), "success")
     except Exception as e:
-        flash(f"Failed to create contest: {str(e)}", "danger")
+        flash(_('flash_contest_create_failed', error=str(e)), "danger")
         
     return redirect(url_for('admin.admin_contests'))
 
@@ -125,7 +126,7 @@ def edit_contest(contest_id):
         question_ids = request.form.getlist('question_ids')
         
         if not title or not start_time_raw or not end_time_raw:
-            flash('Contest title, start time, and end time are required.', 'danger')
+            flash(_('flash_contest_fields_required'), 'danger')
             return redirect(url_for('admin.edit_contest', contest_id=contest_id))
             
         try:
@@ -133,7 +134,7 @@ def edit_contest(contest_id):
             end_time = datetime.fromisoformat(end_time_raw)
             
             if end_time <= start_time:
-                flash('End time must be after start time.', 'danger')
+                flash(_('flash_contest_end_after_start'), 'danger')
                 return redirect(url_for('admin.edit_contest', contest_id=contest_id))
                 
             with get_main_db() as cur:
@@ -151,10 +152,10 @@ def edit_contest(contest_id):
                         VALUES (%s, %s);
                     """, (contest_id, int(q_id)))
                     
-            flash(f"Contest '{title}' updated successfully!", "success")
+            flash(_('flash_contest_updated', title=title), "success")
             return redirect(url_for('admin.admin_contests'))
         except Exception as e:
-            flash(f"Failed to update contest: {str(e)}", "danger")
+            flash(_('flash_contest_update_failed', error=str(e)), "danger")
             return redirect(url_for('admin.edit_contest', contest_id=contest_id))
             
     # GET request
@@ -162,7 +163,7 @@ def edit_contest(contest_id):
         cur.execute("SELECT id, title, description, start_time, end_time FROM contests WHERE id = %s;", (contest_id,))
         contest = cur.fetchone()
         if not contest:
-            flash("Contest not found.", "danger")
+            flash(_('flash_contest_not_found'), "danger")
             return redirect(url_for('admin.admin_contests'))
             
         # Get all questions with difficulty and visibility
@@ -204,7 +205,7 @@ def create_question():
         difficulty = 1
     
     if not title or not description or not init_sql or not solution_sql:
-        flash('All question fields are required.', 'danger')
+        flash(_('flash_question_fields_required'), 'danger')
         return redirect(url_for('admin.admin_questions'))
         
     try:
@@ -214,9 +215,9 @@ def create_question():
                 VALUES (%s, %s, %s, %s, %s, %s);
             """, (title, description, init_sql, solution_sql, visibility, difficulty))
             
-        flash(f"Question '{title}' created successfully!", "success")
+        flash(_('flash_question_created', title=title), "success")
     except Exception as e:
-        flash(f"Failed to create question: {str(e)}", "danger")
+        flash(_('flash_question_create_failed', error=str(e)), "danger")
         
     return redirect(url_for('admin.admin_questions'))
 
@@ -250,9 +251,9 @@ def delete_contest(contest_id):
     try:
         with get_main_db() as cur:
             cur.execute("DELETE FROM contests WHERE id = %s;", (contest_id,))
-        flash("Contest deleted successfully.", "warning")
+        flash(_('flash_contest_deleted'), "warning")
     except Exception as e:
-        flash(f"Failed to delete contest: {str(e)}", "danger")
+        flash(_('flash_contest_delete_failed', error=str(e)), "danger")
     return redirect(url_for('admin.admin_contests'))
 
 @bp.route('/admin/question/delete/<int:question_id>', methods=['POST'])
@@ -261,9 +262,9 @@ def delete_question(question_id):
     try:
         with get_main_db() as cur:
             cur.execute("DELETE FROM questions WHERE id = %s;", (question_id,))
-        flash("Question deleted successfully.", "warning")
+        flash(_('flash_question_deleted'), "warning")
     except Exception as e:
-        flash(f"Failed to delete question: {str(e)}", "danger")
+        flash(_('flash_question_delete_failed', error=str(e)), "danger")
     return redirect(url_for('admin.admin_questions'))
 
 @bp.route('/admin/question/edit/<int:question_id>', methods=['GET'])
@@ -276,7 +277,7 @@ def edit_question_view(question_id):
         """, (question_id,))
         question = cur.fetchone()
         if not question:
-            flash("Question not found.", "danger")
+            flash(_('error_question_not_found'), "danger")
             return redirect(url_for('admin.admin_questions'))
             
     q_data = {
@@ -306,7 +307,7 @@ def edit_question(question_id):
         difficulty = 1
         
     if not title or not description or not init_sql or not solution_sql:
-        flash("All fields are required.", "danger")
+        flash(_('flash_admin_fields_required'), "danger")
         return redirect(url_for('admin.edit_question_view', question_id=question_id))
         
     try:
@@ -316,9 +317,9 @@ def edit_question(question_id):
                 SET title = %s, description = %s, init_sql = %s, solution_sql = %s, visibility = %s, difficulty = %s 
                 WHERE id = %s;
             """, (title, description, init_sql, solution_sql, visibility, difficulty, question_id))
-        flash(f"Question '{title}' updated successfully!", "success")
+        flash(_('flash_question_updated', title=title), "success")
     except Exception as e:
-        flash(f"Failed to update question: {str(e)}", "danger")
+        flash(_('flash_question_update_failed', error=str(e)), "danger")
         
     return redirect(url_for('admin.admin_questions'))
 
@@ -326,7 +327,7 @@ def edit_question(question_id):
 @admin_required
 def update_team_role(team_id):
     if team_id == session.get('team_id'):
-        flash("You cannot change your own role.", "danger")
+        flash(_('flash_team_role_own'), "danger")
         return redirect(url_for('admin.admin_teams'))
         
     is_admin_str = request.form.get('is_admin', 'false').lower()
@@ -335,9 +336,9 @@ def update_team_role(team_id):
     try:
         with get_main_db() as cur:
             cur.execute("UPDATE teams SET is_admin = %s WHERE id = %s;", (is_admin, team_id))
-        flash("Team role updated successfully.", "success")
+        flash(_('flash_team_role_updated'), "success")
     except Exception as e:
-        flash(f"Failed to update team role: {str(e)}", "danger")
+        flash(_('flash_team_role_update_failed', error=str(e)), "danger")
         
     return redirect(url_for('admin.admin_teams'))
 
@@ -345,15 +346,15 @@ def update_team_role(team_id):
 @admin_required
 def delete_team(team_id):
     if team_id == session.get('team_id'):
-        flash("You cannot delete your own account.", "danger")
+        flash(_('flash_team_delete_own'), "danger")
         return redirect(url_for('admin.admin_teams'))
         
     try:
         with get_main_db() as cur:
             cur.execute("DELETE FROM teams WHERE id = %s;", (team_id,))
-        flash("Team deleted successfully.", "warning")
+        flash(_('flash_team_deleted'), "warning")
     except Exception as e:
-        flash(f"Failed to delete team: {str(e)}", "danger")
+        flash(_('flash_team_delete_failed', error=str(e)), "danger")
         
     return redirect(url_for('admin.admin_teams'))
 

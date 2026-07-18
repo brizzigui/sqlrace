@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, session
+from translations import translate as _
 from routes.auth import login_required
 from database import get_main_db
 from datetime import datetime
@@ -111,7 +112,7 @@ def compute_contest_leaderboard(contest_id):
 def show_leaderboard(contest_id):
     contest_data, questions, board_data = compute_contest_leaderboard(contest_id)
     if not contest_data:
-        flash('Contest not found.', 'danger')
+        flash(_('flash_contest_not_found'), 'danger')
         return redirect(url_for('contest.contests_list'))
         
     return render_template(
@@ -126,7 +127,7 @@ def show_leaderboard(contest_id):
 def leaderboard_json(contest_id):
     contest_data, questions, board_data = compute_contest_leaderboard(contest_id)
     if not contest_data:
-        return jsonify({'error': 'Contest not found'}), 404
+        return jsonify({'error': _('flash_contest_not_found')}), 404
         
     return jsonify({
         'contest': contest_data,

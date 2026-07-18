@@ -183,7 +183,67 @@ TRANSLATIONS = {
         'admin_desc_questions': 'Add and edit independent questions, difficulties, and statements.',
         'admin_desc_teams': 'List and monitor registered competition teams.',
         'footer_desc': 'An online judge platform for SQL query challenges and database competitions.',
-        'footer_institution': 'Federal University of Santa Maria'
+        'footer_institution': 'Federal University of Santa Maria',
+        
+        # Placeholders & defaults
+        'placeholder_contest_title': 'e.g., SQL Sprint Round 1',
+        'placeholder_contest_desc': 'Contest rules, scope, or details...',
+        'placeholder_question_title': 'e.g., Finding Top Spenders',
+        'placeholder_question_desc': 'Describe the task and the schema structure... (Markdown supported)',
+        'placeholder_init_sql': 'CREATE TABLE employees (id INT, salary INT);...',
+        'placeholder_solution_sql': 'SELECT * FROM employees ORDER BY salary DESC LIMIT 1;',
+        'default_contest_desc': 'Welcome to this competition! Execute queries carefully.',
+        'default_no_description': 'No description provided.',
+        'practice_mode_label': 'Practice Mode',
+        'error_label': 'Error:',
+        'timer_starts_in': 'Starts in: ',
+        'timer_ended': 'Ended',
+        'status_accepted_ac': 'Accepted (AC)',
+        'status_wrong_answer_wa': 'Wrong Answer (WA)',
+        'status_runtime_error_re': 'Runtime Error (RE)',
+        'status_system_issue': 'System Connection Issue',
+        'query_empty_set': 'Empty set (0 rows returned).',
+        'empty_answer_mismatch': 'The outputs of your query do not match the expected answer.',
+        'failed_communicate': 'Failed to communicate with the judge endpoint: ',
+        'loading': 'Loading...',
+        'refresh_failed': 'Refresh Failed',
+        'status_accepted': 'Accepted',
+        'status_attempted': 'Attempted',
+        'status_unattempted': 'Unattempted',
+        'title_contest_dashboard': 'Leaderboard - {title} - SQL Race',
+        'title_login': 'Login - SQL Race',
+        'title_register': 'Register Team - SQL Race',
+        'title_editor': 'Editor - {title} - SQL Race',
+        
+        # Flash / API messages
+        'flash_contest_fields_required': 'Contest title, start time, and end time are required.',
+        'flash_contest_end_after_start': 'End time must be after start time.',
+        'flash_contest_created': 'Contest "{title}" created successfully!',
+        'flash_contest_create_failed': 'Failed to create contest: {error}',
+        'flash_contest_updated': 'Contest "{title}" updated successfully!',
+        'flash_contest_update_failed': 'Failed to update contest: {error}',
+        'flash_contest_deleted': 'Contest deleted successfully.',
+        'flash_contest_delete_failed': 'Failed to delete contest: {error}',
+        'flash_question_fields_required': 'All question fields are required.',
+        'flash_question_created': 'Question "{title}" created successfully!',
+        'flash_question_create_failed': 'Failed to create question: {error}',
+        'flash_question_updated': 'Question "{title}" updated successfully!',
+        'flash_question_update_failed': 'Failed to update question: {error}',
+        'flash_question_deleted': 'Question deleted successfully.',
+        'flash_question_delete_failed': 'Failed to delete question: {error}',
+        'flash_admin_fields_required': 'All fields are required.',
+        'flash_team_role_own': 'You cannot change your own role.',
+        'flash_team_role_updated': 'Team role updated successfully.',
+        'flash_team_role_update_failed': 'Failed to update team role: {error}',
+        'flash_team_delete_own': 'You cannot delete your own account.',
+        'flash_team_deleted': 'Team deleted successfully.',
+        'flash_team_delete_failed': 'Failed to delete team: {error}',
+        'flash_image_upload_failed': 'Image upload failed.',
+        'flash_question_restricted': 'Question not found or is restricted.',
+        'js_select_image': 'Please select an image file first.',
+        'js_uploading': 'Uploading...',
+        'js_upload_failed': 'Upload failed',
+        'js_copied': 'Markdown image tag copied to clipboard!'
     },
     'pt': {
         # Nav Header
@@ -369,6 +429,80 @@ TRANSLATIONS = {
         'admin_desc_questions': 'Adicione e edite questões independentes, dificuldades e enunciados.',
         'admin_desc_teams': 'Liste e monitore as equipes registradas na competição.',
         'footer_desc': 'Uma plataforma de juiz online para desafios de consultas SQL e competições de banco de dados.',
-        'footer_institution': 'Universidade Federal de Santa Maria'
+        'footer_institution': 'Universidade Federal de Santa Maria',
+        
+        # Placeholders & defaults
+        'placeholder_contest_title': 'ex: Maratona SQL Rodada 1',
+        'placeholder_contest_desc': 'Regras da competição, escopo ou detalhes...',
+        'placeholder_question_title': 'ex: Encontrar Maiores Compradores',
+        'placeholder_question_desc': 'Descreva a tarefa e a estrutura do esquema... (Suporta Markdown)',
+        'placeholder_init_sql': 'CREATE TABLE funcionarios (id INT, salario INT);...',
+        'placeholder_solution_sql': 'SELECT * FROM funcionarios ORDER BY salario DESC LIMIT 1;',
+        'default_contest_desc': 'Bem-vindo a esta competição! Execute suas consultas com atenção.',
+        'default_no_description': 'Nenhuma descrição fornecida.',
+        'practice_mode_label': 'Modo de Prática',
+        'error_label': 'Erro:',
+        'timer_starts_in': 'Começa em: ',
+        'timer_ended': 'Encerrada',
+        'status_accepted_ac': 'Aceito (AC)',
+        'status_wrong_answer_wa': 'Resposta Incorreta (WA)',
+        'status_runtime_error_re': 'Erro de Execução (RE)',
+        'status_system_issue': 'Falha de Conexão com o Sistema',
+        'query_empty_set': 'Conjunto vazio (0 linhas retornadas).',
+        'empty_answer_mismatch': 'Os resultados da sua consulta não coincidem com a resposta esperada.',
+        'failed_communicate': 'Falha ao se comunicar com o servidor de avaliação: ',
+        'loading': 'Carregando...',
+        'refresh_failed': 'Falha ao Atualizar',
+        'status_accepted': 'Aceito',
+        'status_attempted': 'Tentado',
+        'status_unattempted': 'Não Tentado',
+        'title_contest_dashboard': 'Placar - {title} - SQL Race',
+        'title_login': 'Entrar - SQL Race',
+        'title_register': 'Registrar Equipe - SQL Race',
+        'title_editor': 'Editor - {title} - SQL Race',
+        
+        # Flash / API messages
+        'flash_contest_fields_required': 'Título, horário de início e horário de término da competição são obrigatórios.',
+        'flash_contest_end_after_start': 'O horário de término deve ser após o horário de início.',
+        'flash_contest_created': 'Competição "{title}" criada com sucesso!',
+        'flash_contest_create_failed': 'Falha ao criar competição: {error}',
+        'flash_contest_updated': 'Competição "{title}" atualizada com sucesso!',
+        'flash_contest_update_failed': 'Falha ao atualizar competição: {error}',
+        'flash_contest_deleted': 'Competição excluída com sucesso.',
+        'flash_contest_delete_failed': 'Falha ao excluir competição: {error}',
+        'flash_question_fields_required': 'Todos os campos da questão são obrigatórios.',
+        'flash_question_created': 'Questão "{title}" criada com sucesso!',
+        'flash_question_create_failed': 'Falha ao criar questão: {error}',
+        'flash_question_updated': 'Questão "{title}" atualizada com sucesso!',
+        'flash_question_update_failed': 'Falha ao atualizar questão: {error}',
+        'flash_question_deleted': 'Questão excluída com sucesso.',
+        'flash_question_delete_failed': 'Falha ao excluir questão: {error}',
+        'flash_admin_fields_required': 'Todos os campos são obrigatórios.',
+        'flash_team_role_own': 'Você não pode alterar sua própria função.',
+        'flash_team_role_updated': 'Função da equipe atualizada com sucesso.',
+        'flash_team_role_update_failed': 'Falha ao atualizar função da equipe: {error}',
+        'flash_team_delete_own': 'Você não pode excluir sua própria conta.',
+        'flash_team_deleted': 'Equipe excluída com sucesso.',
+        'flash_team_delete_failed': 'Falha ao excluir equipe: {error}',
+        'flash_image_upload_failed': 'Falha no envio da imagem.',
+        'flash_question_restricted': 'Questão não encontrada ou é restrita.',
+        'js_select_image': 'Por favor, selecione um arquivo de imagem primeiro.',
+        'js_uploading': 'Enviando...',
+        'js_upload_failed': 'Falha no envio',
+        'js_copied': 'Tag Markdown da imagem copiada para a área de transferência!'
     }
 }
+
+from flask import session
+
+def translate(key, **kwargs):
+    lang = session.get('lang', 'en')
+    lang_dict = TRANSLATIONS.get(lang, TRANSLATIONS['en'])
+    msg = lang_dict.get(key, TRANSLATIONS['en'].get(key, key))
+    if kwargs:
+        try:
+            return msg.format(**kwargs)
+        except Exception:
+            pass
+    return msg
+

@@ -1,9 +1,22 @@
 {% extends 'base.html' %}
 
 {% block title %}Login - SQL Race{% endblock %}
+{% block body_class %}auth-page{% endblock %}
 
 {% block content %}
 <div class="auth-wrapper fade-in">
+    <!-- SQL-inspired background decorations -->
+    <div class="auth-background-decorations">
+        <div class="decor-grid"></div>
+        <div class="decor-circle decor-circle-1"></div>
+        <div class="decor-circle decor-circle-2"></div>
+        <div class="sql-floating-code sql-code-1">SELECT * FROM submissions;</div>
+        <div class="sql-floating-code sql-code-2">JOIN team ON team.id = sub.team_id;</div>
+        <div class="sql-floating-code sql-code-3">WHERE status = 'Accepted';</div>
+        <div class="sql-floating-code sql-code-4">GROUP BY difficulty ORDER BY penalty ASC;</div>
+        <div class="sql-floating-code sql-code-5">CREATE INDEX idx_teams ON users;</div>
+    </div>
+
     <div class="auth-card">
         <div class="auth-card-glow"></div>
         <div class="auth-header">

@@ -314,9 +314,29 @@ body {
     flex-grow: 1;
 }
 
+/* Auth pages: remove app-content constraints so wrapper can go edge-to-edge */
+body.auth-page .app-content {
+    padding: 0;
+    max-width: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
 /* Alert Notification System */
 .flash-messages {
     margin-bottom: 24px;
+}
+
+body.auth-page .flash-messages {
+    margin-bottom: 0;
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 450px;
+    z-index: 10;
 }
 
 .alert {
@@ -368,7 +388,12 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 40px 0;
+    padding: 60px 24px;
+    position: relative;
+    overflow: hidden;
+    flex: 1;
+    width: 100%;
+    min-height: calc(100vh - 72px);
 }
 
 .auth-card {
@@ -1956,3 +1981,134 @@ textarea {
         height: 320px;
     }
 }
+
+/* Auth Background Decorations */
+.auth-background-decorations {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    user-select: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.decor-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.8;
+}
+
+.decor-circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(140px);
+    opacity: 0.12;
+    pointer-events: none;
+}
+
+.decor-circle-1 {
+    width: 450px;
+    height: 450px;
+    background: var(--primary-grad);
+    top: -50px;
+    left: -50px;
+    animation: floatBubble 18s ease-in-out infinite alternate;
+}
+
+.decor-circle-2 {
+    width: 400px;
+    height: 400px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+    bottom: -50px;
+    right: -50px;
+    animation: floatBubble 22s ease-in-out infinite alternate-reverse;
+}
+
+.sql-floating-code {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    font-weight: 700;
+    user-select: none;
+    pointer-events: none;
+    white-space: nowrap;
+    opacity: 0.04;
+    transition: opacity 0.3s ease;
+}
+
+.sql-code-1 {
+    top: 15%;
+    left: 8%;
+    color: #00f2fe;
+    animation: floatText 9s ease-in-out infinite;
+    opacity: 0.06;
+}
+
+.sql-code-2 {
+    top: 45%;
+    left: 5%;
+    color: #8b5cf6;
+    animation: floatText 12s ease-in-out infinite;
+    opacity: 0.05;
+}
+
+.sql-code-3 {
+    bottom: 18%;
+    left: 10%;
+    color: #10b981;
+    animation: floatText 10s ease-in-out infinite;
+    opacity: 0.07;
+}
+
+.sql-code-4 {
+    top: 25%;
+    right: 5%;
+    color: #fbbf24;
+    animation: floatText 13s ease-in-out infinite;
+    opacity: 0.05;
+}
+
+.sql-code-5 {
+    bottom: 22%;
+    right: 8%;
+    color: #00f2fe;
+    animation: floatText 11s ease-in-out infinite;
+    opacity: 0.06;
+}
+
+/* Ensure the form card stands out above absolute elements */
+.auth-card {
+    z-index: 2;
+}
+
+@keyframes floatBubble {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(60px, 40px) scale(1.15); }
+}
+
+@keyframes floatText {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-16px) rotate(0.5deg); }
+}
+
+@media (max-width: 768px) {
+    .sql-floating-code {
+        font-size: 0.8rem;
+    }
+    .decor-circle {
+        filter: blur(90px);
+        width: 250px;
+        height: 250px;
+    }
+}
+

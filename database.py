@@ -87,12 +87,21 @@ def init_db():
         cur.execute("""
         CREATE TABLE IF NOT EXISTS questions (
             id SERIAL PRIMARY KEY,
-            contest_id INT REFERENCES contests(id) ON DELETE CASCADE,
             title VARCHAR(255) NOT NULL,
             description TEXT NOT NULL,
             init_sql TEXT NOT NULL,
             solution_sql TEXT NOT NULL,
+            visibility VARCHAR(20) NOT NULL DEFAULT 'public',
+            difficulty INT NOT NULL DEFAULT 1 CHECK (difficulty BETWEEN 1 AND 5),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        """)
+
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS contest_questions (
+            contest_id INT REFERENCES contests(id) ON DELETE CASCADE,
+            question_id INT REFERENCES questions(id) ON DELETE CASCADE,
+            PRIMARY KEY (contest_id, question_id)
         );
         """)
         
@@ -101,11 +110,44 @@ def init_db():
             id SERIAL PRIMARY KEY,
             team_id INT REFERENCES teams(id) ON DELETE CASCADE,
             question_id INT REFERENCES questions(id) ON DELETE CASCADE,
+            contest_id INT REFERENCES contests(id) ON DELETE CASCADE,
             query TEXT NOT NULL,
             status VARCHAR(50) NOT NULL,
             error_message TEXT,
             submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+        """)
+
+        # Migration queries for existing databases
+        # 1. Add visibility column to questions if it does not exist
+        cur.execute("ALTER TABLE questions ADD COLUMN IF NOT EXISTS visibility VARCHAR(20) NOT NULL DEFAULT 'public';")
+        
+        # 2. Add difficulty column to questions if it does not exist
+        cur.execute("ALTER TABLE questions ADD COLUMN IF NOT EXISTS difficulty INT NOT NULL DEFAULT 1 CHECK (difficulty BETWEEN 1 AND 5);")
+        
+        # 3. Add contest_id column to submissions if it does not exist
+        cur.execute("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS contest_id INT REFERENCES contests(id) ON DELETE CASCADE;")
+
+        # 3. If questions still has contest_id, migrate data to contest_questions and submissions, then drop it
+        cur.execute("""
+        DO $$
+        BEGIN
+            IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='questions' AND column_name='contest_id') THEN
+                -- Migrate links to contest_questions
+                INSERT INTO contest_questions (contest_id, question_id)
+                SELECT contest_id, id FROM questions WHERE contest_id IS NOT NULL
+                ON CONFLICT DO NOTHING;
+
+                -- Set contest_id on old submissions
+                UPDATE submissions s
+                SET contest_id = q.contest_id
+                FROM questions q
+                WHERE s.question_id = q.id AND s.contest_id IS NULL AND q.contest_id IS NOT NULL;
+
+                -- Drop old column
+                ALTER TABLE questions DROP COLUMN contest_id;
+            END IF;
+        END $$;
         """)
 
         # Seed default admin if not exists

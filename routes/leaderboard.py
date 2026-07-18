@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for
+from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, session
 from routes.auth import login_required
 from database import get_main_db
 from datetime import datetime
@@ -15,8 +15,14 @@ def compute_contest_leaderboard(contest_id):
             
         contest_id_val, title, start_time, end_time = contest
         
-        # Get questions
-        cur.execute("SELECT id, title FROM questions WHERE contest_id = %s ORDER BY id ASC;", (contest_id,))
+        # Get questions for the contest via join table
+        cur.execute("""
+            SELECT q.id, q.title 
+            FROM questions q
+            JOIN contest_questions cq ON q.id = cq.question_id
+            WHERE cq.contest_id = %s 
+            ORDER BY q.id ASC;
+        """, (contest_id,))
         questions = cur.fetchall()
         q_list = [{'id': q[0], 'title': q[1]} for q in questions]
         q_ids = [q[0] for q in questions]
@@ -25,12 +31,11 @@ def compute_contest_leaderboard(contest_id):
         cur.execute("SELECT id, username FROM teams WHERE is_admin = FALSE;")
         teams = cur.fetchall()
         
-        # Get all submissions within the contest timeframe, sorted by time
+        # Get all submissions within the contest timeframe to this contest, sorted by time
         cur.execute("""
             SELECT s.team_id, s.question_id, s.status, s.submitted_at 
             FROM submissions s
-            JOIN questions q ON s.question_id = q.id
-            WHERE q.contest_id = %s AND s.submitted_at BETWEEN %s AND %s
+            WHERE s.contest_id = %s AND s.submitted_at BETWEEN %s AND %s
             ORDER BY s.submitted_at ASC;
         """, (contest_id, start_time, end_time))
         submissions = cur.fetchall()
@@ -128,3 +133,30 @@ def leaderboard_json(contest_id):
         'questions': questions,
         'leaderboard': board_data
     })
+
+@bp.route('/leaderboard')
+@login_required
+def global_leaderboard():
+    with get_main_db() as cur:
+        # Rank by solved count DESC, total submissions ASC (meaning fewer attempts to solve issues is better), then team name ASC
+        cur.execute("""
+            SELECT t.id, t.username,
+                   (SELECT COUNT(DISTINCT question_id) FROM submissions WHERE team_id = t.id AND status = 'Accepted') as solved_count,
+                   (SELECT COUNT(*) FROM submissions WHERE team_id = t.id) as total_submissions
+            FROM teams t
+            WHERE t.is_admin = FALSE
+            ORDER BY solved_count DESC, total_submissions ASC, t.username ASC;
+        """)
+        leaderboard_rows = cur.fetchall()
+        
+    leaderboard_data = []
+    for idx, row in enumerate(leaderboard_rows):
+        leaderboard_data.append({
+            'rank': idx + 1,
+            'team_id': row[0],
+            'username': row[1],
+            'solved_count': row[2],
+            'total_submissions': row[3]
+        })
+        
+    return render_template('global_leaderboard.html', leaderboard=leaderboard_data)

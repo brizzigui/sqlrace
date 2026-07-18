@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ _('nav_questions') }} - SQL Race{% endblock %}
+
+{% block content %}
+<div class="dashboard-container fade-in">
+    <div class="dashboard-header">
+        <h1>{{ _('questions_title') }}</h1>
+        <p>{{ _('questions_sub') }}</p>
+    </div>
+
+    <!-- Questions Table -->
+    <div class="leaderboard-card" style="margin-top: 24px;">
+        <div class="leaderboard-table-wrapper">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th style="width: 140px; text-align: center;">{{ _('questions_status') }}</th>
+                        <th style="width: 80px;">{{ _('questions_id') }}</th>
+                        <th>{{ _('questions_name') }}</th>
+                        <th style="width: 120px;">{{ _('admin_difficulty') }}</th>
+                        <th style="width: 150px; text-align: center;">{{ _('questions_action') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if questions %}
+                        {% for q in questions %}
+                            <tr class="leaderboard-row">
+                                <td style="text-align: center; vertical-align: middle; padding: 16px 8px;">
+                                    {% if q.status == 'Accepted' %}
+                                        <span class="badge active-badge" style="font-weight: 600;">🟢 Accepted</span>
+                                    {% elif q.status == 'Attempted' %}
+                                        <span class="badge" style="background: var(--color-failed-bg); border: 1px solid var(--color-failed-border); color: var(--color-failed); font-weight: 600; padding: 4px 8px; border-radius: 4px;">🔴 Attempted</span>
+                                    {% else %}
+                                        <span class="badge" style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); color: var(--text-muted); font-weight: 500; padding: 4px 8px; border-radius: 4px;">Unattempted</span>
+                                    {% endif %}
+                                </td>
+                                <td style="vertical-align: middle; padding: 16px 8px;">#{{ q.id }}</td>
+                                <td style="vertical-align: middle; padding: 16px 8px;">
+                                    <strong style="color: var(--text-primary); font-size: 1.05rem;">{{ q.title }}</strong>
+                                </td>
+                                <td style="vertical-align: middle; padding: 16px 8px; color: var(--color-upcoming); font-size: 1rem; letter-spacing: 2px;">
+                                    {{ "★" * q.difficulty }}
+                                </td>
+                                <td style="text-align: center; vertical-align: middle; padding: 16px 8px;">
+                                    <a href="{{ url_for('contest.practice_question_details', question_id=q.id) }}" class="btn btn-outline" style="padding: 6px 16px; font-size: 0.9rem; display: inline-block;">
+                                        {{ _('questions_solve') }}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-muted text-center" style="padding: 40px; font-size: 1.1rem;">
+                                {{ _('questions_no_questions') }}
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

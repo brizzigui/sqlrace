@@ -7,15 +7,25 @@
     <!-- Left Pane: Problem Description and Schema -->
     <div class="workspace-panel panel-left">
         <div class="panel-header">
-            <a href="{{ url_for('contest.contest_dashboard', contest_id=contest.id) }}" class="back-link">&larr; {{ _('editor_back') }}</a>
-            <div class="contest-timer-small">
-                {{ _('editor_ends_in') }}: <span class="contest-timer" data-endtime="{{ contest.end_time }}" data-starttime="{{ contest.start_time }}">...</span>
-            </div>
+            {% if practice_mode %}
+                <a href="{{ url_for('contest.questions_list') }}" class="back-link">&larr; {{ _('editor_back_questions') }}</a>
+                <div class="contest-timer-small" style="color: var(--text-muted);">
+                    Practice Mode
+                </div>
+            {% else %}
+                <a href="{{ url_for('contest.contest_dashboard', contest_id=contest.id) }}" class="back-link">&larr; {{ _('editor_back') }}</a>
+                <div class="contest-timer-small">
+                    {{ _('editor_ends_in') }}: <span class="contest-timer" data-endtime="{{ contest.end_time }}" data-starttime="{{ contest.start_time }}">...</span>
+                </div>
+            {% endif %}
         </div>
         
         <div class="panel-body scrollable">
             <div class="problem-intro">
                 <h1>{{ question.title }}</h1>
+                <div class="difficulty-display" style="color: var(--color-upcoming); font-size: 0.95rem; margin-top: 4px; letter-spacing: 2px;">
+                    {{ "★" * question.difficulty }}
+                </div>
             </div>
             
             <div class="problem-description">
@@ -36,18 +46,17 @@
     <div class="workspace-panel panel-right">
         <div class="panel-header">
             <span class="editor-label">{{ _('editor_label') }}</span>
-            <span class="db-indicator">{{ _('editor_target_db') }}: <code>sqlrace_sandbox</code></span>
         </div>
         
         <div class="panel-body split-vertical">
             <!-- Code Editor Section -->
             <div class="editor-section">
-                <form id="submission-form" data-submiturl="{{ url_for('contest.submit_query', contest_id=contest.id, question_id=question.id) }}">
+                <form id="submission-form" data-submiturl="{% if practice_mode %}{{ url_for('contest.submit_practice_query', question_id=question.id) }}{% else %}{{ url_for('contest.submit_query', contest_id=contest.id, question_id=question.id) }}{% endif %}">
                     <div class="textarea-wrapper">
                         <textarea id="sql-code-editor" name="query" placeholder="{{ _('editor_placeholder') }}" required spellcheck="false" autofocus></textarea>
                     </div>
                     <div class="editor-controls">
-                        {% if contest.is_active %}
+                        {% if practice_mode or contest.is_active %}
                             <button type="submit" id="run-btn" class="btn btn-success">{{ _('editor_submit') }}</button>
                         {% else %}
                             <button type="button" class="btn btn-secondary" disabled>{{ _('editor_inactive') }}</button>

@@ -48,6 +48,28 @@
                         <input type="datetime-local" id="end_time" name="end_time" required>
                     </div>
                 </div>
+                
+                <!-- Question Selection with Search -->
+                <div class="form-group">
+                    <label>{{ _('admin_questions_select') }}</label>
+                    <input type="text" id="contest-question-search" placeholder="{{ _('admin_search_questions') }}" onkeyup="filterQuestions('contest-question-search', 'contest-question-list')" style="width: 100%; padding: 8px 12px; margin-bottom: 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-surface); color: var(--text-primary); font-size: 0.9rem;">
+                    
+                    <div id="contest-question-list" class="questions-checkbox-list" style="max-height: 180px; overflow-y: auto; border: 1px solid var(--border-color); padding: 10px; border-radius: 4px; background: rgba(0,0,0,0.15); margin-top: 5px;">
+                        {% if questions %}
+                            {% for q in questions %}
+                                <label class="question-item" data-id="{{ q[0] }}" data-name="{{ q[1]|lower }}" style="display: block; margin-bottom: 6px; cursor: pointer; font-size: 0.9rem;">
+                                    <input type="checkbox" name="question_ids" value="{{ q[0] }}"> 
+                                    <strong>#{{ q[0] }} {{ q[1] }}</strong> 
+                                    <span style="color: var(--color-upcoming); font-size: 0.8rem; margin-left: 5px;">{{ "★" * q[3] }}</span>
+                                    <span style="color: var(--text-muted); font-size: 0.8rem; margin-left: 5px;">({{ _('admin_visibility') }}: {{ _('admin_public') if q[2] == 'public' else _('admin_restricted') }})</span>
+                                </label>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted text-center" style="font-size: 0.85rem; margin: 0;">{{ _('admin_no_questions') }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
                 <button type="submit" class="btn btn-success">{{ _('admin_publish') }}</button>
             </form>
 
@@ -71,9 +93,10 @@
                                     <td><strong>{{ c[1] }}</strong></td>
                                     <td>{{ c[3].strftime('%Y-%m-%d %H:%M') }}</td>
                                     <td>{{ c[4].strftime('%Y-%m-%d %H:%M') }}</td>
-                                    <td>
-                                        <form action="{{ url_for('admin.delete_contest', contest_id=c[0]) }}" method="POST" onsubmit="return confirm('{{ _('admin_delete_confirm_c') }}');">
-                                            <button type="submit" class="btn-text btn-danger-text">{{ _('arena_ended') }}</button>
+                                    <td style="display: flex; gap: 8px; align-items: center;">
+                                        <a href="{{ url_for('admin.edit_contest', contest_id=c[0]) }}" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.85rem;">{{ _('admin_edit_contest') }}</a>
+                                        <form action="{{ url_for('admin.delete_contest', contest_id=c[0]) }}" method="POST" onsubmit="return confirm('{{ _('admin_delete_confirm_c') }}');" style="margin: 0;">
+                                            <button type="submit" class="btn-text btn-danger-text" style="font-size: 0.85rem;">{{ _('arena_ended') }}</button>
                                         </form>
                                     </td>
                                 </tr>
@@ -92,15 +115,26 @@
         <div class="admin-card">
             <h2>{{ _('admin_add_question') }}</h2>
             <form action="{{ url_for('admin.create_question') }}" method="POST" class="admin-form">
-                <div class="form-group">
-                    <label for="contest_id">{{ _('admin_associate') }}</label>
-                    <select id="contest_id" name="contest_id" required>
-                        <option value="">{{ _('admin_select_contest') }}</option>
-                        {% for c in contests %}
-                            <option value="{{ c[0] }}">{{ c[1] }}</option>
-                        {% endfor %}
-                    </select>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="visibility">{{ _('admin_visibility') }}</label>
+                        <select id="visibility" name="visibility" required>
+                            <option value="public" selected>{{ _('admin_public') }}</option>
+                            <option value="restricted">{{ _('admin_restricted') }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="difficulty">{{ _('admin_difficulty') }}</label>
+                        <select id="difficulty" name="difficulty" required>
+                            <option value="1">★ (1/5)</option>
+                            <option value="2">★★ (2/5)</option>
+                            <option value="3" selected>★★★ (3/5)</option>
+                            <option value="4">★★★★ (4/5)</option>
+                            <option value="5">★★★★★ (5/5)</option>
+                        </select>
+                    </div>
                 </div>
+
                 <div class="form-group">
                     <label for="q_title">{{ _('admin_question_title') }}</label>
                     <input type="text" id="q_title" name="title" placeholder="e.g., Finding Top Spenders" required>
@@ -109,6 +143,23 @@
                     <label for="q_description">{{ _('admin_statement') }}</label>
                     <textarea id="q_description" name="description" rows="4" placeholder="Describe the task and the schema structure..." required></textarea>
                 </div>
+
+                <!-- Inline Image Uploader Helper -->
+                <div style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border-color); padding: 12px; border-radius: 6px; margin-bottom: 16px;">
+                    <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 6px;">{{ _('admin_upload_image') }}</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="file" id="image-upload-input" accept="image/*" style="flex: 1; border: 1px solid var(--border-color); padding: 4px; border-radius: 4px; background: var(--bg-surface); color: var(--text-secondary); font-size: 0.8rem;">
+                        <button type="button" class="btn btn-primary" onclick="handleImageUpload()" style="padding: 6px 12px; font-size: 0.85rem;">{{ _('admin_upload_btn') }}</button>
+                    </div>
+                    <div id="image-upload-result" style="margin-top: 8px; display: none;">
+                        <label style="font-size: 0.75rem; color: var(--text-muted);">{{ _('admin_copy_tag') }}:</label>
+                        <div style="display: flex; gap: 8px; margin-top: 4px;">
+                            <input type="text" id="image-tag-output" readonly style="flex: 1; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-main); color: var(--primary-color); font-family: var(--font-mono); font-size: 0.8rem;">
+                            <button type="button" class="btn btn-outline" onclick="copyImageTag()" style="padding: 4px 10px; font-size: 0.8rem;">Copy</button>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="form-group">
                     <label for="init_sql">{{ _('admin_init_sql') }}</label>
                     <textarea id="init_sql" name="init_sql" rows="6" class="code-textarea" placeholder="CREATE TABLE employees (id INT, salary INT);&#10;INSERT INTO employees VALUES (1, 5000);" required></textarea>
@@ -125,10 +176,12 @@
                 <table class="admin-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th style="width: 50px;">ID</th>
                             <th>{{ _('admin_question_title') }}</th>
-                            <th>{{ _('admin_contest_title') }}</th>
-                            <th>{{ _('admin_action') }}</th>
+                            <th style="width: 100px;">{{ _('admin_difficulty') }}</th>
+                            <th style="width: 100px;">{{ _('admin_visibility') }}</th>
+                            <th>{{ _('admin_associate') }}</th>
+                            <th style="width: 70px;">{{ _('admin_action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -136,18 +189,24 @@
                             {% for q in questions %}
                                 <tr>
                                     <td>{{ q[0] }}</td>
-                                    <td>{{ q[1] }}</td>
-                                    <td><small>{{ q[3] }}</small></td>
+                                    <td><strong>{{ q[1] }}</strong></td>
+                                    <td style="color: var(--color-upcoming); font-size: 0.95rem;">{{ "★" * q[3] }}</td>
                                     <td>
-                                        <form action="{{ url_for('admin.delete_question', question_id=q[0]) }}" method="POST" onsubmit="return confirm('{{ _('admin_delete_confirm_q') }}');">
-                                            <button type="submit" class="btn-text btn-danger-text">{{ _('arena_ended') }}</button>
+                                        <span class="badge {% if q[2] == 'public' %}active-badge{% else %}past-badge{% endif %}" style="font-size: 0.8rem;">
+                                            {{ _('admin_public') if q[2] == 'public' else _('admin_restricted') }}
+                                        </span>
+                                    </td>
+                                    <td><small style="color: var(--text-secondary);">{{ q[4] }}</small></td>
+                                    <td>
+                                        <form action="{{ url_for('admin.delete_question', question_id=q[0]) }}" method="POST" onsubmit="return confirm('{{ _('admin_delete_confirm_q') }}');" style="margin: 0;">
+                                            <button type="submit" class="btn-text btn-danger-text" style="font-size: 0.85rem;">{{ _('arena_ended') }}</button>
                                         </form>
                                     </td>
                                 </tr>
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="4" class="text-muted text-center">{{ _('admin_no_questions') }}</td>
+                                <td colspan="6" class="text-muted text-center">{{ _('admin_no_questions') }}</td>
                             </tr>
                         {% endif %}
                     </tbody>
@@ -156,4 +215,74 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterQuestions(searchId, listId) {
+    const query = document.getElementById(searchId).value.toLowerCase().trim();
+    const list = document.getElementById(listId);
+    const items = list.getElementsByClassName('question-item');
+    
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const id = item.getAttribute('data-id');
+        const name = item.getAttribute('data-name');
+        
+        if (id.includes(query) || name.includes(query)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    }
+}
+
+async function handleImageUpload() {
+    const fileInput = document.getElementById('image-upload-input');
+    if (fileInput.files.length === 0) {
+        alert('Please select an image file first.');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('image', fileInput.files[0]);
+    
+    const btn = document.querySelector('button[onclick="handleImageUpload()"]');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Uploading...';
+    
+    try {
+        const response = await fetch("{{ url_for('admin.upload_image') }}", {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Upload failed');
+        }
+        
+        const data = await response.json();
+        const imgTag = `<img src="${data.url}" alt="${fileInput.files[0].name}" style="max-width: 100%; height: auto; border-radius: 6px; margin: 12px 0;" />`;
+        
+        document.getElementById('image-tag-output').value = imgTag;
+        document.getElementById('image-upload-result').style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = originalText;
+    } catch (err) {
+        alert('Error: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
+}
+
+function copyImageTag() {
+    const copyText = document.getElementById('image-tag-output');
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(copyText.value);
+    alert('HTML image tag copied to clipboard!');
+}
+</script>
 {% endblock %}

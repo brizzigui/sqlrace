@@ -18,9 +18,19 @@
             <a href="/" class="app-logo">
                 <span class="logo-accent">&lt;SQL/&gt;</span> RACE
             </a>
-            <nav class="app-nav">
+            
+            <!-- Mobile Menu Toggle Button -->
+            <button class="menu-toggle" aria-label="Toggle Navigation" onclick="toggleMobileMenu()">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+
+            <nav class="app-nav" id="app-nav-el">
                 {% if session.get('team_id') %}
                     <a href="{{ url_for('contest.contests_list') }}" class="nav-link">{{ _('nav_contests') }}</a>
+                    <a href="{{ url_for('contest.questions_list') }}" class="nav-link">{{ _('nav_questions') }}</a>
+                    <a href="{{ url_for('leaderboard.global_leaderboard') }}" class="nav-link">{{ _('nav_global_leaderboard') }}</a>
                     {% if session.get('is_admin') %}
                         <a href="{{ url_for('admin.admin_dashboard') }}" class="nav-link admin-tag">{{ _('nav_admin') }}</a>
                     {% endif %}
@@ -39,6 +49,15 @@
             </nav>
         </div>
     </header>
+
+    <script>
+    function toggleMobileMenu() {
+        const nav = document.getElementById('app-nav-el');
+        const toggle = document.querySelector('.menu-toggle');
+        nav.classList.toggle('active');
+        toggle.classList.toggle('active');
+    }
+    </script>
 
     <main class="app-content">
         <div class="flash-messages">

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ _('global_leaderboard_title') }} - SQL Race{% endblock %}
+
+{% block content %}
+<div class="dashboard-container fade-in">
+    <div class="contest-header-bar">
+        <div>
+            <h1>🏆 {{ _('global_leaderboard_title') }}</h1>
+            <p class="contest-subheader">{{ _('global_leaderboard_sub') }}</p>
+        </div>
+    </div>
+
+    <!-- Leaderboard Card -->
+    <div class="leaderboard-card" style="margin-top: 24px;">
+        <div class="leaderboard-table-wrapper">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th style="width: 100px; text-align: center;">{{ _('leaderboard_rank') }}</th>
+                        <th>{{ _('leaderboard_team') }}</th>
+                        <th style="width: 200px; text-align: center;">{{ _('leaderboard_solved_questions') }}</th>
+                        <th style="width: 200px; text-align: center;">{{ _('leaderboard_total_submissions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if leaderboard %}
+                        {% for row in leaderboard %}
+                            <tr class="leaderboard-row {% if session.get('team_id') == row.team_id %}current-team-row{% endif %}">
+                                <td class="rank-col" style="text-align: center; font-size: 1.1rem; padding: 16px 8px; vertical-align: middle;">
+                                    {% if row.rank == 1 %}🥇{% elif row.rank == 2 %}🥈{% elif row.rank == 3 %}🥉{% else %}{{ row.rank }}{% endif %}
+                                </td>
+                                <td class="team-name-col" style="padding: 16px 8px; vertical-align: middle;">
+                                    <strong style="font-size: 1.05rem;">{{ row.username }}</strong>
+                                    {% if session.get('team_id') == row.team_id %}
+                                        <span class="my-team-label">(You)</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: center; font-size: 1.1rem; font-weight: 600; color: var(--color-accepted); padding: 16px 8px; vertical-align: middle;">
+                                    {{ row.solved_count }}
+                                </td>
+                                <td style="text-align: center; font-size: 1.1rem; color: var(--text-secondary); padding: 16px 8px; vertical-align: middle;">
+                                    {{ row.total_submissions }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-muted text-center" style="padding: 40px; font-size: 1.1rem;">
+                                {{ _('leaderboard_empty') }}
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

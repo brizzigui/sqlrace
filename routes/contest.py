@@ -20,7 +20,6 @@ def contests_list():
     past = []
     
     for c in all_contests:
-        # c is (id, title, description, start_time, end_time)
         start = c[3]
         end = c[4]
         contest_dict = {
@@ -55,19 +54,25 @@ def contest_dashboard(contest_id):
             flash('Contest not found.', 'danger')
             return redirect(url_for('contest.contests_list'))
             
-        # Fetch questions for this contest
-        cur.execute("SELECT id, title FROM questions WHERE contest_id = %s ORDER BY id ASC;", (contest_id,))
+        # Fetch questions for this contest via the join table
+        cur.execute("""
+            SELECT q.id, q.title, q.difficulty 
+            FROM questions q
+            JOIN contest_questions cq ON q.id = cq.question_id
+            WHERE cq.contest_id = %s 
+            ORDER BY q.id ASC;
+        """, (contest_id,))
         questions = cur.fetchall()
         
         # Check status for each question
         question_list = []
         for q in questions:
-            q_id, q_title = q
+            q_id, q_title, q_difficulty = q
             cur.execute("""
                 SELECT status FROM submissions 
-                WHERE team_id = %s AND question_id = %s 
+                WHERE team_id = %s AND question_id = %s AND contest_id = %s
                 ORDER BY submitted_at DESC;
-            """, (team_id, q_id))
+            """, (team_id, q_id, contest_id))
             subs = cur.fetchall()
             
             status = 'Unattempted'
@@ -81,6 +86,7 @@ def contest_dashboard(contest_id):
             question_list.append({
                 'id': q_id,
                 'title': q_title,
+                'difficulty': q[2],
                 'status': status
             })
             
@@ -112,30 +118,32 @@ def question_details(contest_id, question_id):
     now = datetime.now()
     
     with get_main_db() as cur:
-        # Validate contest and question relation
+        # Validate contest
         cur.execute("SELECT id, start_time, end_time FROM contests WHERE id = %s;", (contest_id,))
         contest = cur.fetchone()
         if not contest:
             flash('Contest not found.', 'danger')
             return redirect(url_for('contest.contests_list'))
             
+        # Validate that the question belongs to this contest
         cur.execute("""
-            SELECT id, title, description, init_sql 
-            FROM questions 
-            WHERE id = %s AND contest_id = %s;
+            SELECT q.id, q.title, q.description, q.init_sql, q.difficulty 
+            FROM questions q
+            JOIN contest_questions cq ON q.id = cq.question_id
+            WHERE q.id = %s AND cq.contest_id = %s;
         """, (question_id, contest_id))
         question = cur.fetchone()
         if not question:
             flash('Question not found in this contest.', 'danger')
             return redirect(url_for('contest.contest_dashboard', contest_id=contest_id))
             
-        # Fetch team's submissions for this question
+        # Fetch team's submissions for this question inside this contest
         cur.execute("""
             SELECT id, query, status, error_message, submitted_at 
             FROM submissions 
-            WHERE team_id = %s AND question_id = %s 
+            WHERE team_id = %s AND question_id = %s AND contest_id = %s
             ORDER BY submitted_at DESC;
-        """, (team_id, question_id))
+        """, (team_id, question_id, contest_id))
         submissions = cur.fetchall()
         
     start_time = contest[1]
@@ -146,7 +154,8 @@ def question_details(contest_id, question_id):
         'id': question[0],
         'title': question[1],
         'description': question[2],
-        'init_sql': question[3]
+        'init_sql': question[3],
+        'difficulty': question[4]
     }
     
     # Format submissions
@@ -167,7 +176,7 @@ def question_details(contest_id, question_id):
         'end_time': end_time.isoformat()
     }
     
-    return render_template('question_editor.html', contest=contest_data, question=q_data, submissions=formatted_subs)
+    return render_template('question_editor.html', practice_mode=False, contest=contest_data, question=q_data, submissions=formatted_subs)
 
 @bp.route('/contest/<int:contest_id>/question/<int:question_id>/submit', methods=['POST'])
 @login_required
@@ -175,7 +184,6 @@ def submit_query(contest_id, question_id):
     team_id = session.get('team_id')
     now = datetime.now()
     
-    # Parse request JSON or Form
     if request.is_json:
         data = request.get_json()
         user_query = data.get('query', '').strip()
@@ -201,26 +209,30 @@ def submit_query(contest_id, question_id):
         if now > end_time:
             return jsonify({'status': 'Runtime Error', 'error_message': 'Contest has already ended.'}), 403
             
-        # Get question
-        cur.execute("SELECT init_sql, solution_sql FROM questions WHERE id = %s AND contest_id = %s;", (question_id, contest_id))
+        # Get question details associated with contest
+        cur.execute("""
+            SELECT q.init_sql, q.solution_sql 
+            FROM questions q
+            JOIN contest_questions cq ON q.id = cq.question_id
+            WHERE q.id = %s AND cq.contest_id = %s;
+        """, (question_id, contest_id))
         question = cur.fetchone()
         if not question:
-            return jsonify({'status': 'Runtime Error', 'error_message': 'Question not found.'}), 404
+            return jsonify({'status': 'Runtime Error', 'error_message': 'Question not found in this contest.'}), 404
             
         init_sql, solution_sql = question
 
     # Run the judge (sandbox database)
     status, error_message, user_cols, user_rows = evaluate_submission(init_sql, solution_sql, user_query)
     
-    # Save submission metadata to main database
+    # Save submission metadata to main database with contest_id populated
     with get_main_db() as cur:
         cur.execute("""
-            INSERT INTO submissions (team_id, question_id, query, status, error_message, submitted_at)
-            VALUES (%s, %s, %s, %s, %s, %s) RETURNING id, submitted_at;
-        """, (team_id, question_id, user_query, status, error_message, now))
+            INSERT INTO submissions (team_id, question_id, contest_id, query, status, error_message, submitted_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id, submitted_at;
+        """, (team_id, question_id, contest_id, user_query, status, error_message, now))
         sub_id, sub_time = cur.fetchone()
         
-    # Serialize row values (e.g. convert date objects to string for JSON serialization)
     serializable_rows = []
     for r in user_rows:
         serializable_rows.append([str(val) if val is not None else None for val in r])
@@ -231,5 +243,135 @@ def submit_query(contest_id, question_id):
         'status': status,
         'error_message': error_message,
         'columns': user_cols,
-        'rows': serializable_rows[:100] # Limit response to first 100 rows for performance
+        'rows': serializable_rows[:100]
+    })
+
+@bp.route('/questions')
+@login_required
+def questions_list():
+    team_id = session.get('team_id')
+    with get_main_db() as cur:
+        # Fetch all public questions
+        cur.execute("SELECT id, title, description, difficulty FROM questions WHERE visibility = 'public' ORDER BY id ASC;")
+        questions = cur.fetchall()
+        
+        question_list = []
+        for q in questions:
+            q_id, q_title, q_desc, q_diff = q
+            
+            # Check user's submissions status
+            cur.execute("""
+                SELECT status FROM submissions 
+                WHERE team_id = %s AND question_id = %s 
+                ORDER BY submitted_at DESC;
+            """, (team_id, q_id))
+            subs = cur.fetchall()
+            
+            status = 'Unattempted'
+            if subs:
+                status = 'Attempted'
+                for s in subs:
+                    if s[0] == 'Accepted':
+                        status = 'Accepted'
+                        break
+                        
+            question_list.append({
+                'id': q_id,
+                'title': q_title,
+                'description': q_desc,
+                'difficulty': q[3],
+                'status': status
+            })
+            
+    return render_template('questions.html', questions=question_list)
+
+@bp.route('/question/<int:question_id>')
+@login_required
+def practice_question_details(question_id):
+    team_id = session.get('team_id')
+    with get_main_db() as cur:
+        cur.execute("SELECT id, title, description, init_sql, difficulty FROM questions WHERE id = %s AND visibility = 'public';", (question_id,))
+        question = cur.fetchone()
+        if not question:
+            flash('Question not found or is restricted.', 'danger')
+            return redirect(url_for('contest.questions_list'))
+            
+        # Fetch team's submissions for this question
+        cur.execute("""
+            SELECT id, query, status, error_message, submitted_at 
+            FROM submissions 
+            WHERE team_id = %s AND question_id = %s 
+            ORDER BY submitted_at DESC;
+        """, (team_id, question_id))
+        submissions = cur.fetchall()
+        
+    q_data = {
+        'id': question[0],
+        'title': question[1],
+        'description': question[2],
+        'init_sql': question[3],
+        'difficulty': question[4]
+    }
+    
+    formatted_subs = []
+    for sub in submissions:
+        formatted_subs.append({
+            'id': sub[0],
+            'query': sub[1],
+            'status': sub[2],
+            'error_message': sub[3],
+            'submitted_at': sub[4].strftime('%Y-%m-%d %H:%M:%S')
+        })
+        
+    return render_template('question_editor.html', practice_mode=True, contest=None, question=q_data, submissions=formatted_subs)
+
+@bp.route('/question/<int:question_id>/submit', methods=['POST'])
+@login_required
+def submit_practice_query(question_id):
+    team_id = session.get('team_id')
+    now = datetime.now()
+    
+    if request.is_json:
+        data = request.get_json()
+        user_query = data.get('query', '').strip()
+    else:
+        user_query = request.form.get('query', '').strip()
+        
+    if not user_query:
+        return jsonify({
+            'status': 'Runtime Error',
+            'error_message': 'Query cannot be empty.'
+        }), 400
+        
+    with get_main_db() as cur:
+        # Check if the question is public
+        cur.execute("SELECT init_sql, solution_sql FROM questions WHERE id = %s AND visibility = 'public';", (question_id,))
+        question = cur.fetchone()
+        if not question:
+            return jsonify({'status': 'Runtime Error', 'error_message': 'Question not found.'}), 404
+            
+        init_sql, solution_sql = question
+
+    # Run the judge
+    status, error_message, user_cols, user_rows = evaluate_submission(init_sql, solution_sql, user_query)
+    
+    # Save submission with contest_id set to NULL for practice mode
+    with get_main_db() as cur:
+        cur.execute("""
+            INSERT INTO submissions (team_id, question_id, contest_id, query, status, error_message, submitted_at)
+            VALUES (%s, %s, NULL, %s, %s, %s, %s) RETURNING id, submitted_at;
+        """, (team_id, question_id, user_query, status, error_message, now))
+        sub_id, sub_time = cur.fetchone()
+        
+    serializable_rows = []
+    for r in user_rows:
+        serializable_rows.append([str(val) if val is not None else None for val in r])
+        
+    return jsonify({
+        'submission_id': sub_id,
+        'submitted_at': sub_time.strftime('%Y-%m-%d %H:%M:%S'),
+        'status': status,
+        'error_message': error_message,
+        'columns': user_cols,
+        'rows': serializable_rows[:100]
     })

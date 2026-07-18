@@ -1,9 +1,14 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+import os
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from werkzeug.utils import secure_filename
 from routes.auth import admin_required
 from database import get_main_db
 from datetime import datetime
 
 bp = Blueprint('admin', __name__)
+
+UPLOAD_FOLDER = os.path.join('static', 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @bp.route('/admin')
 @admin_required
@@ -13,12 +18,15 @@ def admin_dashboard():
         cur.execute("SELECT id, title, description, start_time, end_time FROM contests ORDER BY start_time DESC;")
         contests = cur.fetchall()
         
-        # Get questions grouped by contest
+        # Get questions with their associated contests and difficulty
         cur.execute("""
-            SELECT q.id, q.title, q.contest_id, c.title as contest_title 
-            FROM questions q 
-            JOIN contests c ON q.contest_id = c.id 
-            ORDER BY q.contest_id, q.id;
+            SELECT q.id, q.title, q.visibility, q.difficulty,
+                   COALESCE(string_agg(c.title, ', '), 'None') as contests_list
+            FROM questions q
+            LEFT JOIN contest_questions cq ON q.id = cq.question_id
+            LEFT JOIN contests c ON cq.contest_id = c.id
+            GROUP BY q.id, q.title, q.visibility, q.difficulty
+            ORDER BY q.id DESC;
         """)
         questions = cur.fetchall()
         
@@ -48,14 +56,13 @@ def create_contest():
     description = request.form.get('description', '').strip()
     start_time_raw = request.form.get('start_time', '').strip()
     end_time_raw = request.form.get('end_time', '').strip()
+    question_ids = request.form.getlist('question_ids')
     
     if not title or not start_time_raw or not end_time_raw:
         flash('Contest title, start time, and end time are required.', 'danger')
         return redirect(url_for('admin.admin_dashboard'))
         
     try:
-        # HTML5 datetime-local outputs format 'YYYY-MM-DDTHH:MM' or with seconds
-        # psycopg2 can handle strings directly, but parsing validates correctness
         start_time = datetime.fromisoformat(start_time_raw)
         end_time = datetime.fromisoformat(end_time_raw)
         
@@ -66,8 +73,16 @@ def create_contest():
         with get_main_db() as cur:
             cur.execute("""
                 INSERT INTO contests (title, description, start_time, end_time)
-                VALUES (%s, %s, %s, %s);
+                VALUES (%s, %s, %s, %s) RETURNING id;
             """, (title, description, start_time, end_time))
+            contest_id = cur.fetchone()[0]
+            
+            # Associate selected questions
+            for q_id in question_ids:
+                cur.execute("""
+                    INSERT INTO contest_questions (contest_id, question_id)
+                    VALUES (%s, %s);
+                """, (contest_id, int(q_id)))
             
         flash(f"Contest '{title}' created successfully!", "success")
     except Exception as e:
@@ -75,30 +90,135 @@ def create_contest():
         
     return redirect(url_for('admin.admin_dashboard'))
 
+@bp.route('/admin/contest/edit/<int:contest_id>', methods=['GET', 'POST'])
+@admin_required
+def edit_contest(contest_id):
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        description = request.form.get('description', '').strip()
+        start_time_raw = request.form.get('start_time', '').strip()
+        end_time_raw = request.form.get('end_time', '').strip()
+        question_ids = request.form.getlist('question_ids')
+        
+        if not title or not start_time_raw or not end_time_raw:
+            flash('Contest title, start time, and end time are required.', 'danger')
+            return redirect(url_for('admin.edit_contest', contest_id=contest_id))
+            
+        try:
+            start_time = datetime.fromisoformat(start_time_raw)
+            end_time = datetime.fromisoformat(end_time_raw)
+            
+            if end_time <= start_time:
+                flash('End time must be after start time.', 'danger')
+                return redirect(url_for('admin.edit_contest', contest_id=contest_id))
+                
+            with get_main_db() as cur:
+                cur.execute("""
+                    UPDATE contests 
+                    SET title = %s, description = %s, start_time = %s, end_time = %s
+                    WHERE id = %s;
+                """, (title, description, start_time, end_time, contest_id))
+                
+                # Update questions association
+                cur.execute("DELETE FROM contest_questions WHERE contest_id = %s;", (contest_id,))
+                for q_id in question_ids:
+                    cur.execute("""
+                        INSERT INTO contest_questions (contest_id, question_id)
+                        VALUES (%s, %s);
+                    """, (contest_id, int(q_id)))
+                    
+            flash(f"Contest '{title}' updated successfully!", "success")
+            return redirect(url_for('admin.admin_dashboard'))
+        except Exception as e:
+            flash(f"Failed to update contest: {str(e)}", "danger")
+            return redirect(url_for('admin.edit_contest', contest_id=contest_id))
+            
+    # GET request
+    with get_main_db() as cur:
+        cur.execute("SELECT id, title, description, start_time, end_time FROM contests WHERE id = %s;", (contest_id,))
+        contest = cur.fetchone()
+        if not contest:
+            flash("Contest not found.", "danger")
+            return redirect(url_for('admin.admin_dashboard'))
+            
+        # Get all questions with difficulty and visibility
+        cur.execute("SELECT id, title, difficulty, visibility FROM questions ORDER BY id DESC;")
+        all_questions = cur.fetchall()
+        
+        # Get associated question IDs
+        cur.execute("SELECT question_id FROM contest_questions WHERE contest_id = %s;", (contest_id,))
+        associated_ids = {row[0] for row in cur.fetchall()}
+        
+    contest_data = {
+        'id': contest[0],
+        'title': contest[1],
+        'description': contest[2],
+        'start_time': contest[3].strftime('%Y-%m-%dT%H:%M'),
+        'end_time': contest[4].strftime('%Y-%m-%dT%H:%M')
+    }
+    
+    return render_template(
+        'admin_edit_contest.html',
+        contest=contest_data,
+        questions=all_questions,
+        associated_ids=associated_ids
+    )
+
 @bp.route('/admin/question/create', methods=['POST'])
 @admin_required
 def create_question():
-    contest_id = request.form.get('contest_id')
     title = request.form.get('title', '').strip()
     description = request.form.get('description', '').strip()
     init_sql = request.form.get('init_sql', '').strip()
     solution_sql = request.form.get('solution_sql', '').strip()
-    if not contest_id or not title or not description or not init_sql or not solution_sql:
+    visibility = request.form.get('visibility', 'public').strip()
+    try:
+        difficulty = int(request.form.get('difficulty', 1))
+        if not (1 <= difficulty <= 5):
+            difficulty = 1
+    except ValueError:
+        difficulty = 1
+    
+    if not title or not description or not init_sql or not solution_sql:
         flash('All question fields are required.', 'danger')
         return redirect(url_for('admin.admin_dashboard'))
         
     try:
         with get_main_db() as cur:
             cur.execute("""
-                INSERT INTO questions (contest_id, title, description, init_sql, solution_sql)
-                VALUES (%s, %s, %s, %s, %s);
-            """, (contest_id, title, description, init_sql, solution_sql))
+                INSERT INTO questions (title, description, init_sql, solution_sql, visibility, difficulty)
+                VALUES (%s, %s, %s, %s, %s, %s);
+            """, (title, description, init_sql, solution_sql, visibility, difficulty))
             
         flash(f"Question '{title}' created successfully!", "success")
     except Exception as e:
         flash(f"Failed to create question: {str(e)}", "danger")
         
     return redirect(url_for('admin.admin_dashboard'))
+
+@bp.route('/admin/upload_image', methods=['POST'])
+@admin_required
+def upload_image():
+    if 'image' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    if file:
+        filename = secure_filename(file.filename)
+        # Unique filename using timestamp
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        filename = f"{timestamp}_{filename}"
+        
+        # Ensure uploads folder exists
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+        
+        url = url_for('static', filename=f"uploads/{filename}")
+        return jsonify({'url': url})
+    return jsonify({'error': 'Failed to save file'}), 500
 
 @bp.route('/admin/contest/delete/<int:contest_id>', methods=['POST'])
 @admin_required

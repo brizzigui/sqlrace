@@ -331,7 +331,7 @@ body.auth-page .app-content {
 body.auth-page .flash-messages {
     margin-bottom: 0;
     position: absolute;
-    top: 16px;
+    top: 88px;
     left: 50%;
     transform: translateX(-50%);
     width: 90%;
@@ -388,7 +388,7 @@ body.auth-page .flash-messages {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 60px 24px;
+    padding: 80px 24px;
     position: relative;
     overflow: hidden;
     flex: 1;

@@ -47,7 +47,10 @@ def create_app():
     def render_markdown(text):
         if not text:
             return ""
-        return markdown.markdown(text, extensions=['fenced_code', 'tables'])
+        html = markdown.markdown(text, extensions=['fenced_code', 'tables', 'nl2br', 'sane_lists'])
+        # Wrap generated tables in a responsive scroll container with the premium data-table class
+        html = html.replace('<table>', '<div class="table-scroll"><table class="data-table">').replace('</table>', '</table></div>')
+        return html
 
     @app.route('/set_lang/<lang>')
     def set_lang(lang):

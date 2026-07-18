@@ -152,6 +152,7 @@ function initSubmissionHandler() {
             if (result.status === 'Accepted') {
                 statusBanner.classList.add('status-banner-accepted');
                 statusText.innerHTML = '🟢 Accepted (AC)';
+                triggerConfetti();
             } else if (result.status === 'Wrong Answer') {
                 statusBanner.classList.add('status-banner-wrong');
                 statusText.innerHTML = '🔴 Wrong Answer (WA)';
@@ -378,3 +379,63 @@ window.refreshLeaderboard = async function(contestId) {
         }, 3000);
     }
 };
+
+/* Confetti Effect */
+function triggerConfetti() {
+    if (!document.getElementById('confetti-style')) {
+        const style = document.createElement('style');
+        style.id = 'confetti-style';
+        style.textContent = `
+            @keyframes confetti-fall {
+                0% {
+                    transform: translateY(0) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(105vh) rotate(720deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    const colors = ['#00f2fe', '#4facfe', '#10b981', '#3b82f6', '#f43f5e', '#fbbf24', '#a78bfa'];
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '100vw';
+    container.style.height = '100vh';
+    container.style.pointerEvents = 'none';
+    container.style.zIndex = '9999';
+    container.style.overflow = 'hidden';
+    document.body.appendChild(container);
+
+    const count = 120;
+    for (let i = 0; i < count; i++) {
+        const confetti = document.createElement('div');
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const left = Math.random() * 100 + 'vw';
+        const size = Math.random() * 10 + 6 + 'px';
+        const delay = Math.random() * 1.5;
+        const duration = Math.random() * 2.5 + 2.5;
+        
+        confetti.style.position = 'absolute';
+        confetti.style.top = '-20px';
+        confetti.style.left = left;
+        confetti.style.width = size;
+        confetti.style.height = size;
+        confetti.style.backgroundColor = color;
+        confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        confetti.style.opacity = Math.random() * 0.4 + 0.6;
+        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+        confetti.style.animation = `confetti-fall ${duration}s linear ${delay}s forwards`;
+        
+        container.appendChild(confetti);
+    }
+    
+    setTimeout(() => {
+        container.remove();
+    }, 6000);
+}

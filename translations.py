@@ -156,7 +156,10 @@ TRANSLATIONS = {
         'admin_upload_image': 'Inline Image Uploader',
         'admin_upload_btn': 'Upload Image',
         'admin_copy_tag': 'Copy Markdown Tag',
-        'admin_select_difficulty': '-- Select Difficulty --'
+        'admin_select_difficulty': '-- Select Difficulty --',
+        'admin_edit_question': 'Edit SQL Question',
+        'admin_delete': 'Delete',
+        'admin_edit': 'Edit'
     },
     'pt': {
         # Nav Header
@@ -315,6 +318,9 @@ TRANSLATIONS = {
         'admin_upload_image': 'Enviador de Imagem Inline',
         'admin_upload_btn': 'Enviar Imagem',
         'admin_copy_tag': 'Copiar Tag Markdown',
-        'admin_select_difficulty': '-- Selecionar Dificuldade --'
+        'admin_select_difficulty': '-- Selecionar Dificuldade --',
+        'admin_edit_question': 'Editar Questão SQL',
+        'admin_delete': 'Excluir',
+        'admin_edit': 'Editar'
     }
 }

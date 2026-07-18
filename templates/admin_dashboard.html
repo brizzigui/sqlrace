@@ -82,7 +82,7 @@
                             <th>{{ _('admin_contest_title') }}</th>
                             <th>{{ _('admin_start') }}</th>
                             <th>{{ _('admin_end') }}</th>
-                            <th>{{ _('admin_action') }}</th>
+                            <th style="width: 120px; text-align: center;">{{ _('admin_action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -93,11 +93,14 @@
                                     <td><strong>{{ c[1] }}</strong></td>
                                     <td>{{ c[3].strftime('%Y-%m-%d %H:%M') }}</td>
                                     <td>{{ c[4].strftime('%Y-%m-%d %H:%M') }}</td>
-                                    <td style="display: flex; gap: 8px; align-items: center;">
-                                        <a href="{{ url_for('admin.edit_contest', contest_id=c[0]) }}" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.85rem;">{{ _('admin_edit_contest') }}</a>
-                                        <form action="{{ url_for('admin.delete_contest', contest_id=c[0]) }}" method="POST" onsubmit="return confirm('{{ _('admin_delete_confirm_c') }}');" style="margin: 0;">
-                                            <button type="submit" class="btn-text btn-danger-text" style="font-size: 0.85rem;">{{ _('arena_ended') }}</button>
-                                        </form>
+                                    <td style="text-align: center; vertical-align: middle;">
+                                        <div style="display: flex; gap: 8px; align-items: center; justify-content: center;">
+                                            <a href="{{ url_for('admin.edit_contest', contest_id=c[0]) }}" class="btn-text" style="font-size: 0.85rem; color: var(--primary-color); text-decoration: none;">{{ _('admin_edit') or 'Edit' }}</a>
+                                            <span style="color: var(--border-color);">|</span>
+                                            <form action="{{ url_for('admin.delete_contest', contest_id=c[0]) }}" method="POST" onsubmit="return confirm('{{ _('admin_delete_confirm_c') }}');" style="margin: 0; display: inline;">
+                                                <button type="submit" class="btn-text btn-danger-text" style="font-size: 0.85rem;">{{ _('admin_delete') or 'Delete' }}</button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -181,7 +184,7 @@
                             <th style="width: 100px;">{{ _('admin_difficulty') }}</th>
                             <th style="width: 100px;">{{ _('admin_visibility') }}</th>
                             <th>{{ _('admin_associate') }}</th>
-                            <th style="width: 70px;">{{ _('admin_action') }}</th>
+                            <th style="width: 120px; text-align: center;">{{ _('admin_action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -197,10 +200,14 @@
                                         </span>
                                     </td>
                                     <td><small style="color: var(--text-secondary);">{{ q[4] }}</small></td>
-                                    <td>
-                                        <form action="{{ url_for('admin.delete_question', question_id=q[0]) }}" method="POST" onsubmit="return confirm('{{ _('admin_delete_confirm_q') }}');" style="margin: 0;">
-                                            <button type="submit" class="btn-text btn-danger-text" style="font-size: 0.85rem;">{{ _('arena_ended') }}</button>
-                                        </form>
+                                    <td style="text-align: center; vertical-align: middle;">
+                                        <div style="display: flex; gap: 8px; align-items: center; justify-content: center;">
+                                            <a href="{{ url_for('admin.edit_question_view', question_id=q[0]) }}" class="btn-text" style="font-size: 0.85rem; color: var(--primary-color); text-decoration: none;">{{ _('admin_edit') or 'Edit' }}</a>
+                                            <span style="color: var(--border-color);">|</span>
+                                            <form action="{{ url_for('admin.delete_question', question_id=q[0]) }}" method="POST" onsubmit="return confirm('{{ _('admin_delete_confirm_q') }}');" style="margin: 0; display: inline;">
+                                                <button type="submit" class="btn-text btn-danger-text" style="font-size: 0.85rem;">{{ _('admin_delete') or 'Delete' }}</button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             {% endfor %}

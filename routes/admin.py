@@ -241,3 +241,60 @@ def delete_question(question_id):
     except Exception as e:
         flash(f"Failed to delete question: {str(e)}", "danger")
     return redirect(url_for('admin.admin_dashboard'))
+
+@bp.route('/admin/question/edit/<int:question_id>', methods=['GET'])
+@admin_required
+def edit_question_view(question_id):
+    with get_main_db() as cur:
+        cur.execute("""
+            SELECT id, title, description, init_sql, solution_sql, visibility, difficulty 
+            FROM questions WHERE id = %s;
+        """, (question_id,))
+        question = cur.fetchone()
+        if not question:
+            flash("Question not found.", "danger")
+            return redirect(url_for('admin.admin_dashboard'))
+            
+    q_data = {
+        'id': question[0],
+        'title': question[1],
+        'description': question[2],
+        'init_sql': question[3],
+        'solution_sql': question[4],
+        'visibility': question[5],
+        'difficulty': question[6]
+    }
+    return render_template('admin_edit_question.html', question=q_data)
+
+@bp.route('/admin/question/edit/<int:question_id>', methods=['POST'])
+@admin_required
+def edit_question(question_id):
+    title = request.form.get('title', '').strip()
+    description = request.form.get('description', '').strip()
+    init_sql = request.form.get('init_sql', '').strip()
+    solution_sql = request.form.get('solution_sql', '').strip()
+    visibility = request.form.get('visibility', 'public').strip()
+    try:
+        difficulty = int(request.form.get('difficulty', 1))
+        if not (1 <= difficulty <= 5):
+            difficulty = 1
+    except ValueError:
+        difficulty = 1
+        
+    if not title or not description or not init_sql or not solution_sql:
+        flash("All fields are required.", "danger")
+        return redirect(url_for('admin.edit_question_view', question_id=question_id))
+        
+    try:
+        with get_main_db() as cur:
+            cur.execute("""
+                UPDATE questions 
+                SET title = %s, description = %s, init_sql = %s, solution_sql = %s, visibility = %s, difficulty = %s 
+                WHERE id = %s;
+            """, (title, description, init_sql, solution_sql, visibility, difficulty, question_id))
+        flash(f"Question '{title}' updated successfully!", "success")
+    except Exception as e:
+        flash(f"Failed to update question: {str(e)}", "danger")
+        
+    return redirect(url_for('admin.admin_dashboard'))
+

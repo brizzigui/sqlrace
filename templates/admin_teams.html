@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ _('admin_manage_teams') }} - SQL Race{% endblock %}
+
+{% block content %}
+<div class="admin-container fade-in" style="max-width: 900px; margin: 0 auto;">
+    <div class="dashboard-header" style="margin-bottom: 24px;">
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="back-link" style="color: var(--primary-color); text-decoration: none; display: inline-block; margin-bottom: 12px;">&larr; {{ _('leaderboard_back') }}</a>
+        <h1>{{ _('admin_manage_teams') }}</h1>
+        <p>View and manage all active competition teams registered in the database.</p>
+    </div>
+
+    <!-- Teams List Card -->
+    <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 16px; flex-wrap: wrap;">
+            <h2 style="margin: 0;">{{ _('admin_teams') }}</h2>
+            <input type="text" id="team-search" placeholder="Search teams by username..." onkeyup="filterTeams()" style="width: 250px; max-width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-surface); color: var(--text-primary); font-size: 0.85rem; margin: 0;">
+        </div>
+
+        <div class="admin-table-wrapper">
+            <table class="admin-table" id="teams-table">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">ID</th>
+                        <th>Username / Team Name</th>
+                        <th style="width: 200px;">Created At</th>
+                        <th style="width: 150px;">Role</th>
+                        <th style="width: 100px; text-align: center;">{{ _('admin_action') or 'Action' }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if teams %}
+                        {% for team in teams %}
+                            <tr class="team-row" data-username="{{ team[1]|lower }}">
+                                <td>{{ team[0] }}</td>
+                                <td>
+                                    <strong>{{ team[1] }}</strong>
+                                    {% if team[0] == session.get('team_id') %}
+                                        <span class="badge active-badge" style="font-size: 0.75rem; padding: 2px 6px; margin-left: 6px; border-radius: 4px; vertical-align: middle;">{{ _('admin_you') or 'You' }}</span>
+                                    {% endif %}
+                                </td>
+                                <td><span style="color: var(--text-secondary); font-size: 0.9rem;">{{ team[2].strftime('%Y-%m-%d %H:%M:%S') }}</span></td>
+                                <td>
+                                    {% if team[0] == session.get('team_id') %}
+                                        <span class="badge active-badge" style="border-radius: 9999px; padding: 6px 16px; font-size: 0.8rem; display: inline-block;">Admin</span>
+                                    {% else %}
+                                        <form action="{{ url_for('admin.update_team_role', team_id=team[0]) }}" method="POST" style="margin: 0; display: inline-block;">
+                                            <select name="is_admin" onchange="this.form.submit()" class="badge-select {% if team[3] %}badge-select-admin{% else %}badge-select-competitor{% endif %}">
+                                                <option value="false" {% if not team[3] %}selected{% endif %}>Competitor</option>
+                                                <option value="true" {% if team[3] %}selected{% endif %}>Admin</option>
+                                            </select>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: center; vertical-align: middle;">
+                                    {% if team[0] == session.get('team_id') %}
+                                        <span style="color: var(--text-muted); font-size: 0.85rem;">-</span>
+                                    {% else %}
+                                        <form action="{{ url_for('admin.delete_team', team_id=team[0]) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this team? All submissions for this team will be permanently deleted!');" style="margin: 0; display: inline;">
+                                            <button type="submit" class="btn-text btn-danger-text" style="font-size: 0.85rem;">{{ _('admin_delete') or 'Delete' }}</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-muted text-center">No registered teams found.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterTeams() {
+    const query = document.getElementById('team-search').value.toLowerCase().trim();
+    const rows = document.querySelectorAll('#teams-table tbody .team-row');
+    
+    rows.forEach(row => {
+        const username = row.getAttribute('data-username');
+        if (username.includes(query)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

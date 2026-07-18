@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ _('admin_manage_questions') }} - SQL Race{% endblock %}
+
+{% block content %}
+<div class="admin-container fade-in">
+    <div class="dashboard-header" style="margin-bottom: 24px;">
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="back-link" style="color: var(--primary-color); text-decoration: none; display: inline-block; margin-bottom: 12px;">&larr; {{ _('leaderboard_back') }}</a>
+        <h1>{{ _('admin_manage_questions') }}</h1>
+        <p>Add and edit individual programming tasks, test suites, and statement files.</p>
+    </div>
+
+    <div class="admin-grid">
+        <!-- Add SQL Question -->
+        <div class="admin-card">
+            <h2>{{ _('admin_add_question') }}</h2>
+            <form action="{{ url_for('admin.create_question') }}" method="POST" class="admin-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="visibility">{{ _('admin_visibility') }}</label>
+                        <select id="visibility" name="visibility" required>
+                            <option value="public">{{ _('admin_public') }}</option>
+                            <option value="restricted">{{ _('admin_restricted') }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="difficulty">{{ _('admin_difficulty') }}</label>
+                        <select id="difficulty" name="difficulty" required>
+                            <option value="1">★ (1/5)</option>
+                            <option value="2">★★ (2/5)</option>
+                            <option value="3">★★★ (3/5)</option>
+                            <option value="4">★★★★ (4/5)</option>
+                            <option value="5">★★★★★ (5/5)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="q_title">{{ _('admin_question_title') }}</label>
+                    <input type="text" id="q_title" name="title" placeholder="e.g., Finding Top Spenders" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="q_description">{{ _('admin_statement') }}</label>
+                    <textarea id="q_description" name="description" rows="5" placeholder="Describe the task and the schema structure... (Markdown supported)" required></textarea>
+                </div>
+                
+                <!-- Inline Image Uploader Widget (Directly under statement textarea) -->
+                <div style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border-color); padding: 12px; border-radius: 6px; margin-bottom: 16px;">
+                    <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 6px;">{{ _('admin_upload_image') }}</label>
+                    <div class="uploader-flex-row" style="display: flex; gap: 8px; align-items: center;">
+                        <input type="file" id="image-upload-input" accept="image/*" style="flex: 1; border: 1px solid var(--border-color); padding: 4px; border-radius: 4px; background: var(--bg-surface); color: var(--text-secondary); font-size: 0.8rem;">
+                        <button type="button" class="btn btn-primary" onclick="handleImageUpload()" style="padding: 6px 12px; font-size: 0.85rem;">{{ _('admin_upload_btn') }}</button>
+                    </div>
+                    <div id="image-upload-result" style="margin-top: 8px; display: none;">
+                        <label style="font-size: 0.75rem; color: var(--text-muted);">{{ _('admin_copy_tag') }}:</label>
+                        <div class="uploader-flex-row" style="display: flex; gap: 8px; margin-top: 4px;">
+                            <input type="text" id="image-tag-output" readonly style="flex: 1; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-main); color: var(--primary-color); font-family: var(--font-mono); font-size: 0.8rem;">
+                            <button type="button" class="btn btn-outline" onclick="copyImageTag()" style="padding: 4px 10px; font-size: 0.8rem;">Copy</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="init_sql">{{ _('admin_init_sql') }}</label>
+                    <textarea id="init_sql" name="init_sql" rows="6" class="code-textarea" placeholder="CREATE TABLE employees (id INT, salary INT);..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="solution_sql">{{ _('admin_solution_sql') }}</label>
+                    <textarea id="solution_sql" name="solution_sql" rows="4" class="code-textarea" placeholder="SELECT * FROM employees ORDER BY salary DESC LIMIT 1;" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success">{{ _('admin_publish') }}</button>
+            </form>
+        </div>
+
+        <!-- Questions Listing -->
+        <div class="admin-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 16px; flex-wrap: wrap;">
+                <h2 style="margin: 0;">{{ _('admin_existing_questions') }}</h2>
+                <input type="text" id="question-list-search" placeholder="{{ _('admin_search_questions') }}" onkeyup="filterQuestionList()" style="width: 250px; max-width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-surface); color: var(--text-primary); font-size: 0.85rem; margin: 0;">
+            </div>
+            <div class="admin-table-wrapper">
+                <table class="admin-table" id="questions-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">ID</th>
+                            <th>{{ _('admin_question_title') }}</th>
+                            <th style="width: 100px;">{{ _('admin_difficulty') }}</th>
+                            <th style="width: 100px;">{{ _('admin_visibility') }}</th>
+                            <th>{{ _('admin_associate') }}</th>
+                            <th style="width: 120px; text-align: center;">{{ _('admin_action') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if questions %}
+                            {% for q in questions %}
+                                <tr class="question-row" data-id="{{ q[0] }}" data-name="{{ q[1]|lower }}">
+                                    <td>{{ q[0] }}</td>
+                                    <td><strong>{{ q[1] }}</strong></td>
+                                    <td style="color: var(--color-upcoming); font-size: 0.95rem;">{{ "★" * q[3] }}</td>
+                                    <td>
+                                        <span class="badge {% if q[2] == 'public' %}active-badge{% else %}past-badge{% endif %}" style="font-size: 0.8rem;">
+                                            {{ _('admin_public') if q[2] == 'public' else _('admin_restricted') }}
+                                        </span>
+                                    </td>
+                                    <td><small style="color: var(--text-secondary);">{{ q[4] }}</small></td>
+                                    <td style="text-align: center; vertical-align: middle;">
+                                        <div style="display: flex; gap: 8px; align-items: center; justify-content: center;">
+                                            <a href="{{ url_for('admin.edit_question_view', question_id=q[0]) }}" class="btn-text" style="font-size: 0.85rem; color: var(--primary-color); text-decoration: none;">{{ _('admin_edit') or 'Edit' }}</a>
+                                            <span style="color: var(--border-color);">|</span>
+                                            <form action="{{ url_for('admin.delete_question', question_id=q[0]) }}" method="POST" onsubmit="return confirm('{{ _('admin_delete_confirm_q') }}');" style="margin: 0; display: inline;">
+                                                <button type="submit" class="btn-text btn-danger-text" style="font-size: 0.85rem;">{{ _('admin_delete') or 'Delete' }}</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-muted text-center">{{ _('admin_no_questions') }}</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function handleImageUpload() {
+    const fileInput = document.getElementById('image-upload-input');
+    if (fileInput.files.length === 0) {
+        alert('Please select an image file first.');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('image', fileInput.files[0]);
+    
+    const btn = document.querySelector('button[onclick="handleImageUpload()"]');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Uploading...';
+    
+    try {
+        const response = await fetch("{{ url_for('admin.upload_image') }}", {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Upload failed');
+        }
+        
+        const data = await response.json();
+        const imgMarkdown = `![${fileInput.files[0].name}](${data.url})`;
+        
+        document.getElementById('image-tag-output').value = imgMarkdown;
+        document.getElementById('image-upload-result').style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = originalText;
+    } catch (err) {
+        alert('Error: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
+}
+
+function copyImageTag() {
+    const copyText = document.getElementById('image-tag-output');
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(copyText.value);
+    alert('Markdown image tag copied to clipboard!');
+}
+
+function filterQuestionList() {
+    const query = document.getElementById('question-list-search').value.toLowerCase().trim();
+    const rows = document.querySelectorAll('#questions-table tbody .question-row');
+    
+    rows.forEach(row => {
+        const id = row.getAttribute('data-id');
+        const name = row.getAttribute('data-name');
+        if (id.includes(query) || name.includes(query)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

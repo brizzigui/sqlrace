@@ -159,7 +159,14 @@ TRANSLATIONS = {
         'admin_select_difficulty': '-- Select Difficulty --',
         'admin_edit_question': 'Edit SQL Question',
         'admin_delete': 'Delete',
-        'admin_edit': 'Edit'
+        'admin_edit': 'Edit',
+        'admin_you': 'You',
+        'admin_manage_contests': 'Manage Contests',
+        'admin_manage_questions': 'Manage Questions',
+        'admin_manage_teams': 'Manage Teams',
+        'admin_desc_contests': 'Create contests, associate questions, and edit schedules.',
+        'admin_desc_questions': 'Add and edit independent questions, difficulties, and statements.',
+        'admin_desc_teams': 'List and monitor registered competition teams.'
     },
     'pt': {
         # Nav Header
@@ -321,6 +328,13 @@ TRANSLATIONS = {
         'admin_select_difficulty': '-- Selecionar Dificuldade --',
         'admin_edit_question': 'Editar Questão SQL',
         'admin_delete': 'Excluir',
-        'admin_edit': 'Editar'
+        'admin_edit': 'Editar',
+        'admin_you': 'Você',
+        'admin_manage_contests': 'Gerenciar Competições',
+        'admin_manage_questions': 'Gerenciar Questões',
+        'admin_manage_teams': 'Gerenciar Equipes',
+        'admin_desc_contests': 'Crie competições, associe questões e edite cronogramas.',
+        'admin_desc_questions': 'Adicione e edite questões independentes, dificuldades e enunciados.',
+        'admin_desc_teams': 'Liste e monitore as equipes registradas na competição.'
     }
 }

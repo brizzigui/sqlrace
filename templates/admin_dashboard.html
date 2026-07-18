@@ -25,271 +25,43 @@
         </div>
     </div>
 
-    <div class="admin-grid">
-        <!-- Contests Management -->
-        <div class="admin-card">
-            <h2>{{ _('admin_create_contest') }}</h2>
-            <form action="{{ url_for('admin.create_contest') }}" method="POST" class="admin-form">
-                <div class="form-group">
-                    <label for="title">{{ _('admin_contest_title') }}</label>
-                    <input type="text" id="title" name="title" placeholder="e.g., SQL Sprint Round 1" required>
-                </div>
-                <div class="form-group">
-                    <label for="description">{{ _('admin_description') }}</label>
-                    <textarea id="description" name="description" rows="3" placeholder="Contest rules, scope, or details..."></textarea>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="start_time">{{ _('admin_start') }}</label>
-                        <input type="datetime-local" id="start_time" name="start_time" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="end_time">{{ _('admin_end') }}</label>
-                        <input type="datetime-local" id="end_time" name="end_time" required>
-                    </div>
-                </div>
-                
-                <!-- Question Selection with Search -->
-                <div class="form-group">
-                    <label>{{ _('admin_questions_select') }}</label>
-                    <input type="text" id="contest-question-search" placeholder="{{ _('admin_search_questions') }}" onkeyup="filterQuestions('contest-question-search', 'contest-question-list')" style="width: 100%; padding: 8px 12px; margin-bottom: 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-surface); color: var(--text-primary); font-size: 0.9rem;">
-                    
-                    <div id="contest-question-list" class="questions-checkbox-list" style="max-height: 180px; overflow-y: auto; border: 1px solid var(--border-color); padding: 10px; border-radius: 4px; background: rgba(0,0,0,0.15); margin-top: 5px;">
-                        {% if questions %}
-                            {% for q in questions %}
-                                <label class="question-item" data-id="{{ q[0] }}" data-name="{{ q[1]|lower }}" style="display: block; margin-bottom: 6px; cursor: pointer; font-size: 0.9rem;">
-                                    <input type="checkbox" name="question_ids" value="{{ q[0] }}"> 
-                                    <strong>#{{ q[0] }} {{ q[1] }}</strong> 
-                                    <span style="color: var(--color-upcoming); font-size: 0.8rem; margin-left: 5px;">{{ "★" * q[3] }}</span>
-                                    <span style="color: var(--text-muted); font-size: 0.8rem; margin-left: 5px;">({{ _('admin_visibility') }}: {{ _('admin_public') if q[2] == 'public' else _('admin_restricted') }})</span>
-                                </label>
-                            {% endfor %}
-                        {% else %}
-                            <p class="text-muted text-center" style="font-size: 0.85rem; margin: 0;">{{ _('admin_no_questions') }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-success">{{ _('admin_publish') }}</button>
-            </form>
-
-            <h2 class="section-divider">{{ _('admin_existing_contests') }}</h2>
-            <div class="admin-table-wrapper">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>{{ _('admin_contest_title') }}</th>
-                            <th>{{ _('admin_start') }}</th>
-                            <th>{{ _('admin_end') }}</th>
-                            <th style="width: 120px; text-align: center;">{{ _('admin_action') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if contests %}
-                            {% for c in contests %}
-                                <tr>
-                                    <td>{{ c[0] }}</td>
-                                    <td><strong>{{ c[1] }}</strong></td>
-                                    <td>{{ c[3].strftime('%Y-%m-%d %H:%M') }}</td>
-                                    <td>{{ c[4].strftime('%Y-%m-%d %H:%M') }}</td>
-                                    <td style="text-align: center; vertical-align: middle;">
-                                        <div style="display: flex; gap: 8px; align-items: center; justify-content: center;">
-                                            <a href="{{ url_for('admin.edit_contest', contest_id=c[0]) }}" class="btn-text" style="font-size: 0.85rem; color: var(--primary-color); text-decoration: none;">{{ _('admin_edit') or 'Edit' }}</a>
-                                            <span style="color: var(--border-color);">|</span>
-                                            <form action="{{ url_for('admin.delete_contest', contest_id=c[0]) }}" method="POST" onsubmit="return confirm('{{ _('admin_delete_confirm_c') }}');" style="margin: 0; display: inline;">
-                                                <button type="submit" class="btn-text btn-danger-text" style="font-size: 0.85rem;">{{ _('admin_delete') or 'Delete' }}</button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="5" class="text-muted text-center">{{ _('admin_no_contests') }}</td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
+    <!-- Navigation Hub Grid -->
+    <div class="admin-hub-grid">
+        <!-- Manage Contests -->
+        <a href="{{ url_for('admin.admin_contests') }}" class="hub-card hub-card-contests">
+            <div class="hub-card-icon">
+                <!-- SVG Icon for Contests (Calendar/Cup) -->
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5z"/>
+                </svg>
             </div>
-        </div>
+            <div class="hub-card-title">{{ _('admin_manage_contests') }}</div>
+            <div class="hub-card-desc">{{ _('admin_desc_contests') }}</div>
+        </a>
 
-        <!-- Questions Management -->
-        <div class="admin-card">
-            <h2>{{ _('admin_add_question') }}</h2>
-            <form action="{{ url_for('admin.create_question') }}" method="POST" class="admin-form">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="visibility">{{ _('admin_visibility') }}</label>
-                        <select id="visibility" name="visibility" required>
-                            <option value="public" selected>{{ _('admin_public') }}</option>
-                            <option value="restricted">{{ _('admin_restricted') }}</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="difficulty">{{ _('admin_difficulty') }}</label>
-                        <select id="difficulty" name="difficulty" required>
-                            <option value="1">★ (1/5)</option>
-                            <option value="2">★★ (2/5)</option>
-                            <option value="3" selected>★★★ (3/5)</option>
-                            <option value="4">★★★★ (4/5)</option>
-                            <option value="5">★★★★★ (5/5)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="q_title">{{ _('admin_question_title') }}</label>
-                    <input type="text" id="q_title" name="title" placeholder="e.g., Finding Top Spenders" required>
-                </div>
-                <div class="form-group">
-                    <label for="q_description">{{ _('admin_statement') }}</label>
-                    <textarea id="q_description" name="description" rows="4" placeholder="Describe the task and the schema structure..." required></textarea>
-                </div>
-
-                <!-- Inline Image Uploader Helper -->
-                <div style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border-color); padding: 12px; border-radius: 6px; margin-bottom: 16px;">
-                    <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 6px;">{{ _('admin_upload_image') }}</label>
-                    <div class="uploader-flex-row" style="display: flex; gap: 8px; align-items: center;">
-                        <input type="file" id="image-upload-input" accept="image/*" style="flex: 1; border: 1px solid var(--border-color); padding: 4px; border-radius: 4px; background: var(--bg-surface); color: var(--text-secondary); font-size: 0.8rem;">
-                        <button type="button" class="btn btn-primary" onclick="handleImageUpload()" style="padding: 6px 12px; font-size: 0.85rem;">{{ _('admin_upload_btn') }}</button>
-                    </div>
-                    <div id="image-upload-result" style="margin-top: 8px; display: none;">
-                        <label style="font-size: 0.75rem; color: var(--text-muted);">{{ _('admin_copy_tag') }}:</label>
-                        <div class="uploader-flex-row" style="display: flex; gap: 8px; margin-top: 4px;">
-                            <input type="text" id="image-tag-output" readonly style="flex: 1; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-main); color: var(--primary-color); font-family: var(--font-mono); font-size: 0.8rem;">
-                            <button type="button" class="btn btn-outline" onclick="copyImageTag()" style="padding: 4px 10px; font-size: 0.8rem;">Copy</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="init_sql">{{ _('admin_init_sql') }}</label>
-                    <textarea id="init_sql" name="init_sql" rows="6" class="code-textarea" placeholder="CREATE TABLE employees (id INT, salary INT);&#10;INSERT INTO employees VALUES (1, 5000);" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="solution_sql">{{ _('admin_solution_sql') }}</label>
-                    <textarea id="solution_sql" name="solution_sql" rows="4" class="code-textarea" placeholder="SELECT * FROM employees ORDER BY salary DESC LIMIT 1;" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">{{ _('admin_create_challenge') }}</button>
-            </form>
-
-            <h2 class="section-divider">{{ _('admin_existing_questions') }}</h2>
-            <div class="admin-table-wrapper">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 50px;">ID</th>
-                            <th>{{ _('admin_question_title') }}</th>
-                            <th style="width: 100px;">{{ _('admin_difficulty') }}</th>
-                            <th style="width: 100px;">{{ _('admin_visibility') }}</th>
-                            <th>{{ _('admin_associate') }}</th>
-                            <th style="width: 120px; text-align: center;">{{ _('admin_action') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if questions %}
-                            {% for q in questions %}
-                                <tr>
-                                    <td>{{ q[0] }}</td>
-                                    <td><strong>{{ q[1] }}</strong></td>
-                                    <td style="color: var(--color-upcoming); font-size: 0.95rem;">{{ "★" * q[3] }}</td>
-                                    <td>
-                                        <span class="badge {% if q[2] == 'public' %}active-badge{% else %}past-badge{% endif %}" style="font-size: 0.8rem;">
-                                            {{ _('admin_public') if q[2] == 'public' else _('admin_restricted') }}
-                                        </span>
-                                    </td>
-                                    <td><small style="color: var(--text-secondary);">{{ q[4] }}</small></td>
-                                    <td style="text-align: center; vertical-align: middle;">
-                                        <div style="display: flex; gap: 8px; align-items: center; justify-content: center;">
-                                            <a href="{{ url_for('admin.edit_question_view', question_id=q[0]) }}" class="btn-text" style="font-size: 0.85rem; color: var(--primary-color); text-decoration: none;">{{ _('admin_edit') or 'Edit' }}</a>
-                                            <span style="color: var(--border-color);">|</span>
-                                            <form action="{{ url_for('admin.delete_question', question_id=q[0]) }}" method="POST" onsubmit="return confirm('{{ _('admin_delete_confirm_q') }}');" style="margin: 0; display: inline;">
-                                                <button type="submit" class="btn-text btn-danger-text" style="font-size: 0.85rem;">{{ _('admin_delete') or 'Delete' }}</button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="6" class="text-muted text-center">{{ _('admin_no_questions') }}</td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
+        <!-- Manage Questions -->
+        <a href="{{ url_for('admin.admin_questions') }}" class="hub-card hub-card-questions">
+            <div class="hub-card-icon">
+                <!-- SVG Icon for Questions (List/Code) -->
+                <svg viewBox="0 0 24 24">
+                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                </svg>
             </div>
-        </div>
+            <div class="hub-card-title">{{ _('admin_manage_questions') }}</div>
+            <div class="hub-card-desc">{{ _('admin_desc_questions') }}</div>
+        </a>
+
+        <!-- Manage Teams -->
+        <a href="{{ url_for('admin.admin_teams') }}" class="hub-card hub-card-teams">
+            <div class="hub-card-icon">
+                <!-- SVG Icon for Teams (Users) -->
+                <svg viewBox="0 0 24 24">
+                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                </svg>
+            </div>
+            <div class="hub-card-title">{{ _('admin_manage_teams') }}</div>
+            <div class="hub-card-desc">{{ _('admin_desc_teams') }}</div>
+        </a>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-function filterQuestions(searchId, listId) {
-    const query = document.getElementById(searchId).value.toLowerCase().trim();
-    const list = document.getElementById(listId);
-    const items = list.getElementsByClassName('question-item');
-    
-    for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        const id = item.getAttribute('data-id');
-        const name = item.getAttribute('data-name');
-        
-        if (id.includes(query) || name.includes(query)) {
-            item.style.display = 'block';
-        } else {
-            item.style.display = 'none';
-        }
-    }
-}
-
-async function handleImageUpload() {
-    const fileInput = document.getElementById('image-upload-input');
-    if (fileInput.files.length === 0) {
-        alert('Please select an image file first.');
-        return;
-    }
-    
-    const formData = new FormData();
-    formData.append('image', fileInput.files[0]);
-    
-    const btn = document.querySelector('button[onclick="handleImageUpload()"]');
-    const originalText = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = 'Uploading...';
-    
-    try {
-        const response = await fetch("{{ url_for('admin.upload_image') }}", {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error || 'Upload failed');
-        }
-        
-        const data = await response.json();
-        const imgMarkdown = `![${fileInput.files[0].name}](${data.url})`;
-        
-        document.getElementById('image-tag-output').value = imgMarkdown;
-        document.getElementById('image-upload-result').style.display = 'block';
-        btn.disabled = false;
-        btn.textContent = originalText;
-    } catch (err) {
-        alert('Error: ' + err.message);
-        btn.disabled = false;
-        btn.textContent = originalText;
-    }
-}
-
-function copyImageTag() {
-    const copyText = document.getElementById('image-tag-output');
-    copyText.select();
-    copyText.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(copyText.value);
-    alert('Markdown image tag copied to clipboard!');
-}
-</script>
 {% endblock %}

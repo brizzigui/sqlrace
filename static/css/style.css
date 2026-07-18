@@ -1434,6 +1434,148 @@ textarea {
     to { opacity: 1; }
 }
 
+/* Admin Hub Cards */
+.admin-hub-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin-top: 32px;
+}
+
+.hub-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 32px 24px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: var(--transition-smooth);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+}
+
+.hub-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--border-hover);
+}
+
+.hub-card-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    transition: var(--transition-smooth);
+}
+
+.hub-card-icon svg {
+    width: 32px;
+    height: 32px;
+    fill: currentColor;
+}
+
+.hub-card-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.hub-card-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+/* Color thematic card overrides */
+.hub-card-contests .hub-card-icon {
+    background: rgba(0, 242, 254, 0.12);
+    color: #00f2fe;
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.15);
+}
+.hub-card-contests:hover {
+    box-shadow: 0 12px 30px rgba(0, 242, 254, 0.15);
+}
+
+.hub-card-questions .hub-card-icon {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+.hub-card-questions:hover {
+    box-shadow: 0 12px 30px rgba(16, 185, 129, 0.15);
+}
+
+.hub-card-teams .hub-card-icon {
+    background: rgba(139, 92, 246, 0.12);
+    color: #8b5cf6;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+}
+.hub-card-teams:hover {
+    box-shadow: 0 12px 30px rgba(139, 92, 246, 0.15);
+}
+
+@media (max-width: 768px) {
+    .admin-hub-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+}
+
+/* Badge-style dropdowns */
+.badge-select {
+    padding: 6px 28px 6px 16px;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    outline: none;
+    text-align: center;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px;
+    transition: var(--transition-smooth);
+    display: inline-block;
+}
+
+.badge-select-admin {
+    background-color: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+    border-color: rgba(16, 185, 129, 0.3);
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+.badge-select-admin:hover {
+    background-color: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.5);
+}
+
+.badge-select-competitor {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+.badge-select-competitor:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--border-hover);
+}
+
+.badge-select option {
+    background-color: var(--bg-surface-elevated);
+    color: var(--text-primary);
+}
+
 /* Hamburger Menu Toggle Button */
 .menu-toggle {
     display: none;

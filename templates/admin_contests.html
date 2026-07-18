@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ _('admin_manage_contests') }} - SQL Race{% endblock %}
+
+{% block content %}
+<div class="admin-container fade-in">
+    <div class="dashboard-header" style="margin-bottom: 24px;">
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="back-link" style="color: var(--primary-color); text-decoration: none; display: inline-block; margin-bottom: 12px;">&larr; {{ _('leaderboard_back') }}</a>
+        <h1>{{ _('admin_manage_contests') }}</h1>
+        <p>Create and manage competitions, timelines, and question lists.</p>
+    </div>
+
+    <div class="admin-grid">
+        <!-- Create Contest -->
+        <div class="admin-card">
+            <h2>{{ _('admin_create_contest') }}</h2>
+            <form action="{{ url_for('admin.create_contest') }}" method="POST" class="admin-form">
+                <div class="form-group">
+                    <label for="title">{{ _('admin_contest_title') }}</label>
+                    <input type="text" id="title" name="title" placeholder="e.g., SQL Sprint Round 1" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">{{ _('admin_description') }}</label>
+                    <textarea id="description" name="description" rows="3" placeholder="Contest rules, scope, or details..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="start_time">{{ _('admin_start') }}</label>
+                        <input type="datetime-local" id="start_time" name="start_time" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="end_time">{{ _('admin_end') }}</label>
+                        <input type="datetime-local" id="end_time" name="end_time" required>
+                    </div>
+                </div>
+                
+                <!-- Question Selection with Search -->
+                <div class="form-group">
+                    <label>{{ _('admin_questions_select') }}</label>
+                    <input type="text" id="contest-question-search" placeholder="{{ _('admin_search_questions') }}" onkeyup="filterQuestions('contest-question-search', 'contest-question-list')" style="width: 100%; padding: 8px 12px; margin-bottom: 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-surface); color: var(--text-primary); font-size: 0.9rem;">
+                    
+                    <div id="contest-question-list" class="questions-checkbox-list" style="max-height: 180px; overflow-y: auto; border: 1px solid var(--border-color); padding: 10px; border-radius: 4px; background: rgba(0,0,0,0.15); margin-top: 5px;">
+                        {% if questions %}
+                            {% for q in questions %}
+                                <label class="question-item" data-id="{{ q[0] }}" data-name="{{ q[1]|lower }}" style="display: block; margin-bottom: 6px; cursor: pointer; font-size: 0.9rem;">
+                                    <input type="checkbox" name="question_ids" value="{{ q[0] }}"> 
+                                    <strong>#{{ q[0] }} {{ q[1] }}</strong> 
+                                    <span style="color: var(--color-upcoming); font-size: 0.8rem; margin-left: 5px;">{{ "★" * q[2] }}</span>
+                                    <span style="color: var(--text-muted); font-size: 0.8rem; margin-left: 5px;">({{ _('admin_visibility') }}: {{ _('admin_public') if q[3] == 'public' else _('admin_restricted') }})</span>
+                                </label>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted text-center" style="font-size: 0.85rem; margin: 0;">{{ _('admin_no_questions') }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-success">{{ _('admin_publish') }}</button>
+            </form>
+        </div>
+
+        <!-- Contests Listing -->
+        <div class="admin-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 16px; flex-wrap: wrap;">
+                <h2 style="margin: 0;">{{ _('admin_existing_contests') }}</h2>
+                <input type="text" id="contest-search" placeholder="{{ _('admin_search_contests') }}" onkeyup="filterContests()" style="width: 250px; max-width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-surface); color: var(--text-primary); font-size: 0.85rem; margin: 0;">
+            </div>
+            <div class="admin-table-wrapper">
+                <table class="admin-table" id="contests-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">ID</th>
+                            <th>{{ _('admin_contest_title') }}</th>
+                            <th>{{ _('admin_start') }}</th>
+                            <th>{{ _('admin_end') }}</th>
+                            <th style="width: 120px; text-align: center;">{{ _('admin_action') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if contests %}
+                            {% for c in contests %}
+                                <tr class="contest-row" data-name="{{ c[1]|lower }}">
+                                    <td>{{ c[0] }}</td>
+                                    <td><strong>{{ c[1] }}</strong></td>
+                                    <td>{{ c[3].strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>{{ c[4].strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td style="text-align: center; vertical-align: middle;">
+                                        <div style="display: flex; gap: 8px; align-items: center; justify-content: center;">
+                                            <a href="{{ url_for('admin.edit_contest', contest_id=c[0]) }}" class="btn-text" style="font-size: 0.85rem; color: var(--primary-color); text-decoration: none;">{{ _('admin_edit') or 'Edit' }}</a>
+                                            <span style="color: var(--border-color);">|</span>
+                                            <form action="{{ url_for('admin.delete_contest', contest_id=c[0]) }}" method="POST" onsubmit="return confirm('{{ _('admin_delete_confirm_c') }}');" style="margin: 0; display: inline;">
+                                                <button type="submit" class="btn-text btn-danger-text" style="font-size: 0.85rem;">{{ _('admin_delete') or 'Delete' }}</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-muted text-center">{{ _('admin_no_contests') }}</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterQuestions(searchId, listId) {
+    const query = document.getElementById(searchId).value.toLowerCase().trim();
+    const list = document.getElementById(listId);
+    const items = list.getElementsByClassName('question-item');
+    
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const id = item.getAttribute('data-id');
+        const name = item.getAttribute('data-name');
+        
+        if (id.includes(query) || name.includes(query)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    }
+}
+
+function filterContests() {
+    const query = document.getElementById('contest-search').value.toLowerCase().trim();
+    const rows = document.querySelectorAll('#contests-table tbody .contest-row');
+    
+    rows.forEach(row => {
+        const name = row.getAttribute('data-name');
+        if (name.includes(query)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

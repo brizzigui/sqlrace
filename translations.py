@@ -181,7 +181,9 @@ TRANSLATIONS = {
         'admin_manage_teams': 'Manage Teams',
         'admin_desc_contests': 'Create contests, associate questions, and edit schedules.',
         'admin_desc_questions': 'Add and edit independent questions, difficulties, and statements.',
-        'admin_desc_teams': 'List and monitor registered competition teams.'
+        'admin_desc_teams': 'List and monitor registered competition teams.',
+        'footer_desc': 'An online judge platform for SQL query challenges and database competitions.',
+        'footer_institution': 'Federal University of Santa Maria'
     },
     'pt': {
         # Nav Header
@@ -365,6 +367,8 @@ TRANSLATIONS = {
         'admin_manage_teams': 'Gerenciar Equipes',
         'admin_desc_contests': 'Crie competições, associe questões e edite cronogramas.',
         'admin_desc_questions': 'Adicione e edite questões independentes, dificuldades e enunciados.',
-        'admin_desc_teams': 'Liste e monitore as equipes registradas na competição.'
+        'admin_desc_teams': 'Liste e monitore as equipes registradas na competição.',
+        'footer_desc': 'Uma plataforma de juiz online para desafios de consultas SQL e competições de banco de dados.',
+        'footer_institution': 'Universidade Federal de Santa Maria'
     }
 }

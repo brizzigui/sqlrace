@@ -78,8 +78,34 @@
 
     {% if not hide_footer %}
     <footer class="app-footer">
-        <div class="footer-container">
-            <p>&copy; 2026 SQL Race Judge. Built for premium database competitions.</p>
+        <div class="footer-content">
+            <!-- Left Pane: App Brand, description & Links -->
+            <div class="footer-left">
+                <a href="{{ url_for('contest.contests_list') }}" class="app-logo">
+                    <span class="logo-accent">&lt;SQL/&gt;</span> RACE
+                </a>
+                <p class="footer-desc">
+                    {{ _('footer_desc') }}
+                </p>
+                <div class="footer-links">
+                    <a href="{{ url_for('contest.contests_list') }}">{{ _('nav_contests') }}</a>
+                    <span class="footer-divider">|</span>
+                    <a href="{{ url_for('contest.questions_list') }}">{{ _('nav_questions') }}</a>
+                    <span class="footer-divider">|</span>
+                    <a href="{{ url_for('leaderboard.global_leaderboard') }}">{{ _('nav_global_leaderboard') }}</a>
+                </div>
+            </div>
+
+            <!-- Right Pane: Institutional Branding (UFSM) -->
+            <div class="footer-right">
+                <a href="https://www.ufsm.br" target="_blank" rel="noopener noreferrer" class="footer-logo-link">
+                    <img src="{{ url_for('static', filename='ufsm-logo.png') }}" alt="UFSM Logo" class="footer-logo-img">
+                </a>
+                <span class="footer-institution">{{ _('footer_institution') }}</span>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 SQLRace
         </div>
     </footer>
     {% endif %}

@@ -200,10 +200,109 @@ body {
     margin-top: auto;
     border-top: 1px solid var(--border-color);
     background: var(--bg-surface);
-    padding: 24px;
+    padding: 32px 24px 24px;
+    color: var(--text-muted);
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.footer-left {
+    text-align: left;
+    max-width: 600px;
+}
+
+.footer-left .app-logo {
+    margin-bottom: 12px;
+    font-size: 1.3rem;
+}
+
+.footer-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+    line-height: 1.6;
+}
+
+.footer-links {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.85rem;
+}
+
+.footer-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: var(--transition-smooth);
+}
+
+.footer-links a:hover {
+    color: var(--primary-color);
+}
+
+.footer-divider {
+    color: var(--border-color);
+}
+
+.footer-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+}
+
+.footer-logo-link {
+    display: block;
+    transition: var(--transition-smooth);
+}
+
+.footer-logo-link:hover {
+    transform: translateY(-2px);
+}
+
+.footer-logo-img {
+    height: 96px;
+    width: auto;
+    display: block;
+    object-fit: contain;
+}
+
+.footer-institution {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin-top: 8px;
+    display: block;
+}
+
+.footer-bottom {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
     text-align: center;
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .footer-content {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+    .footer-right {
+        align-items: flex-start;
+        text-align: left;
+    }
 }
 
 /* Layout Content */

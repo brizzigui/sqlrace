@@ -7,7 +7,7 @@
     <div class="dashboard-header" style="margin-bottom: 24px;">
         <a href="{{ url_for('admin.admin_dashboard') }}" class="back-link" style="color: var(--primary-color); text-decoration: none; display: inline-block; margin-bottom: 12px;">&larr; {{ _('leaderboard_back') }}</a>
         <h1>{{ _('admin_manage_questions') }}</h1>
-        <p>Add and edit individual programming tasks, test suites, and statement files.</p>
+        <p>{{ _('admin_questions_subtitle') }}</p>
     </div>
 
     <div class="admin-grid">
@@ -56,7 +56,7 @@
                         <label style="font-size: 0.75rem; color: var(--text-muted);">{{ _('admin_copy_tag') }}:</label>
                         <div class="uploader-flex-row" style="display: flex; gap: 8px; margin-top: 4px;">
                             <input type="text" id="image-tag-output" readonly style="flex: 1; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-main); color: var(--primary-color); font-family: var(--font-mono); font-size: 0.8rem;">
-                            <button type="button" class="btn btn-outline" onclick="copyImageTag()" style="padding: 4px 10px; font-size: 0.8rem;">Copy</button>
+                            <button type="button" class="btn btn-outline" onclick="copyImageTag()" style="padding: 4px 10px; font-size: 0.8rem;">{{ _('admin_copy_btn') }}</button>
                         </div>
                     </div>
                 </div>

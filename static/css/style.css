@@ -755,7 +755,7 @@ textarea {
     display: grid;
     grid-template-columns: 1fr 1.2fr;
     gap: 0;
-    height: calc(100vh - 72px - 66px); /* minus header, footer */
+    height: calc(100vh - 72px); /* minus header only, footer hidden */
     margin: -32px -24px; /* full bleed offset */
 }
 

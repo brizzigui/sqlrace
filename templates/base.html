@@ -76,11 +76,13 @@
         {% block content %}{% endblock %}
     </main>
 
+    {% if not hide_footer %}
     <footer class="app-footer">
         <div class="footer-container">
             <p>&copy; 2026 SQL Race Judge. Built for premium database competitions.</p>
         </div>
     </footer>
+    {% endif %}
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block extra_js %}{% endblock %}

@@ -176,7 +176,7 @@ def question_details(contest_id, question_id):
         'end_time': end_time.isoformat()
     }
     
-    return render_template('question_editor.html', practice_mode=False, contest=contest_data, question=q_data, submissions=formatted_subs)
+    return render_template('question_editor.html', practice_mode=False, contest=contest_data, question=q_data, submissions=formatted_subs, hide_footer=True)
 
 @bp.route('/contest/<int:contest_id>/question/<int:question_id>/submit', methods=['POST'])
 @login_required
@@ -323,7 +323,7 @@ def practice_question_details(question_id):
             'submitted_at': sub[4].strftime('%Y-%m-%d %H:%M:%S')
         })
         
-    return render_template('question_editor.html', practice_mode=True, contest=None, question=q_data, submissions=formatted_subs)
+    return render_template('question_editor.html', practice_mode=True, contest=None, question=q_data, submissions=formatted_subs, hide_footer=True)
 
 @bp.route('/question/<int:question_id>/submit', methods=['POST'])
 @login_required

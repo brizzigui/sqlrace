@@ -144,7 +144,6 @@ def global_leaderboard():
                    (SELECT COUNT(DISTINCT question_id) FROM submissions WHERE team_id = t.id AND status = 'Accepted') as solved_count,
                    (SELECT COUNT(*) FROM submissions WHERE team_id = t.id) as total_submissions
             FROM teams t
-            WHERE t.is_admin = FALSE
             ORDER BY solved_count DESC, total_submissions ASC, t.username ASC;
         """)
         leaderboard_rows = cur.fetchall()

@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from flask import Flask, redirect, url_for
 from flask_session import Session
 from dotenv import load_dotenv
@@ -12,7 +13,8 @@ def create_app():
     
     # Configure Server-side Session using filesystem to prevent tamper-prone cookie session
     app.config['SESSION_TYPE'] = 'filesystem'
-    app.config['SESSION_PERMANENT'] = False
+    app.config['SESSION_PERMANENT'] = True
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
     app.config['SESSION_USE_SIGNER'] = True
     Session(app)
     

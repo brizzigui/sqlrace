@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ _('error_404_title') }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-404-wrapper {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        padding: 40px 20px;
+        overflow: hidden;
+    }
+
+    .error-404-card {
+        background: rgba(17, 24, 39, 0.65);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 50px 40px;
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+        box-shadow: var(--card-shadow);
+        position: relative;
+        z-index: 5;
+        transition: var(--transition-smooth);
+    }
+
+    .error-404-card:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 12px 40px 0 rgba(0, 242, 254, 0.15);
+    }
+
+    .error-404-glow {
+        position: absolute;
+        top: -10%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 250px;
+        height: 250px;
+        background: var(--primary-grad);
+        filter: blur(80px);
+        opacity: 0.15;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .error-404-code {
+        font-size: 8rem;
+        font-weight: 900;
+        font-family: var(--font-sans);
+        line-height: 1;
+        margin-bottom: 10px;
+        background: var(--primary-grad);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -2px;
+        filter: drop-shadow(0 2px 10px rgba(0, 242, 254, 0.3));
+        animation: textPulse 4s ease-in-out infinite;
+    }
+
+    .error-404-headline {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: var(--text-primary);
+    }
+
+    .error-404-desc {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        margin-bottom: 30px;
+        line-height: 1.6;
+    }
+
+    /* SQL Mock Console */
+    .sql-console {
+        background: #05070c;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 16px 20px;
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        text-align: left;
+        color: #f3f4f6;
+        margin-bottom: 35px;
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+        overflow-x: auto;
+    }
+
+    .sql-prompt {
+        color: var(--text-muted);
+        user-select: none;
+        margin-right: 8px;
+    }
+
+    .sql-keyword {
+        color: #ff7b72;
+        font-weight: bold;
+    }
+
+    .sql-string {
+        color: #a5d6ff;
+    }
+
+    .sql-cursor {
+        display: inline-block;
+        width: 8px;
+        height: 15px;
+        background: var(--primary-color);
+        margin-left: 4px;
+        animation: blink 1s step-end infinite;
+        vertical-align: middle;
+    }
+
+    .sql-result-table {
+        border-top: 1px dashed rgba(255, 255, 255, 0.15);
+        margin-top: 12px;
+        padding-top: 12px;
+        color: #8b949e;
+    }
+
+    .sql-error-msg {
+        color: var(--color-failed);
+        font-weight: bold;
+    }
+
+    .btn-404 {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: var(--primary-grad);
+        color: #030712;
+        padding: 12px 28px;
+        border-radius: 30px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: var(--transition-smooth);
+        box-shadow: var(--glow-primary);
+    }
+
+    .btn-404:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 25px rgba(0, 242, 254, 0.45);
+        color: #030712;
+    }
+
+    .btn-404 svg {
+        transition: var(--transition-smooth);
+    }
+
+    .btn-404:hover svg {
+        transform: translateX(-4px);
+    }
+
+    @keyframes textPulse {
+        0%, 100% { filter: drop-shadow(0 2px 10px rgba(0, 242, 254, 0.3)); }
+        50% { filter: drop-shadow(0 2px 25px rgba(0, 242, 254, 0.6)); }
+    }
+
+    @keyframes blink {
+        from, to { background-color: transparent }
+        50% { background-color: var(--primary-color) }
+    }
+
+    @media (max-width: 640px) {
+        .error-404-card {
+            padding: 30px 20px;
+        }
+        .error-404-code {
+            font-size: 6rem;
+        }
+        .error-404-headline {
+            font-size: 1.5rem;
+        }
+        .sql-console {
+            font-size: 0.75rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-404-wrapper">
+    <!-- Background decorations matching design tokens -->
+    <div class="auth-background-decorations">
+        <div class="decor-grid"></div>
+        <div class="decor-circle decor-circle-1"></div>
+        <div class="decor-circle decor-circle-2"></div>
+        <div class="sql-floating-code sql-code-1">SELECT * FROM submissions;</div>
+        <div class="sql-floating-code sql-code-2">JOIN team ON team.id = sub.team_id;</div>
+        <div class="sql-floating-code sql-code-3">WHERE status = 'Accepted';</div>
+        <div class="sql-floating-code sql-code-4">GROUP BY difficulty ORDER BY penalty ASC;</div>
+        <div class="sql-floating-code sql-code-5">CREATE INDEX idx_teams ON users;</div>
+    </div>
+
+    <div class="error-404-card">
+        <div class="error-404-glow"></div>
+        <div class="error-404-code">404</div>
+        <h2 class="error-404-headline">{{ _('error_404_headline') }}</h2>
+        <p class="error-404-desc">{{ _('error_404_desc') }}</p>
+
+        <!-- SQL Console Simulation -->
+        <div class="sql-console">
+            <div>
+                <span class="sql-prompt">sqlrace&gt;</span>
+                <span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> internet.pages <span class="sql-keyword">WHERE</span> path = <span class="sql-string">'{{ request.path }}'</span>;
+            </div>
+            <div class="sql-result-table">
+                <span class="sql-error-msg">ERROR 404 (42S02): Table 'internet.pages' has no row matching key '{{ request.path }}'</span>
+                <br>
+                <span>-- Object not found in database. 0 rows returned.</span><span class="sql-cursor"></span>
+            </div>
+        </div>
+
+        <a href="/" class="btn-404">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            {{ _('error_404_btn') }}
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -243,7 +243,11 @@ TRANSLATIONS = {
         'js_select_image': 'Please select an image file first.',
         'js_uploading': 'Uploading...',
         'js_upload_failed': 'Upload failed',
-        'js_copied': 'Markdown image tag copied to clipboard!'
+        'js_copied': 'Markdown image tag copied to clipboard!',
+        'error_404_title': '404 - Page Not Found',
+        'error_404_headline': 'Oops! Lost in the Query?',
+        'error_404_desc': 'The page you are looking for does not exist, has been moved, or is temporarily unavailable. Check your SQL syntax and try again!',
+        'error_404_btn': 'Back to the race'
     },
     'pt': {
         # Nav Header
@@ -489,7 +493,11 @@ TRANSLATIONS = {
         'js_select_image': 'Por favor, selecione um arquivo de imagem primeiro.',
         'js_uploading': 'Enviando...',
         'js_upload_failed': 'Falha no envio',
-        'js_copied': 'Tag Markdown da imagem copiada para a área de transferência!'
+        'js_copied': 'Tag Markdown da imagem copiada para a área de transferência!',
+        'error_404_title': '404 - Página Não Encontrada',
+        'error_404_headline': 'Ops! Perdido na Consulta?',
+        'error_404_desc': 'A página que você está procurando não existe, foi movida ou está temporariamente indisponível. Verifique sua sintaxe SQL e tente novamente!',
+        'error_404_btn': 'Voltar para a corrida'
     }
 }
 

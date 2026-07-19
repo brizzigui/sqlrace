@@ -1,6 +1,6 @@
 import os
 from datetime import timedelta
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, url_for, render_template
 from flask_session import Session
 from dotenv import load_dotenv
 from database import init_pools
@@ -69,6 +69,10 @@ def create_app():
     @app.route('/')
     def index():
         return redirect(url_for('contest.contests_list'))
+
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template('404.html'), 404
         
     return app
 

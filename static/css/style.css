@@ -2110,5 +2110,11 @@ textarea {
         width: 250px;
         height: 250px;
     }
+    .status-text {
+        display: none;
+    }
+    .badge, .status-badge {
+        padding: 4px 6px;
+    }
 }
 

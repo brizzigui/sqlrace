@@ -38,11 +38,11 @@
                             <div class="question-item-actions">
                                 <span class="status-badge badge-{{ q.status | lower }}">
                                     {% if q.status == 'Accepted' %}
-                                        {{ _('status_accepted') }}
+                                        🟢 <span class="status-text">{{ _('status_accepted') }}</span>
                                     {% elif q.status == 'Attempted' %}
-                                        {{ _('status_attempted') }}
+                                        🔴 <span class="status-text">{{ _('status_attempted') }}</span>
                                     {% else %}
-                                        {{ _('status_unattempted') }}
+                                        ⚪ <span class="status-text">{{ _('status_unattempted') }}</span>
                                     {% endif %}
                                 </span>
                                 <a href="{{ url_for('contest.question_details', contest_id=contest.id, question_id=q.id) }}" class="btn btn-sm btn-outline">

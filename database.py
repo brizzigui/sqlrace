@@ -118,6 +118,22 @@ def init_db():
         );
         """)
 
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS contest_participants (
+            contest_id INT REFERENCES contests(id) ON DELETE CASCADE,
+            team_id INT REFERENCES teams(id) ON DELETE CASCADE,
+            entered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (contest_id, team_id)
+        );
+        """)
+
+        cur.execute("""
+        INSERT INTO contest_participants (contest_id, team_id)
+        SELECT DISTINCT contest_id, team_id FROM submissions
+        WHERE contest_id IS NOT NULL
+        ON CONFLICT DO NOTHING;
+        """)
+
         # Migration queries for existing databases
         # 1. Add visibility column to questions if it does not exist
         cur.execute("ALTER TABLE questions ADD COLUMN IF NOT EXISTS visibility VARCHAR(20) NOT NULL DEFAULT 'public';")

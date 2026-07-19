@@ -55,6 +55,13 @@ def contest_dashboard(contest_id):
             flash(_('flash_contest_not_found'), 'danger')
             return redirect(url_for('contest.contests_list'))
             
+        # Register participant (including admins)
+        cur.execute("""
+            INSERT INTO contest_participants (contest_id, team_id)
+            VALUES (%s, %s)
+            ON CONFLICT DO NOTHING;
+        """, (contest_id, team_id))
+            
         # Fetch questions for this contest via the join table
         cur.execute("""
             SELECT q.id, q.title, q.difficulty 

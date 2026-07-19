@@ -28,8 +28,13 @@ def compute_contest_leaderboard(contest_id):
         q_list = [{'id': q[0], 'title': q[1]} for q in questions]
         q_ids = [q[0] for q in questions]
         
-        # Get all non-admin teams
-        cur.execute("SELECT id, username FROM teams;")
+        # Get all teams who have entered the contest (including admins)
+        cur.execute("""
+            SELECT t.id, t.username 
+            FROM teams t
+            JOIN contest_participants cp ON t.id = cp.team_id
+            WHERE cp.contest_id = %s;
+        """, (contest_id,))
         teams = cur.fetchall()
         
         # Get all submissions within the contest timeframe to this contest, sorted by time

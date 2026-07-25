@@ -3855,51 +3855,76 @@ code[class*="language-"] {
     }
 
     .editor-workspace {
-        display: block;
-        height: auto;
-        min-height: calc(100vh - 120px);
-        margin: 0;
+        display: block !important;
+        height: auto !important;
+        min-height: auto !important;
+        margin: 0 !important;
+        width: 100% !important;
     }
 
-    .workspace-panel {
-        width: 100%;
-        min-height: auto;
-        background: transparent;
-        border: none;
-    }
-
-    .panel-header {
-        padding: 10px 12px;
-        flex-wrap: wrap;
-        gap: 8px;
-        font-size: 0.85rem;
-        border-bottom: 1px solid var(--border-color);
-        background: var(--bg-surface);
-        border-radius: 12px 12px 0 0;
+    /* Standardized Card Container Geometry for Question, Solution, and Results Tabs */
+    #mobile-panel-question,
+    #mobile-panel-right {
+        width: 100% !important;
+        background: var(--bg-surface) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 16px !important;
+        box-shadow: var(--card-shadow) !important;
+        overflow: visible !important;
+        margin: 0 0 20px 0 !important;
+        box-sizing: border-box !important;
+        height: auto !important;
+        max-height: none !important;
     }
 
     .desktop-only-header {
         display: none !important;
     }
 
-    .panel-body {
-        padding: 18px 14px;
-        overflow-y: visible;
+    .panel-header {
+        padding: 12px 16px;
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 0.85rem;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-surface);
+        border-radius: 16px 16px 0 0;
+    }
+
+    /* Reset inner sub-containers so outer card defines horizontal width */
+    .editor-section,
+    .console-section {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Standardized Padding & Unconstrained Vertical Height across all 3 Tabs */
+    .panel-body,
+    .panel-body.scrollable,
+    .panel-body.split-vertical {
+        padding: 20px 16px !important;
+        overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
+        flex-grow: 0 !important;
     }
 
     .panel-left {
-        border-right: none;
-        background: var(--bg-surface);
-        border: 1px solid var(--border-color);
-        border-radius: 14px;
-        box-shadow: var(--card-shadow);
-        margin-bottom: 16px;
+        border-right: none !important;
+        margin-bottom: 0 !important;
     }
 
     .panel-right {
         display: none;
         flex-direction: column;
         gap: 16px;
+        margin-bottom: 0 !important;
     }
 
     .problem-intro {
@@ -3915,10 +3940,13 @@ code[class*="language-"] {
     }
 
     .problem-description {
-        font-size: 1rem;
-        line-height: 1.65;
-        color: var(--text-primary);
-        margin-bottom: 24px;
+        font-size: 1rem !important;
+        line-height: 1.65 !important;
+        color: var(--text-primary) !important;
+        margin-bottom: 24px !important;
+        overflow: visible !important;
+        max-height: none !important;
+        height: auto !important;
     }
 
     .problem-description p {
@@ -3969,17 +3997,12 @@ code[class*="language-"] {
     }
 
     .editor-section {
-        min-height: 320px;
-        background: var(--bg-surface);
-        border: 1px solid var(--border-color);
-        border-radius: 14px;
-        padding: 16px;
-        box-shadow: var(--card-shadow);
+        min-height: 300px;
     }
 
     .textarea-wrapper {
         min-height: 240px;
-        border-radius: 8px;
+        border-radius: 10px;
         overflow: hidden;
         border: 1px solid var(--border-color);
     }
@@ -3991,13 +4014,7 @@ code[class*="language-"] {
     }
 
     .console-section {
-        width: 100%;
-        min-height: 350px;
-        background: var(--bg-surface);
-        border-radius: 14px;
-        border: 1px solid var(--border-color);
-        box-shadow: var(--card-shadow);
-        overflow: hidden;
+        min-height: 320px;
     }
 }
 
@@ -4007,8 +4024,10 @@ code[class*="language-"] {
         padding: 8px 4px;
     }
 
-    .panel-body {
-        padding: 14px 10px;
+    .panel-body,
+    .panel-body.scrollable,
+    .panel-body.split-vertical {
+        padding: 16px 12px !important;
     }
 
     .problem-intro h1 {
@@ -4016,8 +4035,8 @@ code[class*="language-"] {
     }
 
     .problem-description {
-        font-size: 0.98rem;
-        line-height: 1.6;
+        font-size: 0.98rem !important;
+        line-height: 1.6 !important;
     }
 
     .back-link {

@@ -62,8 +62,8 @@
         </div>
         
         <div class="panel-body split-vertical">
-            <!-- Code Editor Section -->
-            <div class="editor-section">
+            <!-- Code Editor Section (Solution Tab) -->
+            <div class="editor-section" id="mobile-section-solution">
                 <form id="submission-form" data-submiturl="{% if practice_mode %}{{ url_for('contest.submit_practice_query', question_id=question.id) }}{% else %}{{ url_for('contest.submit_query', contest_id=contest.id, question_id=question.id) }}{% endif %}">
                     <div class="textarea-wrapper">
                         <textarea id="sql-code-editor" name="query" placeholder="{{ _('editor_placeholder') }}" required spellcheck="false" autofocus></textarea>
@@ -79,8 +79,8 @@
                 </form>
             </div>
             
-            <!-- Output Console Section -->
-            <div class="console-section">
+            <!-- Output Console Section (Results Tab) -->
+            <div class="console-section" id="mobile-section-results">
                 <div class="console-tabs">
                     <button class="console-tab-btn active" onclick="switchConsoleTab('result')">{{ _('editor_console') }}</button>
                     <button class="console-tab-btn" onclick="switchConsoleTab('history')">{{ _('editor_history') }} ({{ submissions | length }})</button>

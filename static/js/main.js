@@ -604,17 +604,17 @@ function switchMobileTab(tabName, btnElement) {
 
     const panelQuestion = document.getElementById('mobile-panel-question');
     const panelRight = document.getElementById('mobile-panel-right');
-    const editorSection = document.querySelector('.editor-section');
-    const consoleSection = document.querySelector('.console-section');
+    const editorSection = document.getElementById('mobile-section-solution') || document.querySelector('.editor-section');
+    const consoleSection = document.getElementById('mobile-section-results') || document.querySelector('.console-section');
 
     if (!panelQuestion || !panelRight) return;
 
     if (tabName === 'question') {
-        panelQuestion.style.display = 'flex';
+        panelQuestion.style.display = 'block';
         panelRight.style.display = 'none';
     } else if (tabName === 'solution') {
         panelQuestion.style.display = 'none';
-        panelRight.style.display = 'flex';
+        panelRight.style.display = 'block';
         if (editorSection) editorSection.style.display = 'flex';
         if (consoleSection) consoleSection.style.display = 'none';
         if (window.sqlCodeMirror) {
@@ -622,7 +622,7 @@ function switchMobileTab(tabName, btnElement) {
         }
     } else if (tabName === 'results') {
         panelQuestion.style.display = 'none';
-        panelRight.style.display = 'flex';
+        panelRight.style.display = 'block';
         if (editorSection) editorSection.style.display = 'none';
         if (consoleSection) consoleSection.style.display = 'flex';
     }

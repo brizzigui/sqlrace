@@ -9,19 +9,25 @@
         <div class="panel-header">
             {% if practice_mode %}
                 <a href="{{ url_for('contest.questions_list') }}" class="back-link">&larr; {{ _('editor_back_questions') }}</a>
-                <div class="contest-timer-small" style="color: var(--text-muted);">
-                    {{ _('practice_mode_label') }}
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <a href="#editor-section-panel" class="mobile-jump-btn" onclick="document.getElementById('editor-section-panel').scrollIntoView({behavior:'smooth'}); return false;">{{ _('editor_jump_editor') }}</a>
+                    <div class="contest-timer-small" style="color: var(--text-muted);">
+                        {{ _('practice_mode_label') }}
+                    </div>
                 </div>
             {% else %}
                 <a href="{{ url_for('contest.contest_dashboard', contest_id=contest.id) }}" class="back-link">&larr; {{ _('editor_back') }}</a>
-                <div class="contest-timer-small">
-                    {{ _('editor_ends_in') }}: <span class="contest-timer" data-endtime="{{ contest.end_time }}" data-starttime="{{ contest.start_time }}">{{ _('loading') }}</span>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <a href="#editor-section-panel" class="mobile-jump-btn" onclick="document.getElementById('editor-section-panel').scrollIntoView({behavior:'smooth'}); return false;">{{ _('editor_jump_editor') }}</a>
+                    <div class="contest-timer-small">
+                        {{ _('editor_ends_in') }}: <span class="contest-timer" data-endtime="{{ contest.end_time }}" data-starttime="{{ contest.start_time }}">{{ _('loading') }}</span>
+                    </div>
                 </div>
             {% endif %}
         </div>
         
         <div class="panel-body scrollable">
-            <div class="problem-intro">
+            <div class="problem-intro" id="problem-intro-heading">
                 <h1>{{ question.title }}</h1>
                 <div class="difficulty-display" style="color: var(--color-upcoming); font-size: 0.95rem; margin-top: 4px; letter-spacing: 2px;">
                     {{ "★" * question.difficulty }}
@@ -43,9 +49,10 @@
     </div>
 
     <!-- Right Pane: SQL Editor and Output Consoles -->
-    <div class="workspace-panel panel-right">
+    <div class="workspace-panel panel-right" id="editor-section-panel">
         <div class="panel-header">
             <span class="editor-label">{{ _('editor_label') }}</span>
+            <a href="#problem-intro-heading" class="mobile-jump-btn" onclick="document.getElementById('problem-intro-heading').scrollIntoView({behavior:'smooth'}); return false;">{{ _('editor_jump_statement') }}</a>
         </div>
         
         <div class="panel-body split-vertical">

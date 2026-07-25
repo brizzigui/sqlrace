@@ -3704,3 +3704,259 @@ code[class*="language-"] {
 .question-description .katex {
     color: var(--text-primary);
 }
+
+/* ==========================================================================
+   Mobile Responsive Enhancements for Profile Page
+   ========================================================================== */
+@media (max-width: 768px) {
+    .profile-card-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 18px;
+        padding: 24px 16px;
+    }
+
+    .profile-avatar-large {
+        width: 90px;
+        height: 90px;
+        border-radius: 20px;
+    }
+
+    .profile-info-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .profile-title-row {
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .profile-username {
+        font-size: 1.6rem;
+        word-break: break-word;
+        text-align: center;
+    }
+
+    .profile-meta-row {
+        justify-content: center;
+        font-size: 0.88rem;
+    }
+
+    .profile-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .profile-stat-card {
+        padding: 16px 20px;
+        gap: 16px;
+    }
+
+    .stat-icon-wrapper {
+        width: 46px;
+        height: 46px;
+        font-size: 1.3rem;
+        border-radius: 12px;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.82rem;
+    }
+
+    .solved-questions-section h2 {
+        font-size: 1.15rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-card-header {
+        padding: 20px 12px;
+    }
+
+    .profile-username {
+        font-size: 1.4rem;
+    }
+
+    .profile-stat-card {
+        padding: 14px 16px;
+    }
+}
+
+/* ==========================================================================
+   Question Editor Workspace Mobile Responsive Enhancements
+   ========================================================================== */
+
+.mobile-jump-btn {
+    display: none;
+    background: rgba(0, 242, 254, 0.12);
+    color: var(--primary-color);
+    border: 1px solid rgba(0, 242, 254, 0.3);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition-smooth);
+    white-space: nowrap;
+}
+
+.mobile-jump-btn:hover {
+    background: rgba(0, 242, 254, 0.25);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+}
+
+@media (max-width: 992px) {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    .mobile-jump-btn {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .editor-workspace {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - 72px);
+        margin: -20px -16px;
+    }
+
+    .workspace-panel {
+        width: 100%;
+        min-height: auto;
+        flex-shrink: 0;
+    }
+
+    .panel-left {
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+        background: #0d121d;
+    }
+
+    .panel-header {
+        padding: 12px 16px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: var(--bg-surface);
+    }
+
+    .panel-body {
+        padding: 20px 16px;
+        overflow-y: visible;
+    }
+
+    .problem-intro {
+        margin-bottom: 16px;
+    }
+
+    .problem-intro h1 {
+        font-size: 1.45rem;
+        line-height: 1.3;
+        color: #ffffff;
+        word-break: break-word;
+    }
+
+    .problem-description {
+        font-size: 1rem;
+        line-height: 1.65;
+        color: var(--text-primary);
+        margin-bottom: 24px;
+    }
+
+    .problem-description p {
+        margin-bottom: 14px;
+        font-size: 1rem;
+        line-height: 1.65;
+    }
+
+    .problem-description ul,
+    .problem-description ol {
+        padding-left: 20px;
+        margin-bottom: 14px;
+    }
+
+    .problem-description li {
+        margin-bottom: 6px;
+        line-height: 1.6;
+    }
+
+    .problem-description code {
+        font-size: 0.9rem;
+        padding: 3px 8px;
+        background: rgba(0, 242, 254, 0.08);
+        border: 1px solid rgba(0, 242, 254, 0.2);
+        color: #00f2fe;
+    }
+
+    .problem-description .data-table {
+        font-size: 0.88rem;
+    }
+
+    .problem-description .data-table th,
+    .problem-description .data-table td {
+        padding: 10px 12px;
+    }
+
+    .schema-viewer h3 {
+        font-size: 1.1rem;
+    }
+
+    .code-container {
+        padding: 14px;
+    }
+
+    .code-container code {
+        font-size: 0.9rem;
+    }
+
+    .panel-right {
+        min-height: 480px;
+    }
+
+    .editor-section {
+        min-height: 280px;
+    }
+
+    .textarea-wrapper {
+        min-height: 220px;
+    }
+
+    #sql-code-editor {
+        font-size: 1rem;
+        padding: 16px;
+        line-height: 1.6;
+    }
+}
+
+@media (max-width: 576px) {
+    .panel-body {
+        padding: 16px 12px;
+    }
+
+    .problem-intro h1 {
+        font-size: 1.3rem;
+    }
+
+    .problem-description {
+        font-size: 0.98rem;
+        line-height: 1.6;
+    }
+
+    .back-link {
+        font-size: 0.82rem;
+    }
+}

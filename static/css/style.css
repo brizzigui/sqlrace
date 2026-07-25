@@ -3481,6 +3481,201 @@ code[class*="language-"] {
 .markdown-content img,
 .statement-preview img {
     max-width: 100%;
+}
+.hub-card-logs:hover {
+    box-shadow: 0 12px 30px rgba(245, 158, 11, 0.15);
+}
+
+/* Manage Resources Spacing & Grid Extensions */
+.resources-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+@media (max-width: 1100px) {
+    .resources-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .resources-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.resources-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+    margin-bottom: 28px;
+    align-items: stretch;
+}
+
+@media (max-width: 992px) {
+    .resources-grid-2 {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+.resource-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 24px 28px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.resource-card .card-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+}
+
+.card-body-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.92rem;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.flex-direction-column {
+    flex-direction: column !important;
+}
+
+.align-items-stretch {
+    align-items: stretch !important;
+}
+
+.gap-1 {
+    gap: 6px !important;
+}
+
+.font-mono {
+    font-family: var(--font-mono);
+}
+
+
+/* Storage Interactive Chart & Top Grid Extensions */
+.storage-top-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 28px;
+    margin-bottom: 28px;
+}
+
+@media (max-width: 1024px) {
+    .storage-top-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.storage-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.storage-chart-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.storage-chart-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    align-self: flex-start;
+}
+
+.chart-wrapper {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    margin: 0 auto 20px auto;
+}
+
+.chart-legend-box {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.legend-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.88rem;
+    padding: 8px 12px;
+    background: var(--bg-surface-elevated);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.legend-color-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.dot-uploads { background-color: #38bdf8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
+.dot-others { background-color: #a855f7; box-shadow: 0 0 10px rgba(168, 85, 247, 0.4); }
+.dot-free { background-color: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+
+.copy-tag-btn {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    border-radius: 6px;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.copy-tag-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* ==========================================================================
+   Question Image Display Constraints
+   ========================================================================== */
+.problem-description img,
+.question-description img,
+.markdown-content img,
+.statement-preview img {
+    max-width: 100%;
     max-height: 450px;
     height: auto;
     width: auto;
@@ -3489,4 +3684,23 @@ code[class*="language-"] {
     margin: 12px 0;
     display: block;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ==========================================================================
+   KaTeX Math Styling Extensions
+   ========================================================================== */
+.katex {
+    font-size: 1.05em;
+}
+
+.katex-display {
+    margin: 1em 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 6px 0;
+}
+
+.problem-description .katex,
+.question-description .katex {
+    color: var(--text-primary);
 }

@@ -69,15 +69,15 @@
                 {% else %}
                     <div class="info-row">
                         <span><strong>Main PostgreSQL Engine</strong> (<code>sqlrace_main</code>)</span>
-                        <span class="badge badge-success">🟢 Size: {{ resources.db_metrics.main_db_size }}</span>
+                        <span class="badge badge-info">🟢 SIZE: {{ resources.db_metrics.main_db_size }}</span>
                     </div>
                     <div class="info-row">
                         <span><strong>Sandbox PostgreSQL Engine</strong> (<code>sqlrace_sandbox</code>)</span>
-                        <span class="badge badge-info">🟢 Size: {{ resources.db_metrics.sandbox_db_size }}</span>
+                        <span class="badge badge-info">🟢 SIZE: {{ resources.db_metrics.sandbox_db_size }}</span>
                     </div>
                     <div class="info-row">
                         <span>Container Runtime Mode</span>
-                        <span class="badge badge-dark">Host Process Mode</span>
+                        <span class="badge badge-neutral">Host Process Mode</span>
                     </div>
                     <div class="info-row">
                         <span>Database Driver & Pool</span>
@@ -115,12 +115,12 @@
 
                 <div class="info-row">
                     <span>Main DB Active Queries</span>
-                    <strong>{{ resources.db_metrics.main_active_queries }} active</strong>
+                    <span class="badge badge-neutral">{{ resources.db_metrics.main_active_queries }} active</span>
                 </div>
 
                 <div class="info-row">
                     <span>Sandbox DB Active Queries</span>
-                    <strong>{{ resources.db_metrics.sandbox_active_queries }} active</strong>
+                    <span class="badge badge-neutral">{{ resources.db_metrics.sandbox_active_queries }} active</span>
                 </div>
             </div>
         </div>
@@ -134,11 +134,11 @@
             <div class="card-body-content">
                 <div class="info-row">
                     <span>Total Evaluated Submissions:</span>
-                    <strong>{{ resources.judge_metrics.total_subs }}</strong>
+                    <span class="badge badge-neutral">{{ resources.judge_metrics.total_subs }}</span>
                 </div>
                 <div class="info-row">
                     <span>Submissions (Last 24 Hours):</span>
-                    <strong>{{ resources.judge_metrics.subs_24h }}</strong>
+                    <span class="badge badge-info">{{ resources.judge_metrics.subs_24h }}</span>
                 </div>
                 <div class="info-row">
                     <span>Accepted (AC):</span>
@@ -181,17 +181,17 @@
 
                 <div class="info-row">
                     <span>System Load Average (1m)</span>
-                    <strong>{{ resources.system.load_1m if resources.system.load_1m else 'N/A' }}</strong>
+                    <span class="badge badge-neutral">{{ resources.system.load_1m if resources.system.load_1m else 'N/A' }}</span>
                 </div>
 
                 <div class="info-row">
                     <span>Total CPU Cores</span>
-                    <strong>{{ resources.system.cpu_cores }} Cores</strong>
+                    <span class="badge badge-neutral">{{ resources.system.cpu_cores }} Cores</span>
                 </div>
 
                 <div class="info-row">
                     <span>Server Target System</span>
-                    <span class="badge badge-dark">Linux Production</span>
+                    <span class="badge badge-neutral">Linux Production</span>
                 </div>
             </div>
         </div>
@@ -209,6 +209,7 @@
     }, 5000);
 </script>
 {% endblock %}
+
 
 
 

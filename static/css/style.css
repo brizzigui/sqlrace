@@ -3049,7 +3049,13 @@ code[class*="language-"] {
     margin-top: 4px;
 }
 
-/* Badges */
+/* Badges System (Uniform Capsule Geometry & Borders) */
+.badge-success {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
 .badge-info {
     background: rgba(56, 189, 248, 0.15);
     color: #38bdf8;
@@ -3068,10 +3074,16 @@ code[class*="language-"] {
     border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-.badge-dark {
+.badge-dark, .badge-neutral {
     background: rgba(148, 163, 184, 0.15);
     color: #cbd5e1;
     border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.badge-primary {
+    background: rgba(0, 242, 254, 0.15);
+    color: #00f2fe;
+    border: 1px solid rgba(0, 242, 254, 0.3);
 }
 
 /* Progress bars */

@@ -4,6 +4,18 @@
 
 {% block content %}
 <div class="editor-workspace fade-in">
+    <!-- Mobile Segmented Tab Navigation (< 992px) -->
+    <div class="mobile-workspace-tabs">
+        <button type="button" class="mobile-tab-btn active" onclick="switchMobileTab('problem', this)">
+            {{ _('editor_tab_problem') }}
+        </button>
+        <button type="button" class="mobile-tab-btn" onclick="switchMobileTab('editor', this)">
+            {{ _('editor_tab_editor') }}
+        </button>
+        <button type="button" class="mobile-tab-btn" onclick="switchMobileTab('results', this)">
+            {{ _('editor_tab_results') }}
+        </button>
+    </div>
     <!-- Left Pane: Problem Description and Schema -->
     <div class="workspace-panel panel-left">
         <div class="panel-header">
@@ -145,4 +157,78 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function switchMobileTab(tabName, btn) {
+    if (btn) {
+        document.querySelectorAll('.mobile-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    } else {
+        document.querySelectorAll('.mobile-tab-btn').forEach(b => {
+            if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(`'${tabName}'`)) {
+                b.classList.add('active');
+            } else {
+                b.classList.remove('active');
+            }
+        });
+    }
+
+    const panelLeft = document.querySelector('.panel-left');
+    const panelRight = document.querySelector('.panel-right');
+    const editorSection = document.querySelector('.editor-section');
+    const consoleSection = document.querySelector('.console-section');
+
+    if (window.innerWidth < 992) {
+        if (tabName === 'problem') {
+            if (panelLeft) panelLeft.style.display = 'flex';
+            if (panelRight) panelRight.style.display = 'none';
+        } else if (tabName === 'editor') {
+            if (panelLeft) panelLeft.style.display = 'none';
+            if (panelRight) panelRight.style.display = 'flex';
+            if (editorSection) editorSection.style.display = 'flex';
+            if (consoleSection) consoleSection.style.display = 'none';
+        } else if (tabName === 'results') {
+            if (panelLeft) panelLeft.style.display = 'none';
+            if (panelRight) panelRight.style.display = 'flex';
+            if (editorSection) editorSection.style.display = 'none';
+            if (consoleSection) consoleSection.style.display = 'flex';
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initial sync for mobile screen width
+    if (window.innerWidth < 992) {
+        switchMobileTab('problem');
+    }
+    
+    window.addEventListener('resize', function() {
+        if (window.innerWidth >= 992) {
+            const panelLeft = document.querySelector('.panel-left');
+            const panelRight = document.querySelector('.panel-right');
+            const editorSection = document.querySelector('.editor-section');
+            const consoleSection = document.querySelector('.console-section');
+            if (panelLeft) panelLeft.style.display = '';
+            if (panelRight) panelRight.style.display = '';
+            if (editorSection) editorSection.style.display = '';
+            if (consoleSection) consoleSection.style.display = '';
+        } else {
+            switchMobileTab('problem');
+        }
+    });
+
+    const subForm = document.getElementById('submission-form');
+    if (subForm) {
+        subForm.addEventListener('submit', function() {
+            if (window.innerWidth < 992) {
+                setTimeout(() => {
+                    switchMobileTab('results');
+                }, 150);
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

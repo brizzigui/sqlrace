@@ -19,8 +19,9 @@
                     <tr>
                         <th style="width: 100px; text-align: center;">{{ _('leaderboard_rank') }}</th>
                         <th>{{ _('leaderboard_team') }}</th>
-                        <th style="width: 200px; text-align: center;">{{ _('leaderboard_solved_questions') }}</th>
-                        <th style="width: 200px; text-align: center;">{{ _('leaderboard_total_submissions') }}</th>
+                        <th style="width: 150px; text-align: center; color: #f59e0b;">⭐ {{ _('leaderboard_score') }}</th>
+                        <th style="width: 180px; text-align: center;">{{ _('leaderboard_solved_questions') }}</th>
+                        <th style="width: 180px; text-align: center;">{{ _('leaderboard_total_submissions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -41,6 +42,9 @@
                                         {% endif %}
                                     </div>
                                 </td>
+                                <td style="text-align: center; font-size: 1.15rem; font-weight: 800; color: #f59e0b; padding: 16px 8px; vertical-align: middle;">
+                                    {{ row.total_score }}
+                                </td>
                                 <td style="text-align: center; font-size: 1.1rem; font-weight: 600; color: var(--color-accepted); padding: 16px 8px; vertical-align: middle;">
                                     {{ row.solved_count }}
                                 </td>
@@ -51,7 +55,7 @@
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td colspan="4" class="text-muted text-center" style="padding: 40px; font-size: 1.1rem;">
+                            <td colspan="5" class="text-muted text-center" style="padding: 40px; font-size: 1.1rem;">
                                 {{ _('leaderboard_empty') }}
                             </td>
                         </tr>

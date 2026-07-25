@@ -144,13 +144,23 @@ def leaderboard_json(contest_id):
 @login_required
 def global_leaderboard():
     with get_main_db() as cur:
-        # Rank by solved count DESC, total submissions ASC (meaning fewer attempts to solve issues is better), then team name ASC
+        # Rank primarily by total_score (sum of difficulties of solved questions) DESC,
+        # then solved count DESC, total submissions ASC, and team name ASC
         cur.execute("""
             SELECT t.id, t.username, t.avatar_seed,
                    (SELECT COUNT(DISTINCT question_id) FROM submissions WHERE team_id = t.id AND status = 'Accepted') as solved_count,
+                   COALESCE((
+                       SELECT SUM(q.difficulty)
+                       FROM questions q
+                       WHERE q.id IN (
+                           SELECT DISTINCT question_id
+                           FROM submissions
+                           WHERE team_id = t.id AND status = 'Accepted'
+                       )
+                   ), 0) as total_score,
                    (SELECT COUNT(*) FROM submissions WHERE team_id = t.id) as total_submissions
             FROM teams t
-            ORDER BY solved_count DESC, total_submissions ASC, t.username ASC;
+            ORDER BY total_score DESC, solved_count DESC, total_submissions ASC, t.username ASC;
         """)
         leaderboard_rows = cur.fetchall()
         
@@ -162,7 +172,8 @@ def global_leaderboard():
             'username': row[1],
             'avatar_seed': row[2] or '',
             'solved_count': row[3],
-            'total_submissions': row[4]
+            'total_score': row[4],
+            'total_submissions': row[5]
         })
         
     return render_template('global_leaderboard.html', leaderboard=leaderboard_data)

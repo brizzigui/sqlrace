@@ -56,7 +56,7 @@
             <div style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border-color); padding: 12px; border-radius: 6px; margin-bottom: 16px;">
                 <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 6px;">{{ _('admin_upload_image') }}</label>
                 <div class="uploader-flex-row" style="display: flex; gap: 8px; align-items: center;">
-                    <input type="file" id="image-upload-input" accept="image/*" style="flex: 1; border: 1px solid var(--border-color); padding: 4px; border-radius: 4px; background: var(--bg-surface); color: var(--text-secondary); font-size: 0.8rem;">
+                    <input type="file" id="image-upload-input" class="custom-file-input" accept="image/*" style="flex: 1;">
                     <button type="button" class="btn btn-primary" onclick="handleImageUpload()" style="padding: 6px 12px; font-size: 0.85rem;">{{ _('admin_upload_btn') }}</button>
                 </div>
                 <div id="image-upload-result" style="margin-top: 8px; display: none;">

@@ -12,7 +12,7 @@
         <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary">&larr; {{ _('leaderboard_back') }}</a>
     </div>
 
-    <!-- Judge Performance Overview 4-Card Top Grid -->
+    <!-- Judge Performance Overview Top Grid -->
     <h2 class="section-title">📊 {{ _('resources_judge_perf') }}</h2>
     <div class="resources-stats-grid">
         <div class="stat-card">
@@ -33,41 +33,40 @@
         </div>
     </div>
 
-    <!-- Side-by-Side Row 1: Containers & Database Connection Pools -->
+    <!-- Side-by-Side Row 1: Equal Height Cards -->
     <div class="resources-grid-2">
-        <!-- Docker Containers & Database Services -->
+        <!-- Left: Containers & Database Engine Status -->
         <div class="resource-card">
             <h3 class="card-title">🐳 {{ _('resources_containers') }}</h3>
-            {% if resources.containers %}
-            <div class="table-scroll">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>{{ _('resources_container_name') }}</th>
-                            <th>{{ _('resources_status') }}</th>
-                            <th>{{ _('resources_image') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for c in resources.containers %}
-                        <tr>
-                            <td><strong>{{ c.name }}</strong> <br><small class="text-muted">{{ c.id }}</small></td>
-                            <td>
-                                {% if c.is_running %}
-                                    <span class="badge badge-success">🟢 {{ c.status }}</span>
-                                {% else %}
-                                    <span class="badge badge-danger">🔴 {{ c.status }}</span>
-                                {% endif %}
-                            </td>
-                            <td><code>{{ c.image }}</code></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-                <div class="services-status-box">
-                    <p class="text-muted mb-3"><small>{{ _('resources_no_containers') }}</small></p>
+            <div class="card-body-content">
+                {% if resources.containers %}
+                <div class="table-scroll">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>{{ _('resources_container_name') }}</th>
+                                <th>{{ _('resources_status') }}</th>
+                                <th>{{ _('resources_image') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in resources.containers %}
+                            <tr>
+                                <td><strong>{{ c.name }}</strong> <br><small class="text-muted">{{ c.id }}</small></td>
+                                <td>
+                                    {% if c.is_running %}
+                                        <span class="badge badge-success">🟢 {{ c.status }}</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">🔴 {{ c.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td><code>{{ c.image }}</code></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
                     <div class="info-row">
                         <span><strong>Main PostgreSQL Engine</strong> (<code>sqlrace_main</code>)</span>
                         <span class="badge badge-success">🟢 Size: {{ resources.db_metrics.main_db_size }}</span>
@@ -76,90 +75,123 @@
                         <span><strong>Sandbox PostgreSQL Engine</strong> (<code>sqlrace_sandbox</code>)</span>
                         <span class="badge badge-info">🟢 Size: {{ resources.db_metrics.sandbox_db_size }}</span>
                     </div>
-                </div>
-            {% endif %}
+                    <div class="info-row">
+                        <span>Container Runtime Mode</span>
+                        <span class="badge badge-dark">Host Process Mode</span>
+                    </div>
+                    <div class="info-row">
+                        <span>Database Driver & Pool</span>
+                        <code>psycopg2 (ThreadedPool)</code>
+                    </div>
+                {% endif %}
+            </div>
         </div>
 
-        <!-- Database Connection Pools -->
+        <!-- Right: Database Connection Pools -->
         <div class="resource-card">
             <h3 class="card-title">🗄️ {{ _('resources_db_pools') }}</h3>
-            <div class="pool-metric-box mb-3">
-                <div class="flex-between">
-                    <div>
+            <div class="card-body-content">
+                <div class="info-row flex-direction-column align-items-stretch gap-1">
+                    <div class="flex-between">
                         <strong>{{ _('resources_main_pool') }}</strong>
-                        <small class="text-muted block">DB Size: {{ resources.db_metrics.main_db_size }}</small>
+                        <span class="text-muted font-mono">{{ resources.main_pool.active }} / {{ resources.main_pool.max }} active conns</span>
                     </div>
-                    <span>{{ _('resources_active_conns', active=resources.main_pool.active, max=resources.main_pool.max) }}</span>
+                    <div class="progress-bar-container">
+                        {% set main_pct = (resources.main_pool.active / resources.main_pool.max * 100)|round|int %}
+                        <div class="progress-bar-fill" style="width: {{ main_pct }}%;"></div>
+                    </div>
                 </div>
-                <div class="progress-bar-container">
-                    {% set main_pct = (resources.main_pool.active / resources.main_pool.max * 100)|round|int %}
-                    <div class="progress-bar-fill" style="width: {{ main_pct }}%;"></div>
-                </div>
-            </div>
 
-            <div class="pool-metric-box">
-                <div class="flex-between">
-                    <div>
+                <div class="info-row flex-direction-column align-items-stretch gap-1">
+                    <div class="flex-between">
                         <strong>{{ _('resources_sandbox_pool') }}</strong>
-                        <small class="text-muted block">DB Size: {{ resources.db_metrics.sandbox_db_size }}</small>
+                        <span class="text-muted font-mono">{{ resources.sandbox_pool.active }} / {{ resources.sandbox_pool.max }} active conns</span>
                     </div>
-                    <span>{{ _('resources_active_conns', active=resources.sandbox_pool.active, max=resources.sandbox_pool.max) }}</span>
+                    <div class="progress-bar-container">
+                        {% set sb_pct = (resources.sandbox_pool.active / resources.sandbox_pool.max * 100)|round|int %}
+                        <div class="progress-bar-fill fill-accent" style="width: {{ sb_pct }}%;"></div>
+                    </div>
                 </div>
-                <div class="progress-bar-container">
-                    {% set sb_pct = (resources.sandbox_pool.active / resources.sandbox_pool.max * 100)|round|int %}
-                    <div class="progress-bar-fill fill-accent" style="width: {{ sb_pct }}%;"></div>
+
+                <div class="info-row">
+                    <span>Main DB Active Queries</span>
+                    <strong>{{ resources.db_metrics.main_active_queries }} active</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Sandbox DB Active Queries</span>
+                    <strong>{{ resources.db_metrics.sandbox_active_queries }} active</strong>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Side-by-Side Row 2: Submissions Breakdown & Host System Load -->
+    <!-- Side-by-Side Row 2: Equal Height Cards -->
     <div class="resources-grid-2">
-        <!-- Submissions Evaluation Breakdown -->
+        <!-- Left: Submissions Evaluation Breakdown -->
         <div class="resource-card">
             <h3 class="card-title">⚡ Submissions Evaluation Breakdown</h3>
-            <div class="info-row">
-                <span>Total Evaluated Submissions:</span>
-                <strong>{{ resources.judge_metrics.total_subs }}</strong>
-            </div>
-            <div class="info-row">
-                <span>Submissions (Last 24 Hours):</span>
-                <strong>{{ resources.judge_metrics.subs_24h }}</strong>
-            </div>
-            <div class="info-row">
-                <span>Accepted (AC):</span>
-                <span class="badge badge-success">{{ resources.judge_metrics.accepted_subs }}</span>
-            </div>
-            <div class="info-row">
-                <span>Wrong Answer (WA):</span>
-                <span class="badge badge-warning">{{ resources.judge_metrics.wa_subs }}</span>
-            </div>
-            <div class="info-row">
-                <span>Runtime Error (RE):</span>
-                <span class="badge badge-danger">{{ resources.judge_metrics.re_subs }}</span>
+            <div class="card-body-content">
+                <div class="info-row">
+                    <span>Total Evaluated Submissions:</span>
+                    <strong>{{ resources.judge_metrics.total_subs }}</strong>
+                </div>
+                <div class="info-row">
+                    <span>Submissions (Last 24 Hours):</span>
+                    <strong>{{ resources.judge_metrics.subs_24h }}</strong>
+                </div>
+                <div class="info-row">
+                    <span>Accepted (AC):</span>
+                    <span class="badge badge-success">{{ resources.judge_metrics.accepted_subs }}</span>
+                </div>
+                <div class="info-row">
+                    <span>Wrong Answer (WA):</span>
+                    <span class="badge badge-warning">{{ resources.judge_metrics.wa_subs }}</span>
+                </div>
+                <div class="info-row">
+                    <span>Runtime Error (RE):</span>
+                    <span class="badge badge-danger">{{ resources.judge_metrics.re_subs }}</span>
+                </div>
             </div>
         </div>
 
-        <!-- Host System Load -->
+        <!-- Right: Host System Metrics -->
         <div class="resource-card">
             <h3 class="card-title">🖥️ {{ _('resources_sys_load') }}</h3>
-            <div class="mb-4">
-                <div class="flex-between mb-2">
-                    <strong>{{ _('resources_cpu_usage') }}:</strong>
-                    <span>{{ resources.system.cpu_percent }}% ({{ resources.system.cpu_cores }} Cores)</span>
+            <div class="card-body-content">
+                <div class="info-row flex-direction-column align-items-stretch gap-1">
+                    <div class="flex-between">
+                        <strong>{{ _('resources_cpu_usage') }}:</strong>
+                        <span>{{ resources.system.cpu_percent }}% ({{ resources.system.cpu_cores }} Cores)</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width: {{ resources.system.cpu_percent }}%;"></div>
+                    </div>
                 </div>
-                <div class="progress-bar-container">
-                    <div class="progress-bar-fill" style="width: {{ resources.system.cpu_percent }}%;"></div>
-                </div>
-            </div>
 
-            <div>
-                <div class="flex-between mb-2">
-                    <strong>{{ _('resources_ram_usage') }}:</strong>
-                    <span>{{ resources.system.ram_percent }}% ({{ resources.system.ram_used_formatted }} / {{ resources.system.ram_total_formatted }})</span>
+                <div class="info-row flex-direction-column align-items-stretch gap-1">
+                    <div class="flex-between">
+                        <strong>{{ _('resources_ram_usage') }}:</strong>
+                        <span>{{ resources.system.ram_percent }}% ({{ resources.system.ram_used_formatted }} / {{ resources.system.ram_total_formatted }})</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill fill-info" style="width: {{ resources.system.ram_percent }}%;"></div>
+                    </div>
                 </div>
-                <div class="progress-bar-container">
-                    <div class="progress-bar-fill fill-info" style="width: {{ resources.system.ram_percent }}%;"></div>
+
+                <div class="info-row">
+                    <span>System Load Average (1m)</span>
+                    <strong>{{ resources.system.load_1m if resources.system.load_1m else 'N/A' }}</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Total CPU Cores</span>
+                    <strong>{{ resources.system.cpu_cores }} Cores</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Server Target System</span>
+                    <span class="badge badge-dark">Linux Production</span>
                 </div>
             </div>
         </div>
@@ -171,11 +203,12 @@
         fetch("{{ url_for('admin.api_resources') }}")
             .then(res => res.json())
             .then(data => {
-                // Live metrics background refresh
+                // Live background metrics refresh
             })
             .catch(err => console.error("Live metrics refresh error:", err));
     }, 5000);
 </script>
 {% endblock %}
+
 
 

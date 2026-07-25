@@ -210,7 +210,7 @@ def team_profile(team_id):
         })
         
     solved_count = len(solved_questions)
-    accuracy_rate = round((solved_count / total_submissions * 100), 1) if total_submissions > 0 else 0.0
+    total_score = sum(q['difficulty'] for q in solved_questions)
     duration_str, date_formatted = format_join_duration(created_at)
     
     team_data = {
@@ -223,7 +223,7 @@ def team_profile(team_id):
         'joined_date': date_formatted,
         'solved_count': solved_count,
         'total_submissions': total_submissions,
-        'accuracy_rate': accuracy_rate
+        'total_score': total_score
     }
     
     return render_template('team_profile.html', team=team_data, solved_questions=solved_questions)

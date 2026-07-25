@@ -2694,9 +2694,9 @@ code[class*="language-"] {
     border-color: rgba(59, 130, 246, 0.25);
 }
 
-.stat-accuracy .stat-icon-wrapper {
-    background: rgba(0, 242, 254, 0.1);
-    border-color: rgba(0, 242, 254, 0.25);
+.stat-score .stat-icon-wrapper {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.25);
 }
 
 .stat-details {
@@ -2713,6 +2713,10 @@ code[class*="language-"] {
 
 .stat-solved .stat-value {
     color: var(--color-accepted);
+}
+
+.stat-score .stat-value {
+    color: #f59e0b;
 }
 
 .stat-label {

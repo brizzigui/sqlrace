@@ -3796,128 +3796,167 @@ code[class*="language-"] {
    Question Editor Workspace Mobile Responsive Enhancements
    ========================================================================== */
 
-.mobile-workspace-tabs {
+.mobile-jump-btn {
     display: none;
-    background: var(--bg-surface);
-    border-bottom: 1px solid var(--border-color);
-    padding: 8px 12px;
-    gap: 8px;
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.mobile-tab-btn {
-    flex: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 12px;
+    background: rgba(0, 242, 254, 0.12);
+    color: var(--primary-color);
+    border: 1px solid rgba(0, 242, 254, 0.3);
+    padding: 4px 10px;
     border-radius: 8px;
-    border: 1px solid transparent;
-    background: transparent;
-    color: var(--text-secondary);
-    font-family: var(--font-sans);
-    font-size: 0.88rem;
+    font-size: 0.78rem;
     font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    transition: var(--transition-smooth);
+    white-space: nowrap;
 }
 
-.mobile-tab-btn:hover {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.05);
+.mobile-jump-btn:hover {
+    background: rgba(0, 242, 254, 0.25);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
 }
 
-.mobile-tab-btn.active {
-    background: linear-gradient(135deg, rgba(0, 242, 254, 0.15) 0%, rgba(79, 172, 254, 0.25) 100%);
-    border-color: rgba(0, 242, 254, 0.4);
-    color: #00f2fe;
-    box-shadow: 0 0 12px rgba(0, 242, 254, 0.2);
-}
+@media (max-width: 992px) {
+    html {
+        scroll-behavior: smooth;
+    }
 
-@media (max-width: 991.98px) {
-    .mobile-workspace-tabs {
-        display: flex;
+    .mobile-jump-btn {
+        display: inline-flex;
+        align-items: center;
     }
 
     .editor-workspace {
         display: flex;
         flex-direction: column;
         height: auto;
-        min-height: calc(100vh - 120px);
+        min-height: calc(100vh - 72px);
         margin: -20px -16px;
     }
 
     .workspace-panel {
         width: 100%;
-        height: auto;
-        min-height: calc(100vh - 140px);
+        min-height: auto;
         flex-shrink: 0;
     }
 
     .panel-left {
         border-right: none;
+        border-bottom: 2px solid var(--border-color);
         background: #0d121d;
-        display: flex;
-        flex-direction: column;
     }
 
-    .panel-left .panel-body.scrollable {
-        flex: 1;
-        overflow-y: auto;
-        padding: 24px 20px;
+    .panel-header {
+        padding: 12px 16px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: var(--bg-surface);
+    }
+
+    .panel-body {
+        padding: 20px 16px;
+        overflow-y: visible;
+    }
+
+    .problem-intro {
+        margin-bottom: 16px;
     }
 
     .problem-intro h1 {
-        font-size: 1.55rem;
-        line-height: 1.35;
+        font-size: 1.45rem;
+        line-height: 1.3;
         color: #ffffff;
+        word-break: break-word;
     }
 
     .problem-description {
-        font-size: 1.05rem;
-        line-height: 1.7;
-        color: #f8fafc;
-        margin-bottom: 28px;
+        font-size: 1rem;
+        line-height: 1.65;
+        color: var(--text-primary);
+        margin-bottom: 24px;
     }
 
     .problem-description p {
-        margin-bottom: 16px;
-        font-size: 1.05rem;
-        line-height: 1.7;
+        margin-bottom: 14px;
+        font-size: 1rem;
+        line-height: 1.65;
+    }
+
+    .problem-description ul,
+    .problem-description ol {
+        padding-left: 20px;
+        margin-bottom: 14px;
+    }
+
+    .problem-description li {
+        margin-bottom: 6px;
+        line-height: 1.6;
     }
 
     .problem-description code {
-        font-size: 0.92rem;
-        padding: 4px 8px;
+        font-size: 0.9rem;
+        padding: 3px 8px;
         background: rgba(0, 242, 254, 0.08);
         border: 1px solid rgba(0, 242, 254, 0.2);
         color: #00f2fe;
-        border-radius: 6px;
+    }
+
+    .problem-description .data-table {
+        font-size: 0.88rem;
+    }
+
+    .problem-description .data-table th,
+    .problem-description .data-table td {
+        padding: 10px 12px;
+    }
+
+    .schema-viewer h3 {
+        font-size: 1.1rem;
+    }
+
+    .code-container {
+        padding: 14px;
+    }
+
+    .code-container code {
+        font-size: 0.9rem;
     }
 
     .panel-right {
-        border-left: none;
-        background: #0b0f19;
-        display: none;
-        flex-direction: column;
-        height: calc(100vh - 140px);
+        min-height: 480px;
+    }
+
+    .editor-section {
+        min-height: 280px;
+    }
+
+    .textarea-wrapper {
+        min-height: 220px;
+    }
+
+    #sql-code-editor {
+        font-size: 1rem;
+        padding: 16px;
+        line-height: 1.6;
     }
 }
 
-@media (min-width: 992px) {
-    .mobile-workspace-tabs {
-        display: none !important;
+@media (max-width: 576px) {
+    .panel-body {
+        padding: 16px 12px;
     }
 
-    .workspace-panel {
-        display: flex !important;
+    .problem-intro h1 {
+        font-size: 1.3rem;
     }
 
-    .editor-section,
-    .console-section {
-        display: flex !important;
+    .problem-description {
+        font-size: 0.98rem;
+        line-height: 1.6;
+    }
+
+    .back-link {
+        font-size: 0.82rem;
     }
 }

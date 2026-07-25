@@ -2288,32 +2288,44 @@ code[class*="language-"] {
 /* ==========================================================================
    Cute Visibility & Star Rating Selectors
    ========================================================================== */
+.cute-toggle-wrapper {
+    max-width: 100%;
+    width: 100%;
+}
+
 .cute-toggle-segmented {
     display: inline-flex;
+    max-width: 100%;
+    width: 100%;
     background: rgba(15, 23, 42, 0.6);
     border: 1px solid var(--border-color);
     padding: 4px;
     border-radius: 12px;
-    gap: 6px;
+    gap: 4px;
     user-select: none;
     transition: var(--transition-smooth);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
 }
 
 .cute-toggle-btn {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 18px;
+    justify-content: center;
+    flex: 1;
+    gap: 6px;
+    padding: 8px 12px;
     border-radius: 8px;
     border: 1px solid transparent;
     background: transparent;
     color: var(--text-secondary);
     font-family: var(--font-sans);
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
+    white-space: nowrap;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 0;
 }
 
 .cute-toggle-btn:hover {
@@ -2336,12 +2348,18 @@ code[class*="language-"] {
 }
 
 .cute-toggle-btn .toggle-icon {
-    font-size: 1rem;
+    font-size: 0.95rem;
     transition: transform 0.25s ease;
+    flex-shrink: 0;
 }
 
 .cute-toggle-btn.active .toggle-icon {
-    transform: scale(1.2);
+    transform: scale(1.15);
+}
+
+.cute-toggle-btn .toggle-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Cute Star Rating Selector */
@@ -2349,6 +2367,8 @@ code[class*="language-"] {
     display: inline-flex;
     align-items: center;
     gap: 12px;
+    max-width: 100%;
+    flex-wrap: wrap;
 }
 
 .cute-stars-container {
@@ -2360,6 +2380,7 @@ code[class*="language-"] {
     padding: 6px 12px;
     border-radius: 12px;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    max-width: 100%;
 }
 
 .cute-star-btn {
@@ -2393,5 +2414,37 @@ code[class*="language-"] {
     min-width: 42px;
     text-align: center;
 }
+
+/* Mobile & Small Screen Responsive Adjustments */
+@media (max-width: 640px) {
+    .cute-toggle-segmented {
+        display: flex;
+        width: 100%;
+    }
+    
+    .cute-toggle-btn {
+        padding: 6px 8px;
+        font-size: 0.8rem;
+        gap: 4px;
+    }
+
+    .cute-toggle-btn .toggle-icon {
+        font-size: 0.85rem;
+    }
+
+    .cute-stars-wrapper {
+        gap: 8px;
+    }
+
+    .cute-stars-container {
+        padding: 4px 8px;
+    }
+
+    .cute-star-btn {
+        font-size: 1.2rem;
+        padding: 2px 2px;
+    }
+}
+
 
 

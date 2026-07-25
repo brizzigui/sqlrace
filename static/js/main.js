@@ -70,26 +70,108 @@ function formatTimeDelta(ms) {
 }
 
 /* --------------------------------------------------------------------------
-   2. Code Editor (Tab Handling)
+   2. Code Editor (CodeMirror & Syntax Highlighting)
    -------------------------------------------------------------------------- */
 function initCodeEditor() {
+    // 1. Main Contest SQL Code Editor
     const editor = document.getElementById('sql-code-editor');
-    if (!editor) return;
+    if (editor) {
+        if (typeof CodeMirror !== 'undefined') {
+            const cm = CodeMirror.fromTextArea(editor, {
+                mode: 'text/x-sql',
+                theme: 'sqlrace',
+                lineNumbers: true,
+                matchBrackets: true,
+                indentUnit: 4,
+                tabSize: 4,
+                indentWithTabs: false,
+                lineWrapping: true,
+                extraKeys: {
+                    "Tab": function(cm) {
+                        cm.replaceSelection("    ");
+                    }
+                }
+            });
+            window.sqlCodeMirror = cm;
+            cm.on('change', () => {
+                cm.save();
+            });
+        } else {
+            // Fallback plain tab key handler if CodeMirror is offline
+            editor.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const start = editor.selectionStart;
+                    const end = editor.selectionEnd;
+                    const tabSpaces = "    ";
+                    editor.value = editor.value.substring(0, start) + tabSpaces + editor.value.substring(end);
+                    editor.selectionStart = editor.selectionEnd = start + tabSpaces.length;
+                }
+            });
+        }
+    }
 
-    editor.addEventListener('keydown', (e) => {
-        if (e.key === 'Tab') {
-            e.preventDefault();
-            const start = editor.selectionStart;
-            const end = editor.selectionEnd;
-
-            // Insert 4 spaces for tab
-            const tabSpaces = "    ";
-            editor.value = editor.value.substring(0, start) + tabSpaces + editor.value.substring(end);
-            
-            // Put caret at right position
-            editor.selectionStart = editor.selectionEnd = start + tabSpaces.length;
+    // 2. Admin SQL Textareas (init_sql & solution_sql)
+    ['init_sql', 'solution_sql'].forEach(id => {
+        const adminTextArea = document.getElementById(id);
+        if (adminTextArea && typeof CodeMirror !== 'undefined') {
+            const cmAdmin = CodeMirror.fromTextArea(adminTextArea, {
+                mode: 'text/x-sql',
+                theme: 'sqlrace',
+                lineNumbers: true,
+                matchBrackets: true,
+                indentUnit: 4,
+                tabSize: 4,
+                indentWithTabs: false,
+                lineWrapping: true
+            });
+            cmAdmin.on('change', () => cmAdmin.save());
         }
     });
+
+    // 3. Highlight all static SQL code blocks on page load
+    highlightAllSqlSnippets();
+}
+
+function highlightAllSqlSnippets() {
+    if (typeof Prism !== 'undefined') {
+        Prism.highlightAll();
+    } else {
+        document.querySelectorAll('pre code.language-sql, code.language-sql').forEach(el => {
+            if (!el.dataset.highlighted) {
+                el.innerHTML = customSqlHighlight(el.textContent);
+                el.dataset.highlighted = "true";
+            }
+        });
+    }
+}
+
+function customSqlHighlight(text) {
+    if (!text) return "";
+    let escaped = escapeHtml(text);
+    const keywords = [
+        'SELECT', 'FROM', 'WHERE', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'ON', 
+        'GROUP BY', 'ORDER BY', 'HAVING', 'LIMIT', 'OFFSET', 'INSERT', 'INTO', 'UPDATE', 
+        'DELETE', 'CREATE', 'TABLE', 'DROP', 'ALTER', 'INDEX', 'AND', 'OR', 'NOT', 
+        'IN', 'IS', 'NULL', 'LIKE', 'ILIKE', 'AS', 'CASE', 'WHEN', 'THEN', 'ELSE', 
+        'END', 'UNION', 'ALL', 'EXISTS', 'PRIMARY', 'KEY', 'FOREIGN', 'REFERENCES',
+        'GROUP', 'ORDER', 'BY', 'ASC', 'DESC', 'DEFAULT', 'VALUES', 'SET'
+    ];
+    
+    // Highlight strings
+    escaped = escaped.replace(/'([^'\\]|\\.)*'/g, '<span class="token string">$&</span>');
+    // Highlight single line comments
+    escaped = escaped.replace(/--.*$/gm, '<span class="token comment">$&</span>');
+    
+    // Highlight keywords (word boundaries)
+    keywords.forEach(kw => {
+        const regex = new RegExp(`\\b(${kw})\\b`, 'gi');
+        escaped = escaped.replace(regex, (match) => {
+            return `<span class="token keyword">${match.toUpperCase()}</span>`;
+        });
+    });
+
+    return escaped;
 }
 
 /* --------------------------------------------------------------------------
@@ -115,6 +197,10 @@ function initSubmissionHandler() {
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        if (window.sqlCodeMirror) {
+            window.sqlCodeMirror.save();
+        }
 
         const queryValue = editor.value.trim();
         if (!queryValue) return;
@@ -251,6 +337,16 @@ function prependToHistory(query, status, errorMessage, timeStr) {
     }
 
     historyContainer.insertBefore(item, historyContainer.firstChild);
+
+    // Apply syntax highlighting to newly prepended submission block
+    const codeEl = queryBox.querySelector('code');
+    if (codeEl) {
+        if (typeof Prism !== 'undefined') {
+            Prism.highlightElement(codeEl);
+        } else {
+            codeEl.innerHTML = customSqlHighlight(query);
+        }
+    }
 
     // Update history tab badge counter
     const historyTabBtn = document.querySelectorAll('.console-tab-btn')[1];

@@ -2118,3 +2118,159 @@ textarea {
     }
 }
 
+/* ==========================================================================
+   SQL Syntax Highlighting & CodeMirror Custom Theme
+   ========================================================================== */
+
+/* CodeMirror Core Editor Container Overrides */
+.CodeMirror {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    height: 100%;
+    min-height: 220px;
+    background: rgba(15, 23, 42, 0.75) !important;
+    color: var(--text-primary) !important;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: var(--transition-smooth);
+}
+
+.CodeMirror-focused {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 12px rgba(0, 242, 254, 0.2);
+}
+
+.CodeMirror-gutters {
+    background: rgba(10, 14, 23, 0.6) !important;
+    border-right: 1px solid var(--border-color) !important;
+    padding-right: 4px;
+}
+
+.CodeMirror-linenumber {
+    color: var(--text-muted) !important;
+    font-size: 0.85rem;
+}
+
+.CodeMirror-cursor {
+    border-left: 2px solid var(--primary-color) !important;
+}
+
+.CodeMirror-activeline-background {
+    background: rgba(56, 189, 248, 0.07) !important;
+}
+
+.CodeMirror-selected {
+    background: rgba(0, 242, 254, 0.22) !important;
+}
+
+/* CodeMirror SQL Token Colors */
+.cm-s-sqlrace .cm-keyword,
+.cm-keyword {
+    color: #00f2fe !important;
+    font-weight: 600;
+}
+
+.cm-s-sqlrace .cm-string,
+.cm-string {
+    color: #10b981 !important;
+}
+
+.cm-s-sqlrace .cm-number,
+.cm-number {
+    color: #fbbf24 !important;
+}
+
+.cm-s-sqlrace .cm-builtin,
+.cm-s-sqlrace .cm-atom,
+.cm-builtin,
+.cm-atom {
+    color: #a78bfa !important;
+    font-weight: 500;
+}
+
+.cm-s-sqlrace .cm-variable,
+.cm-s-sqlrace .cm-variable-2,
+.cm-variable {
+    color: #f3f4f6 !important;
+}
+
+.cm-s-sqlrace .cm-operator,
+.cm-s-sqlrace .cm-punctuation,
+.cm-operator,
+.cm-punctuation {
+    color: #38bdf8 !important;
+}
+
+.cm-s-sqlrace .cm-comment,
+.cm-comment {
+    color: #64748b !important;
+    font-style: italic;
+}
+
+/* Prism.js Syntax Tokens (for rendered SQL snippets) */
+code[class*="language-"],
+pre[class*="language-"] {
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    text-shadow: none;
+}
+
+pre[class*="language-"] {
+    background: rgba(15, 23, 42, 0.65) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    padding: 14px 18px !important;
+    margin: 8px 0 !important;
+    overflow-x: auto;
+}
+
+/* Token colors matching SQLRace theme */
+.token.keyword {
+    color: #00f2fe !important;
+    font-weight: 600;
+}
+
+.token.string,
+.token.char {
+    color: #10b981 !important;
+}
+
+.token.number,
+.token.boolean {
+    color: #fbbf24 !important;
+}
+
+.token.function,
+.token.builtin,
+.token.class-name {
+    color: #a78bfa !important;
+}
+
+.token.operator,
+.token.punctuation {
+    color: #38bdf8 !important;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: #64748b !important;
+    font-style: italic;
+}
+
+/* Editor layout adjustments for CodeMirror integration */
+.textarea-wrapper {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.textarea-wrapper .CodeMirror {
+    flex: 1;
+}
+

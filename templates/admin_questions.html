@@ -16,20 +16,18 @@
             <h2>{{ _('admin_add_question') }}</h2>
             <form action="{{ url_for('admin.create_question') }}" method="POST" class="admin-form">
                 <div class="form-row" style="align-items: flex-start; gap: 24px;">
-                    <div class="form-group" style="flex: 1; min-width: 0;">
+                    <div class="form-group" style="flex: 1;">
                         <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem;">{{ _('admin_visibility') }}</label>
                         <input type="hidden" name="visibility" id="visibility-input" value="public">
-                        <div class="cute-toggle-wrapper">
-                            <div class="cute-toggle-segmented">
-                                <button type="button" class="cute-toggle-btn active" data-val="public" onclick="setCuteVisibility('public')">
-                                    <span class="toggle-icon">🌐</span>
-                                    <span class="toggle-text">{{ _('admin_public') }}</span>
-                                </button>
-                                <button type="button" class="cute-toggle-btn" data-val="restricted" onclick="setCuteVisibility('restricted')">
-                                    <span class="toggle-icon">🔒</span>
-                                    <span class="toggle-text">{{ _('admin_restricted') }}</span>
-                                </button>
-                            </div>
+                        <div class="cute-toggle-segmented">
+                            <button type="button" class="cute-toggle-btn active" data-val="public" onclick="setCuteVisibility('public')">
+                                <span class="toggle-icon">🌐</span>
+                                <span class="toggle-text">{{ _('admin_public') }}</span>
+                            </button>
+                            <button type="button" class="cute-toggle-btn" data-val="restricted" onclick="setCuteVisibility('restricted')">
+                                <span class="toggle-icon">🔒</span>
+                                <span class="toggle-text">{{ _('admin_restricted') }}</span>
+                            </button>
                         </div>
                     </div>
                     <div class="form-group" style="flex: 1;">

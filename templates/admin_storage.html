@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="admin-container fade-in">
-    <div class="dashboard-header flex-header">
+    <div class="dashboard-header flex-header mb-4">
         <div>
             <h1>{{ _('storage_title') }}</h1>
             <p>{{ _('storage_sub') }}</p>
@@ -12,56 +12,98 @@
         <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary">&larr; {{ _('leaderboard_back') }}</a>
     </div>
 
-    <!-- Storage Overview Cards -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <h3>{{ _('storage_total_space') }}</h3>
-            <p class="stat-number">{{ stats.total_size_formatted }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>{{ _('storage_total_files') }}</h3>
-            <p class="stat-number">{{ stats.total_files }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>{{ _('storage_unused_files') }}</h3>
-            <p class="stat-number {% if stats.unused_files_count > 0 %}text-warning{% endif %}">{{ stats.unused_files_count }} ({{ stats.unused_size_formatted }})</p>
-        </div>
-        <div class="stat-card">
-            <h3>{{ _('storage_free_disk') }}</h3>
-            <p class="stat-number">{{ stats.disk_free_formatted }} ({{ stats.disk_used_percent }}% used)</p>
-        </div>
-    </div>
-
-    <!-- Auto-Suggestion Banner if unused files exist -->
-    {% if stats.unused_files_count > 0 %}
-    <div class="alert alert-warning flex-between fade-in mb-4">
+    <!-- Top Section: Overview Stats + Disk Usage Interactive Pie Chart -->
+    <div class="storage-top-grid">
+        <!-- Left Column: Overview Metrics & Cleanup Banner -->
         <div>
-            <strong>⚠️ {{ _('storage_unused_warning', count=stats.unused_files_count, size=stats.unused_size_formatted) }}</strong>
-        </div>
-        <form action="{{ url_for('admin.delete_unused_storage_files') }}" method="POST" onsubmit="return confirm('{{ _('storage_delete_unused_btn') }}?');">
-            <button type="submit" class="btn btn-danger btn-sm">{{ _('storage_delete_unused_btn') }}</button>
-        </form>
-    </div>
-    {% endif %}
+            <div class="storage-stats-grid">
+                <div class="stat-card">
+                    <h3>{{ _('storage_total_space') }}</h3>
+                    <p class="stat-number">{{ stats.total_size_formatted }}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>{{ _('storage_total_files') }}</h3>
+                    <p class="stat-number">{{ stats.total_files }}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>{{ _('storage_unused_files') }}</h3>
+                    <p class="stat-number {% if stats.unused_files_count > 0 %}text-warning{% endif %}">{{ stats.unused_files_count }} ({{ stats.unused_size_formatted }})</p>
+                </div>
+                <div class="stat-card">
+                    <h3>{{ _('storage_free_disk') }}</h3>
+                    <p class="stat-number">{{ stats.disk_free_formatted }}</p>
+                </div>
+            </div>
 
-    <!-- Storage Table Section -->
+            <!-- Auto-Suggestion Banner if unused files exist -->
+            {% if stats.unused_files_count > 0 %}
+            <div class="alert alert-warning flex-between fade-in mt-3 mb-0">
+                <div>
+                    <strong>⚠️ {{ _('storage_unused_warning', count=stats.unused_files_count, size=stats.unused_size_formatted) }}</strong>
+                </div>
+                <form action="{{ url_for('admin.delete_unused_storage_files') }}" method="POST" onsubmit="return confirm('{{ _('storage_delete_unused_btn') }}?');" class="m-0">
+                    <button type="submit" class="btn btn-danger btn-sm">{{ _('storage_delete_unused_btn') }}</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column: Interactive Chart.js Disk Usage Pie Chart -->
+        <div class="storage-chart-card">
+            <h3 class="card-title">📊 {{ _('storage_chart_title') }}</h3>
+            <div class="chart-wrapper">
+                <canvas id="diskPieChart"></canvas>
+            </div>
+            <div class="chart-legend-box">
+                <div class="legend-item">
+                    <span><strong class="legend-color-dot dot-uploads"></strong> {{ _('storage_used_uploads') }}</span>
+                    <strong>{{ stats.total_size_formatted }} ({{ stats.uploads_pct }}%)</strong>
+                </div>
+                <div class="legend-item">
+                    <span><strong class="legend-color-dot dot-others"></strong> {{ _('storage_used_others') }}</span>
+                    <strong>{{ stats.others_formatted }} ({{ stats.others_pct }}%)</strong>
+                </div>
+                <div class="legend-item">
+                    <span><strong class="legend-color-dot dot-free"></strong> {{ _('storage_free_space') }}</span>
+                    <strong>{{ stats.disk_free_formatted }} ({{ stats.free_pct }}%)</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Storage Table Section & Filter Toolbar -->
     <div class="admin-card">
+        <div class="flex-between mb-4 flex-wrap gap-3">
+            <h3 class="card-title m-0">📂 {{ _('storage_total_files') }} ({{ stats.total_files }})</h3>
+            
+            <div class="filter-bar-form">
+                <div class="input-search-wrap">
+                    <input type="text" id="storageSearchInput" class="form-control" placeholder="Search filenames..." onkeyup="filterStorageFiles()">
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-secondary active" onclick="setStorageFilter('all', this)">All</button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="setStorageFilter('used', this)">Used</button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="setStorageFilter('unused', this)">Unused</button>
+                </div>
+            </div>
+        </div>
+
         <div class="table-scroll">
-            <table class="data-table">
+            <table class="data-table" id="storageFilesTable">
                 <thead>
                     <tr>
-                        <th>{{ _('storage_preview') }}</th>
+                        <th style="width: 70px; text-align: center;">Preview</th>
                         <th>{{ _('storage_filename') }}</th>
                         <th>{{ _('storage_size') }}</th>
                         <th>{{ _('storage_mtime') }}</th>
                         <th>{{ _('storage_usage') }}</th>
-                        <th>{{ _('admin_action') }}</th>
+                        <th style="text-align: right;">{{ _('storage_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for f in files %}
-                    <tr>
-                        <td style="width: 70px; text-align: center;">
+                    <tr class="storage-file-row" data-filename="{{ f.filename|lower }}" data-used="{{ 'true' if f.is_used else 'false' }}">
+                        <td style="text-align: center;">
                             {% set ext = f.filename.split('.')[-1].lower() %}
                             {% if ext in ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'] %}
                                 <img src="{{ f.path }}" alt="Preview" class="storage-thumbnail" onclick="window.open('{{ f.path }}', '_blank')" style="cursor: pointer;">
@@ -71,6 +113,7 @@
                         </td>
                         <td>
                             <a href="{{ f.path }}" target="_blank" class="code-link"><code>{{ f.filename }}</code></a>
+                            <button type="button" class="copy-tag-btn ml-2" onclick="copyStorageTag('{{ f.filename }}', '{{ f.path }}')" title="Copy Markdown image tag">📋 {{ _('storage_copy_tag') }}</button>
                         </td>
                         <td>{{ f.size_formatted }}</td>
                         <td>{{ f.mtime }}</td>
@@ -86,10 +129,10 @@
                                 <span class="badge badge-warning">{{ _('storage_unused_badge') }}</span>
                             {% endif %}
                         </td>
-                        <td>
+                        <td style="text-align: right;">
                             <form action="{{ url_for('admin.delete_storage_file') }}" method="POST" onsubmit="return confirm('{{ _('storage_delete_confirm', filename=f.filename) }}');" style="display:inline;">
                                 <input type="hidden" name="filename" value="{{ f.filename }}">
-                                <button type="submit" class="btn btn-danger btn-sm">{{ _('admin_action') }} Excluir</button>
+                                <button type="submit" class="btn btn-danger btn-sm">🗑️ {{ _('admin_delete') or 'Delete' }}</button>
                             </form>
                         </td>
                     </tr>
@@ -103,4 +146,113 @@
         </div>
     </div>
 </div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('diskPieChart').getContext('2d');
+        
+        // Data parsed from Flask backend
+        const uploadsBytes = {{ stats.total_size_bytes }};
+        const othersBytes = {{ stats.others_bytes }};
+        const freeBytes = {{ stats.disk_free_bytes }};
+        
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    "{{ _('storage_used_uploads') }}",
+                    "{{ _('storage_used_others') }}",
+                    "{{ _('storage_free_space') }}"
+                ],
+                datasets: [{
+                    data: [uploadsBytes, othersBytes, freeBytes],
+                    backgroundColor: [
+                        '#38bdf8', // Used by Uploads (Sky Blue)
+                        '#a855f7', // Used by System / Others (Purple)
+                        '#10b981'  // Free Space (Emerald Green)
+                    ],
+                    borderColor: '#0f172a',
+                    borderWidth: 3,
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false // Using custom CSS legend below chart
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw || 0;
+                                const total = uploadsBytes + othersBytes + freeBytes;
+                                const pct = total > 0 ? ((value / total) * 100).toFixed(2) : 0;
+                                return ' ' + context.label + ': ' + formatBytesJS(value) + ' (' + pct + '%)';
+                            }
+                        }
+                    }
+                },
+                cutout: '72%'
+            }
+        });
+    });
+
+    function formatBytesJS(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    let currentFilterMode = 'all';
+
+    function setStorageFilter(mode, btnEl) {
+        currentFilterMode = mode;
+        const btns = btnEl.parentElement.querySelectorAll('.btn');
+        btns.forEach(b => b.classList.remove('active'));
+        btnEl.classList.add('active');
+        filterStorageFiles();
+    }
+
+    function filterStorageFiles() {
+        const query = document.getElementById('storageSearchInput').value.toLowerCase().trim();
+        const rows = document.querySelectorAll('.storage-file-row');
+        
+        rows.forEach(row => {
+            const fname = row.getAttribute('data-filename');
+            const isUsed = row.getAttribute('data-used') === 'true';
+            
+            let matchesFilter = true;
+            if (currentFilterMode === 'used' && !isUsed) matchesFilter = false;
+            if (currentFilterMode === 'unused' && isUsed) matchesFilter = false;
+            
+            let matchesSearch = fname.includes(query);
+            
+            if (matchesFilter && matchesSearch) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function copyStorageTag(filename, url) {
+        const ext = filename.split('.').pop().toLowerCase();
+        let tag = url;
+        if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(ext)) {
+            tag = `![${filename}](${url})`;
+        }
+        navigator.clipboard.writeText(tag).then(() => {
+            alert('Copied markdown tag to clipboard:\n' + tag);
+        }).catch(err => {
+            alert('Copy error: ' + err);
+        });
+    }
+</script>
 {% endblock %}
+

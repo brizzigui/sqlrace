@@ -443,16 +443,25 @@ def admin_storage():
     files_list.sort(key=lambda x: x['mtime'], reverse=True)
     
     disk_total, disk_used, disk_free = shutil.disk_usage('.')
-    disk_percent = round((disk_used / disk_total) * 100, 1)
+    others_bytes = max(0, disk_used - total_size_bytes)
     
     storage_stats = {
         'total_files': len(files_list),
+        'total_size_bytes': total_size_bytes,
         'total_size_formatted': format_bytes(total_size_bytes),
         'unused_files_count': unused_count,
+        'unused_size_bytes': unused_size_bytes,
         'unused_size_formatted': format_bytes(unused_size_bytes),
+        'disk_total_bytes': disk_total,
         'disk_total_formatted': format_bytes(disk_total),
+        'disk_free_bytes': disk_free,
         'disk_free_formatted': format_bytes(disk_free),
-        'disk_used_percent': disk_percent
+        'others_bytes': others_bytes,
+        'others_formatted': format_bytes(others_bytes),
+        'uploads_pct': round((total_size_bytes / disk_total * 100), 2) if disk_total else 0,
+        'others_pct': round((others_bytes / disk_total * 100), 2) if disk_total else 0,
+        'free_pct': round((disk_free / disk_total * 100), 2) if disk_total else 0,
+        'disk_used_percent': round((disk_used / disk_total) * 100, 1) if disk_total else 0
     }
     
     return render_template('admin_storage.html', files=files_list, stats=storage_stats)

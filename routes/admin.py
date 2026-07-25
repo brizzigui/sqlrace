@@ -525,11 +525,12 @@ def delete_unused_storage_files():
 # Manage Resources Routes
 # ==========================================
 def get_system_resources_data():
+    # 1. Docker Containers Status
     containers = []
     try:
         res = subprocess.run(
-            ['docker', 'ps', '-a', '--format', '{{.ID}}|{{.Names}}|{{.Status}}|{{.Image}}'],
-            capture_output=True, text=True, timeout=2
+            'docker ps -a --format "{{.ID}}|{{.Names}}|{{.Status}}|{{.Image}}"',
+            shell=True, capture_output=True, text=True, timeout=3
         )
         if res.returncode == 0 and res.stdout.strip():
             lines = res.stdout.strip().split('\n')
@@ -548,6 +549,33 @@ def get_system_resources_data():
     except Exception:
         pass
 
+    # 2. Database Services and Storage Stats
+    db_metrics = {
+        'main_db_size': 'N/A',
+        'sandbox_db_size': 'N/A',
+        'main_active_queries': 0,
+        'sandbox_active_queries': 0
+    }
+    try:
+        with get_main_db() as cur:
+            cur.execute("SELECT pg_size_pretty(pg_database_size(current_database()));")
+            db_metrics['main_db_size'] = cur.fetchone()[0]
+            cur.execute("SELECT COUNT(*) FROM pg_stat_activity WHERE state = 'active';")
+            db_metrics['main_active_queries'] = cur.fetchone()[0]
+    except Exception:
+        pass
+
+    try:
+        from database import get_sandbox_db
+        with get_sandbox_db() as cur:
+            cur.execute("SELECT pg_size_pretty(pg_database_size(current_database()));")
+            db_metrics['sandbox_db_size'] = cur.fetchone()[0]
+            cur.execute("SELECT COUNT(*) FROM pg_stat_activity WHERE state = 'active';")
+            db_metrics['sandbox_active_queries'] = cur.fetchone()[0]
+    except Exception:
+        pass
+
+    # 3. Connection Pools Status
     main_pool_stats = {'active': 0, 'max': 20}
     sandbox_pool_stats = {'active': 0, 'max': 20}
     if main_pool:
@@ -557,6 +585,7 @@ def get_system_resources_data():
         sandbox_pool_stats['active'] = len(sandbox_pool._used) if hasattr(sandbox_pool, '_used') else 0
         sandbox_pool_stats['max'] = sandbox_pool.maxconn if hasattr(sandbox_pool, 'maxconn') else 20
 
+    # 4. Judge Performance & Evaluation Metrics
     with get_main_db() as cur:
         cur.execute("""
             SELECT 
@@ -565,7 +594,9 @@ def get_system_resources_data():
                 COALESCE(MAX(execution_time_ms), 0) as max_exec_time,
                 COALESCE(AVG(wait_time_ms), 0) as avg_wait_time,
                 SUM(CASE WHEN submitted_at >= NOW() - INTERVAL '24 hours' THEN 1 ELSE 0 END) as subs_24h,
-                SUM(CASE WHEN status = 'Accepted' THEN 1 ELSE 0 END) as accepted_subs
+                SUM(CASE WHEN status = 'Accepted' THEN 1 ELSE 0 END) as accepted_subs,
+                SUM(CASE WHEN status = 'Wrong Answer' THEN 1 ELSE 0 END) as wa_subs,
+                SUM(CASE WHEN status = 'Runtime Error' THEN 1 ELSE 0 END) as re_subs
             FROM submissions;
         """)
         row = cur.fetchone()
@@ -576,21 +607,59 @@ def get_system_resources_data():
     avg_wait_time = round(float(row[3] or 0), 1)
     subs_24h = row[4] or 0
     accepted_subs = row[5] or 0
+    wa_subs = row[6] or 0
+    re_subs = row[7] or 0
     acceptance_rate = round((accepted_subs / total_subs * 100), 1) if total_subs > 0 else 0
 
-    sys_metrics = {'cpu_percent': 0, 'ram_percent': 0, 'ram_used_formatted': 'N/A', 'ram_total_formatted': 'N/A'}
+    # 5. System Load & RAM Utilization (Linux/Cross-platform)
+    sys_metrics = {
+        'cpu_percent': 0,
+        'ram_percent': 0,
+        'ram_used_formatted': 'N/A',
+        'ram_total_formatted': 'N/A',
+        'load_1m': 0,
+        'cpu_cores': os.cpu_count() or 1
+    }
+
     try:
         import psutil
-        sys_metrics['cpu_percent'] = psutil.cpu_percent(interval=None)
+        sys_metrics['cpu_percent'] = round(psutil.cpu_percent(interval=None), 1)
         mem = psutil.virtual_memory()
-        sys_metrics['ram_percent'] = mem.percent
+        sys_metrics['ram_percent'] = round(mem.percent, 1)
         sys_metrics['ram_used_formatted'] = format_bytes(mem.used)
         sys_metrics['ram_total_formatted'] = format_bytes(mem.total)
     except Exception:
-        pass
+        try:
+            with open('/proc/meminfo', 'r') as f:
+                mem = {}
+                for line in f:
+                    parts = line.split(':')
+                    if len(parts) == 2:
+                        k = parts[0].strip()
+                        v = parts[1].strip().split()[0]
+                        mem[k] = int(v) * 1024
+                total = mem.get('MemTotal', 0)
+                available = mem.get('MemAvailable', mem.get('MemFree', 0))
+                used = total - available
+                if total > 0:
+                    sys_metrics['ram_percent'] = round((used / total) * 100, 1)
+                    sys_metrics['ram_used_formatted'] = format_bytes(used)
+                    sys_metrics['ram_total_formatted'] = format_bytes(total)
+        except Exception:
+            pass
+
+    if hasattr(os, 'getloadavg'):
+        try:
+            load = os.getloadavg()
+            sys_metrics['load_1m'] = round(load[0], 2)
+            if sys_metrics['cpu_percent'] == 0:
+                sys_metrics['cpu_percent'] = min(100.0, round((load[0] / sys_metrics['cpu_cores']) * 100, 1))
+        except Exception:
+            pass
 
     return {
         'containers': containers,
+        'db_metrics': db_metrics,
         'main_pool': main_pool_stats,
         'sandbox_pool': sandbox_pool_stats,
         'judge_metrics': {
@@ -599,6 +668,9 @@ def get_system_resources_data():
             'max_exec_time_ms': max_exec_time,
             'avg_wait_time_ms': avg_wait_time,
             'subs_24h': subs_24h,
+            'accepted_subs': accepted_subs,
+            'wa_subs': wa_subs,
+            're_subs': re_subs,
             'acceptance_rate': acceptance_rate
         },
         'system': sys_metrics

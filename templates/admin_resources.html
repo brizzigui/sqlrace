@@ -34,7 +34,7 @@
     </div>
 
     <div class="grid-2-cols mb-4">
-        <!-- Docker Containers Status -->
+        <!-- Docker Containers & Database Services -->
         <div class="admin-card">
             <h3 class="card-title">🐳 {{ _('resources_containers') }}</h3>
             {% if resources.containers %}
@@ -65,16 +65,29 @@
                 </table>
             </div>
             {% else %}
-                <p class="text-muted p-3 mb-0">{{ _('resources_no_containers') }}</p>
+                <div class="services-status-box">
+                    <p class="text-muted mb-2"><small>{{ _('resources_no_containers') }}</small></p>
+                    <div class="flex-between py-2 border-bottom">
+                        <span><strong>Main PostgreSQL Engine</strong> (<code>sqlrace_main</code>)</span>
+                        <span class="badge badge-success">🟢 Size: {{ resources.db_metrics.main_db_size }}</span>
+                    </div>
+                    <div class="flex-between py-2">
+                        <span><strong>Sandbox PostgreSQL Engine</strong> (<code>sqlrace_sandbox</code>)</span>
+                        <span class="badge badge-info">🟢 Size: {{ resources.db_metrics.sandbox_db_size }}</span>
+                    </div>
+                </div>
             {% endif %}
         </div>
 
-        <!-- Database Pool Status -->
+        <!-- Database Pool & Storage Metrics -->
         <div class="admin-card">
             <h3 class="card-title">🗄️ {{ _('resources_db_pools') }}</h3>
             <div class="pool-metric-box mb-3">
                 <div class="flex-between">
-                    <strong>{{ _('resources_main_pool') }}</strong>
+                    <div>
+                        <strong>{{ _('resources_main_pool') }}</strong>
+                        <small class="text-muted block">DB Size: {{ resources.db_metrics.main_db_size }}</small>
+                    </div>
                     <span>{{ _('resources_active_conns', active=resources.main_pool.active, max=resources.main_pool.max) }}</span>
                 </div>
                 <div class="progress-bar-container">
@@ -85,7 +98,10 @@
 
             <div class="pool-metric-box">
                 <div class="flex-between">
-                    <strong>{{ _('resources_sandbox_pool') }}</strong>
+                    <div>
+                        <strong>{{ _('resources_sandbox_pool') }}</strong>
+                        <small class="text-muted block">DB Size: {{ resources.db_metrics.sandbox_db_size }}</small>
+                    </div>
                     <span>{{ _('resources_active_conns', active=resources.sandbox_pool.active, max=resources.sandbox_pool.max) }}</span>
                 </div>
                 <div class="progress-bar-container">
@@ -96,18 +112,51 @@
         </div>
     </div>
 
-    <!-- Host System Load -->
-    <div class="admin-card">
-        <h3 class="card-title">🖥️ {{ _('resources_sys_load') }}</h3>
-        <div class="grid-2-cols">
-            <div>
-                <p class="mb-1"><strong>{{ _('resources_cpu_usage') }}:</strong> {{ resources.system.cpu_percent }}%</p>
-                <div class="progress-bar-container mb-3">
+    <!-- Judge Evaluation Breakdown & Host System Load -->
+    <div class="grid-2-cols mb-4">
+        <!-- Submissions Status Breakdown -->
+        <div class="admin-card">
+            <h3 class="card-title">⚡ Submissions Evaluation Breakdown</h3>
+            <div class="flex-between py-2 border-bottom">
+                <span>Total Evaluated Submissions:</span>
+                <strong>{{ resources.judge_metrics.total_subs }}</strong>
+            </div>
+            <div class="flex-between py-2 border-bottom">
+                <span>Submissions (Last 24 Hours):</span>
+                <strong>{{ resources.judge_metrics.subs_24h }}</strong>
+            </div>
+            <div class="flex-between py-2 border-bottom">
+                <span>Accepted (AC):</span>
+                <span class="badge badge-success">{{ resources.judge_metrics.accepted_subs }}</span>
+            </div>
+            <div class="flex-between py-2 border-bottom">
+                <span>Wrong Answer (WA):</span>
+                <span class="badge badge-warning">{{ resources.judge_metrics.wa_subs }}</span>
+            </div>
+            <div class="flex-between py-2">
+                <span>Runtime Error (RE):</span>
+                <span class="badge badge-danger">{{ resources.judge_metrics.re_subs }}</span>
+            </div>
+        </div>
+
+        <!-- Host System Load -->
+        <div class="admin-card">
+            <h3 class="card-title">🖥️ {{ _('resources_sys_load') }}</h3>
+            <div class="mb-3">
+                <div class="flex-between mb-1">
+                    <strong>{{ _('resources_cpu_usage') }}:</strong>
+                    <span>{{ resources.system.cpu_percent }}% ({{ resources.system.cpu_cores }} Cores)</span>
+                </div>
+                <div class="progress-bar-container">
                     <div class="progress-bar-fill" style="width: {{ resources.system.cpu_percent }}%;"></div>
                 </div>
             </div>
+
             <div>
-                <p class="mb-1"><strong>{{ _('resources_ram_usage') }}:</strong> {{ resources.system.ram_percent }}% ({{ resources.system.ram_used_formatted }} / {{ resources.system.ram_total_formatted }})</p>
+                <div class="flex-between mb-1">
+                    <strong>{{ _('resources_ram_usage') }}:</strong>
+                    <span>{{ resources.system.ram_percent }}% ({{ resources.system.ram_used_formatted }} / {{ resources.system.ram_total_formatted }})</span>
+                </div>
                 <div class="progress-bar-container">
                     <div class="progress-bar-fill fill-info" style="width: {{ resources.system.ram_percent }}%;"></div>
                 </div>
@@ -117,14 +166,14 @@
 </div>
 
 <script>
-    // Auto-refresh resources metrics every 5 seconds
     setInterval(function() {
         fetch("{{ url_for('admin.api_resources') }}")
             .then(res => res.json())
             .then(data => {
-                // Polling update can be expanded if live graph is desired
+                // Live metrics background refresh
             })
             .catch(err => console.error("Live metrics refresh error:", err));
     }, 5000);
 </script>
 {% endblock %}
+

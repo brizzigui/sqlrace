@@ -2965,6 +2965,200 @@ code[class*="language-"] {
 .text-nowrap {
     white-space: nowrap;
 }
+.restricted-badge {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--color-upcoming);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.difficulty-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.diff-1 { background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); }
+.diff-2 { background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.25); }
+.diff-3 { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.25); }
+.diff-4 { background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); }
+.diff-5 { background: rgba(168, 85, 247, 0.12); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.25); }
+
+/* Empty state card */
+.empty-state-card {
+    background: var(--bg-surface);
+    border: 1px dashed var(--border-color);
+    border-radius: 16px;
+    padding: 48px 24px;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+}
+
+/* ==========================================================================
+   Admin Storage, Resources & Audit Logs Extensions
+   ========================================================================== */
+
+/* Flex utilities */
+.flex-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.flex-gap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Hub card accents */
+.hub-card-storage:hover {
+    border-color: #38bdf8;
+    box-shadow: 0 8px 30px rgba(56, 189, 248, 0.2);
+}
+.hub-card-storage .hub-card-icon svg {
+    fill: #38bdf8;
+}
+
+.hub-card-resources:hover {
+    border-color: #a855f7;
+    box-shadow: 0 8px 30px rgba(168, 85, 247, 0.2);
+}
+.hub-card-resources .hub-card-icon svg {
+    fill: #a855f7;
+}
+
+.hub-card-logs:hover {
+    border-color: #f59e0b;
+    box-shadow: 0 8px 30px rgba(245, 158, 11, 0.2);
+}
+.hub-card-logs .hub-card-icon svg {
+    fill: #f59e0b;
+}
+
+/* Storage UI */
+.storage-thumbnail {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: #0f172a;
+}
+
+.file-icon-placeholder {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-surface-elevated);
+    border-radius: 8px;
+    font-size: 1.2rem;
+}
+
+.question-links-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+/* Badges */
+.badge-info {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.badge-dark {
+    background: rgba(148, 163, 184, 0.15);
+    color: #cbd5e1;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+/* Progress bars */
+.pool-metric-box {
+    background: var(--bg-surface-elevated);
+    border-radius: 8px;
+    padding: 14px 16px;
+    border: 1px solid var(--border-color);
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 10px;
+    background: #1e293b;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #059669);
+    border-radius: 5px;
+    transition: width 0.4s ease;
+}
+
+.progress-bar-fill.fill-accent {
+    background: linear-gradient(90deg, #a855f7, #7c3aed);
+}
+
+.progress-bar-fill.fill-info {
+    background: linear-gradient(90deg, #38bdf8, #0284c7);
+}
+
+/* Log Filter Bar */
+.filter-bar-form {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.input-search-wrap {
+    display: flex;
+    gap: 8px;
+}
+
+.text-nowrap {
+    white-space: nowrap;
+}
 
 .text-warning {
     color: #f59e0b !important;
@@ -2975,4 +3169,79 @@ code[class*="language-"] {
     font-weight: 700;
     margin-bottom: 16px;
     color: var(--text-primary);
+}
+
+/* 3x3 Admin Hub Grid Layout */
+.admin-hub-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 24px;
+}
+
+@media (max-width: 1024px) {
+    .admin-hub-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .admin-hub-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.hub-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-decoration: none;
+    transition: var(--transition-smooth);
+    box-shadow: var(--card-shadow);
+}
+
+.hub-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--border-hover);
+}
+
+.hub-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--bg-surface-elevated);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.hub-card-icon svg {
+    width: 26px;
+    height: 26px;
+    fill: var(--primary-color);
+}
+
+.hub-card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.hub-card-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.services-status-box {
+    background: var(--bg-surface-elevated);
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
 }

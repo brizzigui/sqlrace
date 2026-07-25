@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ _('title_team_profile', username=team.username) }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-container fade-in">
+    <div class="profile-back-bar">
+        <a href="{{ url_for('leaderboard.global_leaderboard') }}" class="back-link">&larr; {{ _('profile_back_leaderboard') }}</a>
+    </div>
+
+    <!-- Main Profile Card Header -->
+    <div class="profile-card-header">
+        <div class="profile-avatar-container">
+            <img src="{{ url_for('auth.team_avatar', username=team.username) }}" alt="{{ team.username }}" class="profile-avatar-large">
+        </div>
+        <div class="profile-info-container">
+            <div class="profile-title-row">
+                <h1 class="profile-username">{{ team.username }}</h1>
+                {% if session.get('team_id') == team.id %}
+                    <span class="my-team-badge">({{ _('admin_you') }})</span>
+                {% endif %}
+                {% if team.is_admin %}
+                    <span class="badge admin-tag" style="font-size: 0.85rem; padding: 4px 10px;">⚡ {{ _('admin_role_admin') }}</span>
+                {% else %}
+                    <span class="badge competitor-tag" style="font-size: 0.85rem; padding: 4px 10px;">🏁 {{ _('admin_competitor_label') }}</span>
+                {% endif %}
+            </div>
+            
+            <div class="profile-meta-row">
+                <span class="meta-item">
+                    <span class="meta-icon">📅</span> 
+                    {{ _('profile_member_since') }}: <strong>{{ team.joined_duration }}</strong>
+                    {% if team.joined_date %}
+                        <small class="text-muted">({{ team.joined_date }})</small>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Statistics Grid -->
+    <div class="profile-stats-grid">
+        <div class="stat-card stat-solved">
+            <div class="stat-icon-wrapper">
+                <span class="stat-icon">🟢</span>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ team.solved_count }}</div>
+                <div class="stat-label">{{ _('profile_solved_questions') }}</div>
+            </div>
+        </div>
+
+        <div class="stat-card stat-submissions">
+            <div class="stat-icon-wrapper">
+                <span class="stat-icon">⚡</span>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ team.total_submissions }}</div>
+                <div class="stat-label">{{ _('profile_total_submissions') }}</div>
+            </div>
+        </div>
+
+        <div class="stat-card stat-accuracy">
+            <div class="stat-icon-wrapper">
+                <span class="stat-icon">🎯</span>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ team.accuracy_rate }}%</div>
+                <div class="stat-label">{{ _('profile_accuracy') }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Solved Questions Section -->
+    <div class="solved-questions-section">
+        <div class="section-header">
+            <h2>🏆 {{ _('profile_solved_list') }} <span class="solved-count-badge">{{ team.solved_count }}</span></h2>
+        </div>
+
+        {% if solved_questions %}
+            <div class="leaderboard-card">
+                <div class="table-scroll">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px; text-align: center;">#</th>
+                                <th>{{ _('questions_name') }}</th>
+                                <th style="width: 140px; text-align: center;">{{ _('admin_difficulty') }}</th>
+                                <th style="width: 180px; text-align: center;">Solved Date</th>
+                                <th style="width: 130px; text-align: center;">{{ _('questions_action') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for q in solved_questions %}
+                                <tr>
+                                    <td style="text-align: center; font-weight: 600; color: var(--text-muted);">
+                                        {{ loop.index }}
+                                    </td>
+                                    <td>
+                                        <div class="question-title-cell">
+                                            {% if q.visibility == 'public' %}
+                                                <a href="{{ url_for('contest.question_editor_public', question_id=q.id) }}" class="question-link">
+                                                    <strong>{{ q.title }}</strong>
+                                                </a>
+                                            {% else %}
+                                                <strong>{{ q.title }}</strong>
+                                                <span class="badge restricted-badge" style="margin-left: 8px; font-size: 0.75rem;">{{ _('admin_restricted') }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span class="difficulty-badge diff-{{ q.difficulty }}">
+                                            {% if q.difficulty == 1 %}⭐ Easy{% elif q.difficulty == 2 %}⭐⭐ Medium{% elif q.difficulty == 3 %}⭐⭐⭐ Hard{% elif q.difficulty == 4 %}⭐⭐⭐⭐ Expert{% else %}⭐⭐⭐⭐⭐ Master{% endif %}
+                                        </span>
+                                    </td>
+                                    <td style="text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
+                                        {% if q.solved_at %}
+                                            {{ q.solved_at.strftime('%b %d, %Y %H:%M') }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td style="text-align: center;">
+                                        {% if q.visibility == 'public' %}
+                                            <a href="{{ url_for('contest.question_editor_public', question_id=q.id) }}" class="btn btn-sm btn-outline">
+                                                {{ _('questions_solve') }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted" style="font-size: 0.85rem;">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-state-card">
+                <div class="empty-icon">🎯</div>
+                <h3>{{ _('profile_no_solved') }}</h3>
+                <p class="text-muted" style="margin-top: 8px; margin-bottom: 20px;">
+                    Explore public practice questions or join active contests to solve SQL challenges!
+                </p>
+                <a href="{{ url_for('contest.questions_list') }}" class="btn btn-primary">
+                    {{ _('questions_title') }}
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

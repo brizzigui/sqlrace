@@ -887,6 +887,8 @@ textarea {
     display: flex;
     flex-direction: column;
     background: var(--bg-surface);
+    min-height: 0;
+    overflow: hidden;
 }
 
 .panel-left {
@@ -908,6 +910,7 @@ textarea {
     flex-grow: 1;
     overflow-y: auto;
     padding: 24px;
+    min-height: 0;
 }
 
 .panel-body.scrollable {
@@ -1028,9 +1031,10 @@ textarea {
 
 .split-vertical {
     display: grid;
-    grid-template-rows: 1.2fr 1fr;
+    grid-template-rows: 1fr 1fr;
     height: 100%;
     padding: 0;
+    min-height: 0;
 }
 
 .editor-section {
@@ -1038,7 +1042,7 @@ textarea {
     flex-direction: column;
     border-bottom: 1px solid var(--border-color);
     position: relative;
-    height: 100%;
+    min-height: 0;
 }
 
 #submission-form {
@@ -1090,6 +1094,7 @@ textarea {
     flex-direction: column;
     background: #0f1420;
     overflow: hidden;
+    min-height: 0;
 }
 
 .console-tabs {

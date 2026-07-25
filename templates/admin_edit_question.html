@@ -95,8 +95,23 @@ async function handleImageUpload() {
         return;
     }
     
+    const file = fileInput.files[0];
+    const allowedExts = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'];
+    const fileNameLower = file.name.toLowerCase();
+    const isAllowed = allowedExts.some(ext => fileNameLower.endsWith(ext));
+    if (!isAllowed) {
+        alert("{{ _('js_invalid_image_type') }}");
+        return;
+    }
+    
+    const maxSizeBytes = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSizeBytes) {
+        alert("{{ _('js_file_too_large') }}");
+        return;
+    }
+    
     const formData = new FormData();
-    formData.append('image', fileInput.files[0]);
+    formData.append('image', file);
     
     const btn = document.querySelector('button[onclick="handleImageUpload()"]');
     const originalText = btn.textContent;
@@ -115,7 +130,8 @@ async function handleImageUpload() {
         }
         
         const data = await response.json();
-        const imgMarkdown = `![${fileInput.files[0].name}](${data.url})`;
+        const displayTag = data.filename || file.name;
+        const imgMarkdown = `![${displayTag}](${data.url})`;
         
         document.getElementById('image-tag-output').value = imgMarkdown;
         document.getElementById('image-upload-result').style.display = 'block';

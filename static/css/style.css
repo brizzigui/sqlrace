@@ -2819,6 +2819,7 @@ code[class*="language-"] {
     justify-content: space-between;
     align-items: center;
     gap: 12px;
+    margin-bottom: 10px;
 }
 
 .flex-gap {
@@ -3013,6 +3014,7 @@ code[class*="language-"] {
     justify-content: space-between;
     align-items: center;
     gap: 12px;
+    margin-bottom: 10px;
 }
 
 .flex-gap {
@@ -3471,5 +3473,20 @@ code[class*="language-"] {
     color: var(--primary-color);
 }
 
-
-
+/* ==========================================================================
+   Question Image Display Constraints
+   ========================================================================== */
+.problem-description img,
+.question-description img,
+.markdown-content img,
+.statement-preview img {
+    max-width: 100%;
+    max-height: 450px;
+    height: auto;
+    width: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    margin: 12px 0;
+    display: block;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}

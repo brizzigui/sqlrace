@@ -2,6 +2,7 @@ import os
 import shutil
 import math
 import subprocess
+import uuid
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
 from translations import translate as _
 from werkzeug.utils import secure_filename
@@ -250,6 +251,9 @@ def create_question():
         
     return redirect(url_for('admin.admin_questions'))
 
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+ALLOWED_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'}
+
 @bp.route('/admin/upload_image', methods=['POST'])
 @admin_required
 def upload_image():
@@ -258,11 +262,24 @@ def upload_image():
     file = request.files['image']
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
+    
+    # Extension check
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        return jsonify({'error': _('js_invalid_image_type')}), 400
+    
+    # 10MB Size check
+    file.seek(0, os.SEEK_END)
+    file_length = file.tell()
+    file.seek(0)
+    if file_length > MAX_FILE_SIZE:
+        return jsonify({'error': _('js_file_too_large')}), 400
+
     if file:
-        filename = secure_filename(file.filename)
-        # Unique filename using timestamp
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-        filename = f"{timestamp}_{filename}"
+        # Canonical filename generation: img_YYYYMMDD_HHMMSS_<uuid8>.<ext>
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        unique_id = uuid.uuid4().hex[:8]
+        filename = f"img_{timestamp}_{unique_id}{ext}"
         
         # Ensure uploads folder exists
         os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -272,7 +289,7 @@ def upload_image():
         
         log_audit('STORAGE', 'IMAGE_UPLOAD', f"Uploaded file: {filename}", level='INFO', user_id=session.get('team_id'), username=session.get('username'), ip_address=request.remote_addr)
         url = url_for('static', filename=f"uploads/{filename}")
-        return jsonify({'url': url})
+        return jsonify({'url': url, 'filename': filename})
     return jsonify({'error': 'Failed to save file'}), 500
 
 @bp.route('/admin/contest/delete/<int:contest_id>', methods=['POST'])

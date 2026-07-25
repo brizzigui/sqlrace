@@ -1,6 +1,6 @@
 import os
 from datetime import timedelta
-from flask import Flask, redirect, url_for, render_template
+from flask import Flask, redirect, url_for, render_template, jsonify
 from flask_session import Session
 from dotenv import load_dotenv
 from database import init_pools
@@ -69,6 +69,15 @@ def create_app():
     @app.route('/')
     def index():
         return redirect(url_for('contest.contests_list'))
+
+    # Limit max request body size to 10MB
+    app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
+
+    @app.errorhandler(413)
+    def request_entity_too_large(e):
+        if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.path == '/admin/upload_image':
+            return jsonify({'error': 'File size exceeds maximum limit of 10MB'}), 413
+        return render_template('404.html'), 413
 
     @app.errorhandler(404)
     def page_not_found(e):

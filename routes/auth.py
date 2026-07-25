@@ -113,7 +113,12 @@ def format_join_duration(created_at):
     now = datetime.now()
     delta = now - created_at
     days = delta.days
-    date_formatted = created_at.strftime("%B %d, %Y")
+    
+    lang = session.get('lang', 'en')
+    if lang == 'pt':
+        date_formatted = created_at.strftime("%d/%m/%Y")
+    else:
+        date_formatted = created_at.strftime("%b %d, %Y")
     
     if days <= 0:
         duration_str = _('profile_joined_today')

@@ -47,7 +47,7 @@
 
     <!-- Profile Statistics Grid -->
     <div class="profile-stats-grid">
-        <div class="stat-card stat-solved">
+        <div class="profile-stat-card stat-solved">
             <div class="stat-icon-wrapper">
                 <span class="stat-icon">🟢</span>
             </div>
@@ -57,7 +57,7 @@
             </div>
         </div>
 
-        <div class="stat-card stat-submissions">
+        <div class="profile-stat-card stat-submissions">
             <div class="stat-icon-wrapper">
                 <span class="stat-icon">⚡</span>
             </div>
@@ -67,7 +67,7 @@
             </div>
         </div>
 
-        <div class="stat-card stat-accuracy">
+        <div class="profile-stat-card stat-accuracy">
             <div class="stat-icon-wrapper">
                 <span class="stat-icon">🎯</span>
             </div>
@@ -94,7 +94,7 @@
                                 <th style="width: 80px;">{{ _('questions_id') }}</th>
                                 <th>{{ _('questions_name') }}</th>
                                 <th style="width: 120px;">{{ _('admin_difficulty') }}</th>
-                                <th style="width: 160px; text-align: center;">Solved Date</th>
+                                <th style="width: 160px; text-align: center;">{{ _('profile_solved_date') }}</th>
                                 <th style="width: 150px; text-align: center;">{{ _('questions_action') }}</th>
                             </tr>
                         </thead>
@@ -145,7 +145,7 @@
                 <div class="empty-icon">🎯</div>
                 <h3>{{ _('profile_no_solved') }}</h3>
                 <p class="text-muted" style="margin-top: 8px; margin-bottom: 20px;">
-                    Explore public practice questions or join active contests to solve SQL challenges!
+                    {{ _('profile_no_solved_sub') }}
                 </p>
                 <a href="{{ url_for('contest.questions_list') }}" class="btn btn-primary">
                     {{ _('questions_title') }}

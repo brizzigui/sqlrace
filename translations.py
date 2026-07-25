@@ -237,6 +237,8 @@ TRANSLATIONS = {
         'profile_joined_1_year_ago': 'Joined 1 year ago',
         'profile_regen_avatar': 'Regenerate Avatar',
         'profile_avatar_regenerated': 'Profile avatar regenerated successfully!',
+        'profile_solved_date': 'Solved Date',
+        'profile_no_solved_sub': 'Explore public practice questions or join active contests to solve SQL challenges!',
         
         # Flash / API messages
         'flash_contest_fields_required': 'Contest title, start time, and end time are required.',
@@ -510,6 +512,8 @@ TRANSLATIONS = {
         'profile_joined_1_year_ago': 'Entrou há 1 ano',
         'profile_regen_avatar': 'Gerar Novo Avatar',
         'profile_avatar_regenerated': 'Avatar do perfil gerado novamente com sucesso!',
+        'profile_solved_date': 'Data de Resolução',
+        'profile_no_solved_sub': 'Explore questões públicas de prática ou participe de competições ativas para resolver desafios SQL!',
         
         # Flash / API messages
         'flash_contest_fields_required': 'Título, horário de início e horário de término da competição são obrigatórios.',

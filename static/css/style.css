@@ -2355,7 +2355,7 @@ code[class*="language-"] {
 .cute-stars-wrapper {
     display: inline-flex;
     align-items: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 12px;
     max-width: 100%;
     align-self: flex-start;
@@ -2655,7 +2655,7 @@ code[class*="language-"] {
     margin-bottom: 36px;
 }
 
-.stat-card {
+.profile-stat-card {
     background: var(--bg-surface);
     border: 1px solid var(--border-color);
     border-radius: 14px;
@@ -2667,7 +2667,7 @@ code[class*="language-"] {
     transition: var(--transition-smooth);
 }
 
-.stat-card:hover {
+.profile-stat-card:hover {
     transform: translateY(-3px);
     border-color: var(--border-hover);
 }

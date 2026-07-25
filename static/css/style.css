@@ -2285,3 +2285,113 @@ code[class*="language-"] {
     flex: 1;
 }
 
+/* ==========================================================================
+   Cute Visibility & Star Rating Selectors
+   ========================================================================== */
+.cute-toggle-segmented {
+    display: inline-flex;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border-color);
+    padding: 4px;
+    border-radius: 12px;
+    gap: 6px;
+    user-select: none;
+    transition: var(--transition-smooth);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.cute-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cute-toggle-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.cute-toggle-btn[data-val="public"].active {
+    background: linear-gradient(135deg, rgba(0, 242, 254, 0.15) 0%, rgba(79, 172, 254, 0.25) 100%);
+    border-color: rgba(0, 242, 254, 0.4);
+    color: #00f2fe;
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.25);
+}
+
+.cute-toggle-btn[data-val="restricted"].active {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(239, 68, 68, 0.25) 100%);
+    border-color: rgba(245, 158, 11, 0.4);
+    color: #f59e0b;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.25);
+}
+
+.cute-toggle-btn .toggle-icon {
+    font-size: 1rem;
+    transition: transform 0.25s ease;
+}
+
+.cute-toggle-btn.active .toggle-icon {
+    transform: scale(1.2);
+}
+
+/* Cute Star Rating Selector */
+.cute-stars-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cute-stars-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    border-radius: 12px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.cute-star-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.4rem;
+    color: rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    padding: 2px 4px;
+    line-height: 1;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    user-select: none;
+}
+
+.cute-star-btn.hovered,
+.cute-star-btn.active {
+    color: #f59e0b;
+    text-shadow: 0 0 10px rgba(245, 158, 11, 0.7), 0 0 20px rgba(245, 158, 11, 0.4);
+    transform: scale(1.2);
+}
+
+.cute-difficulty-badge {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    padding: 4px 10px;
+    border-radius: 8px;
+    letter-spacing: 0.5px;
+    min-width: 42px;
+    text-align: center;
+}
+
+

@@ -535,3 +535,48 @@ function triggerConfetti() {
         container.remove();
     }, 6000);
 }
+
+/* --------------------------------------------------------------------------
+   Cute Selectors (Visibility Toggle & Star Rating)
+   -------------------------------------------------------------------------- */
+function setCuteVisibility(val) {
+    const input = document.getElementById('visibility-input');
+    if (input) input.value = val;
+    document.querySelectorAll('.cute-toggle-btn').forEach(btn => {
+        if (btn.getAttribute('data-val') === val) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+function setCuteDifficulty(rating) {
+    const input = document.getElementById('difficulty-input');
+    if (input) input.value = rating;
+    const badge = document.getElementById('difficulty-badge-text');
+    if (badge) badge.textContent = rating + '/5';
+    updateCuteStars(rating, 'active');
+}
+
+function hoverCuteStars(rating) {
+    updateCuteStars(rating, 'hovered');
+}
+
+function resetCuteStars() {
+    const input = document.getElementById('difficulty-input');
+    const currentVal = input ? (parseInt(input.value, 10) || 1) : 1;
+    updateCuteStars(currentVal, 'active');
+}
+
+function updateCuteStars(rating, className) {
+    const starBtns = document.querySelectorAll('.cute-star-btn');
+    starBtns.forEach(btn => {
+        const starNum = parseInt(btn.getAttribute('data-star'), 10);
+        btn.classList.remove('hovered', 'active');
+        if (starNum <= rating) {
+            btn.classList.add(className);
+        }
+    });
+}
+

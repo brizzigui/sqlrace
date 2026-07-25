@@ -15,23 +15,34 @@
         <div class="admin-card">
             <h2>{{ _('admin_add_question') }}</h2>
             <form action="{{ url_for('admin.create_question') }}" method="POST" class="admin-form">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="visibility">{{ _('admin_visibility') }}</label>
-                        <select id="visibility" name="visibility" required>
-                            <option value="public">{{ _('admin_public') }}</option>
-                            <option value="restricted">{{ _('admin_restricted') }}</option>
-                        </select>
+                <div class="form-row" style="align-items: flex-start; gap: 24px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem;">{{ _('admin_visibility') }}</label>
+                        <input type="hidden" name="visibility" id="visibility-input" value="public">
+                        <div class="cute-toggle-segmented">
+                            <button type="button" class="cute-toggle-btn active" data-val="public" onclick="setCuteVisibility('public')">
+                                <span class="toggle-icon">🌐</span>
+                                <span class="toggle-text">{{ _('admin_public') }}</span>
+                            </button>
+                            <button type="button" class="cute-toggle-btn" data-val="restricted" onclick="setCuteVisibility('restricted')">
+                                <span class="toggle-icon">🔒</span>
+                                <span class="toggle-text">{{ _('admin_restricted') }}</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="difficulty">{{ _('admin_difficulty') }}</label>
-                        <select id="difficulty" name="difficulty" required>
-                            <option value="1">★ (1/5)</option>
-                            <option value="2">★★ (2/5)</option>
-                            <option value="3">★★★ (3/5)</option>
-                            <option value="4">★★★★ (4/5)</option>
-                            <option value="5">★★★★★ (5/5)</option>
-                        </select>
+                    <div class="form-group" style="flex: 1;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem;">{{ _('admin_difficulty') }}</label>
+                        <div class="cute-stars-wrapper" id="stars-selector-group">
+                            <input type="hidden" name="difficulty" id="difficulty-input" value="1">
+                            <div class="cute-stars-container" onmouseleave="resetCuteStars()">
+                                {% for i in range(1, 6) %}
+                                    <button type="button" class="cute-star-btn {% if i == 1 %}active{% endif %}" data-star="{{ i }}" onclick="setCuteDifficulty({{ i }})" onmouseenter="hoverCuteStars({{ i }})" title="{{ i }}/5">
+                                        ★
+                                    </button>
+                                {% endfor %}
+                            </div>
+                            <span class="cute-difficulty-badge" id="difficulty-badge-text">1/5</span>
+                        </div>
                     </div>
                 </div>
 
@@ -70,7 +81,7 @@
                     <textarea id="solution_sql" name="solution_sql" rows="4" class="code-textarea" placeholder="{{ _('placeholder_solution_sql') }}" required></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-success">{{ _('admin_publish') }}</button>
+                <button type="submit" class="btn btn-success">{{ _('admin_publish_question') }}</button>
             </form>
         </div>
 

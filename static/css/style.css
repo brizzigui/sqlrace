@@ -896,12 +896,12 @@ textarea {
 
 .panel-header {
     background: var(--bg-surface);
-    padding: 14px 20px;
+    padding: 12px 20px;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 52px;
+    min-height: 52px;
 }
 
 .panel-body {
@@ -3882,13 +3882,22 @@ code[class*="language-"] {
     }
 
     .panel-header {
-        padding: 12px 16px;
-        flex-wrap: wrap;
-        gap: 8px;
+        padding: 12px 16px !important;
+        flex-wrap: wrap !important;
+        gap: 8px 12px !important;
         font-size: 0.85rem;
         border-bottom: 1px solid var(--border-color);
         background: var(--bg-surface);
         border-radius: 16px 16px 0 0;
+        height: auto !important;
+        min-height: 48px !important;
+    }
+
+    .contest-timer-small {
+        font-size: 0.82rem !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        margin-left: auto !important;
     }
 
     /* Reset inner sub-containers so outer card defines horizontal width */

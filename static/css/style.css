@@ -3021,31 +3021,6 @@ code[class*="language-"] {
     gap: 12px;
 }
 
-/* Hub card accents */
-.hub-card-storage:hover {
-    border-color: #38bdf8;
-    box-shadow: 0 8px 30px rgba(56, 189, 248, 0.2);
-}
-.hub-card-storage .hub-card-icon svg {
-    fill: #38bdf8;
-}
-
-.hub-card-resources:hover {
-    border-color: #a855f7;
-    box-shadow: 0 8px 30px rgba(168, 85, 247, 0.2);
-}
-.hub-card-resources .hub-card-icon svg {
-    fill: #a855f7;
-}
-
-.hub-card-logs:hover {
-    border-color: #f59e0b;
-    box-shadow: 0 8px 30px rgba(245, 158, 11, 0.2);
-}
-.hub-card-logs .hub-card-icon svg {
-    fill: #f59e0b;
-}
-
 /* Storage UI */
 .storage-thumbnail {
     width: 48px;
@@ -3171,23 +3146,27 @@ code[class*="language-"] {
     color: var(--text-primary);
 }
 
-/* 3x3 Admin Hub Grid Layout */
+/* ==========================================================================
+   Admin Hub Cards (Original Design Preserved)
+   ========================================================================== */
 .admin-hub-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    margin-top: 24px;
+    gap: 32px;
+    margin-top: 32px;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 992px) {
     .admin-hub-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
     }
 }
 
 @media (max-width: 640px) {
     .admin-hub-grid {
         grid-template-columns: 1fr;
+        gap: 20px;
     }
 }
 
@@ -3195,41 +3174,45 @@ code[class*="language-"] {
     background: var(--bg-surface);
     border: 1px solid var(--border-color);
     border-radius: 16px;
-    padding: 28px 24px;
+    padding: 32px 24px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: var(--transition-smooth);
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    text-decoration: none;
-    transition: var(--transition-smooth);
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
     box-shadow: var(--card-shadow);
 }
 
 .hub-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-6px);
     border-color: var(--border-hover);
 }
 
 .hub-card-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: var(--bg-surface-elevated);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    transition: var(--transition-smooth);
 }
 
 .hub-card-icon svg {
-    width: 26px;
-    height: 26px;
-    fill: var(--primary-color);
+    width: 32px;
+    height: 32px;
+    fill: currentColor;
 }
 
 .hub-card-title {
-    font-size: 1.2rem;
+    font-size: 1.35rem;
     font-weight: 700;
-    color: var(--text-primary);
     margin-bottom: 8px;
 }
 
@@ -3239,9 +3222,58 @@ code[class*="language-"] {
     line-height: 1.4;
 }
 
-.services-status-box {
-    background: var(--bg-surface-elevated);
-    padding: 16px;
-    border-radius: 10px;
-    border: 1px solid var(--border-color);
+/* Color thematic card overrides */
+.hub-card-contests .hub-card-icon {
+    background: rgba(0, 242, 254, 0.12);
+    color: #00f2fe;
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.15);
 }
+.hub-card-contests:hover {
+    box-shadow: 0 12px 30px rgba(0, 242, 254, 0.15);
+}
+
+.hub-card-questions .hub-card-icon {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+.hub-card-questions:hover {
+    box-shadow: 0 12px 30px rgba(16, 185, 129, 0.15);
+}
+
+.hub-card-teams .hub-card-icon {
+    background: rgba(139, 92, 246, 0.12);
+    color: #8b5cf6;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+}
+.hub-card-teams:hover {
+    box-shadow: 0 12px 30px rgba(139, 92, 246, 0.15);
+}
+
+.hub-card-storage .hub-card-icon {
+    background: rgba(56, 189, 248, 0.12);
+    color: #38bdf8;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
+}
+.hub-card-storage:hover {
+    box-shadow: 0 12px 30px rgba(56, 189, 248, 0.15);
+}
+
+.hub-card-resources .hub-card-icon {
+    background: rgba(168, 85, 247, 0.12);
+    color: #a855f7;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.15);
+}
+.hub-card-resources:hover {
+    box-shadow: 0 12px 30px rgba(168, 85, 247, 0.15);
+}
+
+.hub-card-logs .hub-card-icon {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+}
+.hub-card-logs:hover {
+    box-shadow: 0 12px 30px rgba(245, 158, 11, 0.15);
+}
+

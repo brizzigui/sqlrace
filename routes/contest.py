@@ -1,9 +1,10 @@
+import time
+from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from translations import translate as _
 from routes.auth import login_required
 from database import get_main_db
 from judge import evaluate_submission
-from datetime import datetime
 
 bp = Blueprint('contest', __name__)
 
@@ -230,15 +231,19 @@ def submit_query(contest_id, question_id):
             
         init_sql, solution_sql = question
 
-    # Run the judge (sandbox database)
-    status, error_message, user_cols, user_rows = evaluate_submission(init_sql, solution_sql, user_query)
+    # Track request arrival time to calculate queue/wait time
+    req_start = time.time()
+    status, error_message, user_cols, user_rows, exec_time_ms = evaluate_submission(init_sql, solution_sql, user_query)
+    wait_time_ms = int((time.time() - req_start) * 1000) - exec_time_ms
+    if wait_time_ms < 0:
+        wait_time_ms = 0
     
     # Save submission metadata to main database with contest_id populated
     with get_main_db() as cur:
         cur.execute("""
-            INSERT INTO submissions (team_id, question_id, contest_id, query, status, error_message, submitted_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id, submitted_at;
-        """, (team_id, question_id, contest_id, user_query, status, error_message, now))
+            INSERT INTO submissions (team_id, question_id, contest_id, query, status, error_message, submitted_at, execution_time_ms, wait_time_ms)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id, submitted_at;
+        """, (team_id, question_id, contest_id, user_query, status, error_message, now, exec_time_ms, wait_time_ms))
         sub_id, sub_time = cur.fetchone()
         
     serializable_rows = []
@@ -360,15 +365,19 @@ def submit_practice_query(question_id):
             
         init_sql, solution_sql = question
 
-    # Run the judge
-    status, error_message, user_cols, user_rows = evaluate_submission(init_sql, solution_sql, user_query)
+    # Track request arrival time to calculate queue/wait time
+    req_start = time.time()
+    status, error_message, user_cols, user_rows, exec_time_ms = evaluate_submission(init_sql, solution_sql, user_query)
+    wait_time_ms = int((time.time() - req_start) * 1000) - exec_time_ms
+    if wait_time_ms < 0:
+        wait_time_ms = 0
     
     # Save submission with contest_id set to NULL for practice mode
     with get_main_db() as cur:
         cur.execute("""
-            INSERT INTO submissions (team_id, question_id, contest_id, query, status, error_message, submitted_at)
-            VALUES (%s, %s, NULL, %s, %s, %s, %s) RETURNING id, submitted_at;
-        """, (team_id, question_id, user_query, status, error_message, now))
+            INSERT INTO submissions (team_id, question_id, contest_id, query, status, error_message, submitted_at, execution_time_ms, wait_time_ms)
+            VALUES (%s, %s, NULL, %s, %s, %s, %s, %s, %s) RETURNING id, submitted_at;
+        """, (team_id, question_id, user_query, status, error_message, now, exec_time_ms, wait_time_ms))
         sub_id, sub_time = cur.fetchone()
         
     serializable_rows = []

@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ _('storage_title') }} - SQL Race{% endblock %}
+
+{% block content %}
+<div class="admin-container fade-in">
+    <div class="dashboard-header flex-header">
+        <div>
+            <h1>{{ _('storage_title') }}</h1>
+            <p>{{ _('storage_sub') }}</p>
+        </div>
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary">&larr; {{ _('leaderboard_back') }}</a>
+    </div>
+
+    <!-- Storage Overview Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>{{ _('storage_total_space') }}</h3>
+            <p class="stat-number">{{ stats.total_size_formatted }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ _('storage_total_files') }}</h3>
+            <p class="stat-number">{{ stats.total_files }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ _('storage_unused_files') }}</h3>
+            <p class="stat-number {% if stats.unused_files_count > 0 %}text-warning{% endif %}">{{ stats.unused_files_count }} ({{ stats.unused_size_formatted }})</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ _('storage_free_disk') }}</h3>
+            <p class="stat-number">{{ stats.disk_free_formatted }} ({{ stats.disk_used_percent }}% used)</p>
+        </div>
+    </div>
+
+    <!-- Auto-Suggestion Banner if unused files exist -->
+    {% if stats.unused_files_count > 0 %}
+    <div class="alert alert-warning flex-between fade-in mb-4">
+        <div>
+            <strong>⚠️ {{ _('storage_unused_warning', count=stats.unused_files_count, size=stats.unused_size_formatted) }}</strong>
+        </div>
+        <form action="{{ url_for('admin.delete_unused_storage_files') }}" method="POST" onsubmit="return confirm('{{ _('storage_delete_unused_btn') }}?');">
+            <button type="submit" class="btn btn-danger btn-sm">{{ _('storage_delete_unused_btn') }}</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Storage Table Section -->
+    <div class="admin-card">
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>{{ _('storage_preview') }}</th>
+                        <th>{{ _('storage_filename') }}</th>
+                        <th>{{ _('storage_size') }}</th>
+                        <th>{{ _('storage_mtime') }}</th>
+                        <th>{{ _('storage_usage') }}</th>
+                        <th>{{ _('admin_action') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in files %}
+                    <tr>
+                        <td style="width: 70px; text-align: center;">
+                            {% set ext = f.filename.split('.')[-1].lower() %}
+                            {% if ext in ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'] %}
+                                <img src="{{ f.path }}" alt="Preview" class="storage-thumbnail" onclick="window.open('{{ f.path }}', '_blank')" style="cursor: pointer;">
+                            {% else %}
+                                <div class="file-icon-placeholder">📄</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ f.path }}" target="_blank" class="code-link"><code>{{ f.filename }}</code></a>
+                        </td>
+                        <td>{{ f.size_formatted }}</td>
+                        <td>{{ f.mtime }}</td>
+                        <td>
+                            {% if f.is_used %}
+                                <span class="badge badge-success">{{ _('storage_used_in', count=f.used_in|length) }}</span>
+                                <div class="question-links-preview">
+                                    {% for q in f.used_in %}
+                                        <a href="{{ url_for('admin.edit_question_view', question_id=q.id) }}" class="badge badge-secondary" title="View Question">#{{ q.id }} {{ q.title }}</a>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <span class="badge badge-warning">{{ _('storage_unused_badge') }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form action="{{ url_for('admin.delete_storage_file') }}" method="POST" onsubmit="return confirm('{{ _('storage_delete_confirm', filename=f.filename) }}');" style="display:inline;">
+                                <input type="hidden" name="filename" value="{{ f.filename }}">
+                                <button type="submit" class="btn btn-danger btn-sm">{{ _('admin_action') }} Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">{{ _('storage_no_files') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

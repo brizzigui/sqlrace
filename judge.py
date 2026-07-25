@@ -1,3 +1,4 @@
+import time
 import uuid
 import psycopg2
 from database import sandbox_pool, init_pools
@@ -14,12 +15,9 @@ def evaluate_submission(init_sql, solution_sql, user_query):
     6. Compares columns and row contents (order-sensitive if ORDER BY is in the solution).
     
     Returns:
-        (status, error_message, user_cols, user_rows)
-        - status: 'Accepted', 'Wrong Answer', 'Runtime Error'
-        - error_message: Descriptive error details if not 'Accepted'
-        - user_cols: List of column names returned by user query (for debug display)
-        - user_rows: List of rows returned by user query (for debug display)
+        (status, error_message, user_cols, user_rows, exec_time_ms)
     """
+    start_time = time.time()
     schema_name = f"sandbox_{uuid.uuid4().hex}"
     
     init_pools()
@@ -47,7 +45,8 @@ def evaluate_submission(init_sql, solution_sql, user_query):
         except Exception as e:
             status = "Runtime Error"
             error_message = f"Setup Error (init_sql failed): {str(e)}"
-            return status, error_message, [], []
+            exec_time_ms = int((time.time() - start_time) * 1000)
+            return status, error_message, [], [], exec_time_ms
             
         # Execute reference solution
         try:
@@ -57,7 +56,8 @@ def evaluate_submission(init_sql, solution_sql, user_query):
         except Exception as e:
             status = "Runtime Error"
             error_message = f"Setup Error (solution_sql failed): {str(e)}"
-            return status, error_message, [], []
+            exec_time_ms = int((time.time() - start_time) * 1000)
+            return status, error_message, [], [], exec_time_ms
             
         # Execute user query
         try:
@@ -67,26 +67,30 @@ def evaluate_submission(init_sql, solution_sql, user_query):
         except Exception as e:
             status = "Runtime Error"
             error_message = str(e)
-            return status, error_message, [], []
+            exec_time_ms = int((time.time() - start_time) * 1000)
+            return status, error_message, [], [], exec_time_ms
             
         # Compare columns count
         if len(sol_cols) != len(user_cols):
             status = "Wrong Answer"
             error_message = f"Column count mismatch. Expected {len(sol_cols)}, got {len(user_cols)}."
-            return status, error_message, user_cols, user_rows
+            exec_time_ms = int((time.time() - start_time) * 1000)
+            return status, error_message, user_cols, user_rows, exec_time_ms
             
         # Compare columns names in order
         for idx, (sc, uc) in enumerate(zip(sol_cols, user_cols)):
             if sc != uc:
                 status = "Wrong Answer"
                 error_message = f"Column name mismatch at position {idx+1}. Expected '{sc}', got '{uc}'."
-                return status, error_message, user_cols, user_rows
+                exec_time_ms = int((time.time() - start_time) * 1000)
+                return status, error_message, user_cols, user_rows, exec_time_ms
                 
         # Compare rows count
         if len(sol_rows) != len(user_rows):
             status = "Wrong Answer"
             error_message = f"Row count mismatch. Expected {len(sol_rows)} rows, got {len(user_rows)} rows."
-            return status, error_message, user_cols, user_rows
+            exec_time_ms = int((time.time() - start_time) * 1000)
+            return status, error_message, user_cols, user_rows, exec_time_ms
             
         # Check if solution enforces sorting order
         is_ordered = "order by" in solution_sql.lower()
@@ -97,7 +101,8 @@ def evaluate_submission(init_sql, solution_sql, user_query):
                 if s_row != u_row:
                     status = "Wrong Answer"
                     error_message = f"Row comparison mismatch at index {idx+1}."
-                    return status, error_message, user_cols, user_rows
+                    exec_time_ms = int((time.time() - start_time) * 1000)
+                    return status, error_message, user_cols, user_rows, exec_time_ms
         else:
             # Order-insensitive comparison: sort rows in Python
             def sort_key(row):
@@ -114,7 +119,8 @@ def evaluate_submission(init_sql, solution_sql, user_query):
             if sorted_sol != sorted_usr:
                 status = "Wrong Answer"
                 error_message = "Rows content mismatch (query returned correct columns but different rows)."
-                return status, error_message, user_cols, user_rows
+                exec_time_ms = int((time.time() - start_time) * 1000)
+                return status, error_message, user_cols, user_rows, exec_time_ms
                 
         # If all checks pass
         status = "Accepted"
@@ -131,4 +137,6 @@ def evaluate_submission(init_sql, solution_sql, user_query):
                 pass
             sandbox_pool.putconn(conn)
             
-    return status, error_message, user_cols, user_rows
+    exec_time_ms = int((time.time() - start_time) * 1000)
+    return status, error_message, user_cols, user_rows, exec_time_ms
+

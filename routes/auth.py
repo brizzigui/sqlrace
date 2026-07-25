@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from translations import translate as _
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from database import get_main_db
+from database import get_main_db, log_audit
 
 bp = Blueprint('auth', __name__)
 
@@ -59,6 +59,7 @@ def register():
             session['team_id'] = new_id
             session['username'] = username
             session['is_admin'] = False
+            log_audit('AUTH', 'TEAM_REGISTER', f"New team registered: {username}", level='INFO', user_id=new_id, username=username, ip_address=request.remote_addr)
             flash(_('flash_reg_success'), 'success')
             return redirect(url_for('contest.contests_list'))
         except Exception as e:
@@ -87,17 +88,23 @@ def login():
             session['team_id'] = user[0]
             session['username'] = user[1]
             session['is_admin'] = user[3]
+            log_audit('AUTH', 'LOGIN_SUCCESS', f"Team '{username}' logged in successfully", level='INFO', user_id=user[0], username=username, ip_address=request.remote_addr)
             flash(_('flash_login_success', username=username), 'success')
             if user[3]:
                 return redirect(url_for('admin.admin_dashboard'))
             return redirect(url_for('contest.contests_list'))
         else:
+            log_audit('AUTH', 'LOGIN_FAILED', f"Failed login attempt for username '{username}'", level='WARNING', username=username, ip_address=request.remote_addr)
             flash(_('flash_login_invalid'), 'danger')
             
     return render_template('login.html')
 
 @bp.route('/logout')
 def logout():
+    team_id = session.get('team_id')
+    username = session.get('username')
+    if username:
+        log_audit('AUTH', 'LOGOUT', f"Team '{username}' logged out", level='INFO', user_id=team_id, username=username, ip_address=request.remote_addr)
     session.clear()
     flash(_('flash_logout_info'), 'info')
     return redirect(url_for('auth.login'))

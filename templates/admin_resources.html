@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ _('resources_title') }} - SQL Race{% endblock %}
+
+{% block content %}
+<div class="admin-container fade-in">
+    <div class="dashboard-header flex-header">
+        <div>
+            <h1>{{ _('resources_title') }}</h1>
+            <p>{{ _('resources_sub') }}</p>
+        </div>
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary">&larr; {{ _('leaderboard_back') }}</a>
+    </div>
+
+    <!-- Judge Performance Overview Stats -->
+    <h2 class="section-title">📊 {{ _('resources_judge_perf') }}</h2>
+    <div class="stats-grid mb-4">
+        <div class="stat-card">
+            <h3>{{ _('resources_avg_exec_time') }}</h3>
+            <p class="stat-number">{{ resources.judge_metrics.avg_exec_time_ms }} ms</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ _('resources_max_exec_time') }}</h3>
+            <p class="stat-number">{{ resources.judge_metrics.max_exec_time_ms }} ms</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ _('resources_avg_wait_time') }}</h3>
+            <p class="stat-number">{{ resources.judge_metrics.avg_wait_time_ms }} ms</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ _('resources_acceptance_rate') }}</h3>
+            <p class="stat-number">{{ resources.judge_metrics.acceptance_rate }}%</p>
+        </div>
+    </div>
+
+    <div class="grid-2-cols mb-4">
+        <!-- Docker Containers Status -->
+        <div class="admin-card">
+            <h3 class="card-title">🐳 {{ _('resources_containers') }}</h3>
+            {% if resources.containers %}
+            <div class="table-scroll">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>{{ _('resources_container_name') }}</th>
+                            <th>{{ _('resources_status') }}</th>
+                            <th>{{ _('resources_image') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in resources.containers %}
+                        <tr>
+                            <td><strong>{{ c.name }}</strong> <br><small class="text-muted">{{ c.id }}</small></td>
+                            <td>
+                                {% if c.is_running %}
+                                    <span class="badge badge-success">🟢 {{ c.status }}</span>
+                                {% else %}
+                                    <span class="badge badge-danger">🔴 {{ c.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td><code>{{ c.image }}</code></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                <p class="text-muted p-3 mb-0">{{ _('resources_no_containers') }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Database Pool Status -->
+        <div class="admin-card">
+            <h3 class="card-title">🗄️ {{ _('resources_db_pools') }}</h3>
+            <div class="pool-metric-box mb-3">
+                <div class="flex-between">
+                    <strong>{{ _('resources_main_pool') }}</strong>
+                    <span>{{ _('resources_active_conns', active=resources.main_pool.active, max=resources.main_pool.max) }}</span>
+                </div>
+                <div class="progress-bar-container">
+                    {% set main_pct = (resources.main_pool.active / resources.main_pool.max * 100)|round|int %}
+                    <div class="progress-bar-fill" style="width: {{ main_pct }}%;"></div>
+                </div>
+            </div>
+
+            <div class="pool-metric-box">
+                <div class="flex-between">
+                    <strong>{{ _('resources_sandbox_pool') }}</strong>
+                    <span>{{ _('resources_active_conns', active=resources.sandbox_pool.active, max=resources.sandbox_pool.max) }}</span>
+                </div>
+                <div class="progress-bar-container">
+                    {% set sb_pct = (resources.sandbox_pool.active / resources.sandbox_pool.max * 100)|round|int %}
+                    <div class="progress-bar-fill fill-accent" style="width: {{ sb_pct }}%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Host System Load -->
+    <div class="admin-card">
+        <h3 class="card-title">🖥️ {{ _('resources_sys_load') }}</h3>
+        <div class="grid-2-cols">
+            <div>
+                <p class="mb-1"><strong>{{ _('resources_cpu_usage') }}:</strong> {{ resources.system.cpu_percent }}%</p>
+                <div class="progress-bar-container mb-3">
+                    <div class="progress-bar-fill" style="width: {{ resources.system.cpu_percent }}%;"></div>
+                </div>
+            </div>
+            <div>
+                <p class="mb-1"><strong>{{ _('resources_ram_usage') }}:</strong> {{ resources.system.ram_percent }}% ({{ resources.system.ram_used_formatted }} / {{ resources.system.ram_total_formatted }})</p>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill fill-info" style="width: {{ resources.system.ram_percent }}%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-refresh resources metrics every 5 seconds
+    setInterval(function() {
+        fetch("{{ url_for('admin.api_resources') }}")
+            .then(res => res.json())
+            .then(data => {
+                // Polling update can be expanded if live graph is desired
+            })
+            .catch(err => console.error("Live metrics refresh error:", err));
+    }, 5000);
+</script>
+{% endblock %}

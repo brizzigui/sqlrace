@@ -2801,12 +2801,178 @@ code[class*="language-"] {
     box-shadow: var(--card-shadow);
 }
 
-.empty-state-card .empty-icon {
-    font-size: 3rem;
-    margin-bottom: 12px;
+/* ==========================================================================
+   Admin Storage, Resources & Audit Logs Extensions
+   ========================================================================== */
+
+/* Flex utilities */
+.flex-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
 }
 
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
 
+.flex-gap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
+/* Hub card accents */
+.hub-card-storage:hover {
+    border-color: #38bdf8;
+    box-shadow: 0 8px 30px rgba(56, 189, 248, 0.2);
+}
+.hub-card-storage .hub-card-icon svg {
+    fill: #38bdf8;
+}
 
+.hub-card-resources:hover {
+    border-color: #a855f7;
+    box-shadow: 0 8px 30px rgba(168, 85, 247, 0.2);
+}
+.hub-card-resources .hub-card-icon svg {
+    fill: #a855f7;
+}
 
+.hub-card-logs:hover {
+    border-color: #f59e0b;
+    box-shadow: 0 8px 30px rgba(245, 158, 11, 0.2);
+}
+.hub-card-logs .hub-card-icon svg {
+    fill: #f59e0b;
+}
+
+/* Storage UI */
+.storage-thumbnail {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: #0f172a;
+}
+
+.file-icon-placeholder {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-surface-elevated);
+    border-radius: 8px;
+    font-size: 1.2rem;
+}
+
+.question-links-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+/* Badges */
+.badge-info {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.badge-dark {
+    background: rgba(148, 163, 184, 0.15);
+    color: #cbd5e1;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+/* Progress bars */
+.pool-metric-box {
+    background: var(--bg-surface-elevated);
+    border-radius: 8px;
+    padding: 14px 16px;
+    border: 1px solid var(--border-color);
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 10px;
+    background: #1e293b;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #059669);
+    border-radius: 5px;
+    transition: width 0.4s ease;
+}
+
+.progress-bar-fill.fill-accent {
+    background: linear-gradient(90deg, #a855f7, #7c3aed);
+}
+
+.progress-bar-fill.fill-info {
+    background: linear-gradient(90deg, #38bdf8, #0284c7);
+}
+
+/* Log Filter Bar */
+.filter-bar-form {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.input-search-wrap {
+    display: flex;
+    gap: 8px;
+}
+
+.text-nowrap {
+    white-space: nowrap;
+}
+
+.text-warning {
+    color: #f59e0b !important;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+}

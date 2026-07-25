@@ -128,6 +128,20 @@ def init_db():
         """)
 
         cur.execute("""
+        CREATE TABLE IF NOT EXISTS audit_logs (
+            id SERIAL PRIMARY KEY,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            level VARCHAR(20) NOT NULL DEFAULT 'INFO',
+            category VARCHAR(50) NOT NULL,
+            action VARCHAR(100) NOT NULL,
+            message TEXT NOT NULL,
+            user_id INT,
+            username VARCHAR(100),
+            ip_address VARCHAR(45)
+        );
+        """)
+
+        cur.execute("""
         INSERT INTO contest_participants (contest_id, team_id)
         SELECT DISTINCT contest_id, team_id FROM submissions
         WHERE contest_id IS NOT NULL
@@ -147,6 +161,13 @@ def init_db():
         
         # 3. Add contest_id column to submissions if it does not exist
         cur.execute("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS contest_id INT REFERENCES contests(id) ON DELETE CASCADE;")
+
+        # 4. Add timing columns to submissions table for judging performance metrics
+        cur.execute("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS execution_time_ms INT DEFAULT 0;")
+        cur.execute("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS wait_time_ms INT DEFAULT 0;")
+
+        # 5. Automatically rotate/prune audit logs older than 7 days
+        cur.execute("DELETE FROM audit_logs WHERE timestamp < NOW() - INTERVAL '7 days';")
 
         # 3. If questions still has contest_id, migrate data to contest_questions and submissions, then drop it
         cur.execute("""
@@ -184,3 +205,19 @@ def init_db():
             print(f"Default admin account created: {admin_username} / {admin_password}")
         
     print("Database tables initialized successfully.")
+
+def log_audit(category, action, message, level='INFO', user_id=None, username=None, ip_address=None):
+    """
+    Logs an action to the audit_logs table and rotates logs older than 7 days.
+    """
+    try:
+        with get_main_db() as cur:
+            # Auto-prune logs older than 7 days
+            cur.execute("DELETE FROM audit_logs WHERE timestamp < NOW() - INTERVAL '7 days';")
+            cur.execute("""
+                INSERT INTO audit_logs (category, action, message, level, user_id, username, ip_address)
+                VALUES (%s, %s, %s, %s, %s, %s, %s);
+            """, (category, action, message, level, user_id, username, ip_address))
+    except Exception as e:
+        print(f"Failed to record audit log: {e}")
+

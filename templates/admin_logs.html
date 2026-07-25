@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ _('logs_title') }} - SQL Race{% endblock %}
+
+{% block content %}
+<div class="admin-container fade-in">
+    <div class="dashboard-header flex-header">
+        <div>
+            <h1>{{ _('logs_title') }}</h1>
+            <p>{{ _('logs_sub') }}</p>
+        </div>
+        <div class="flex-gap">
+            <form action="{{ url_for('admin.clear_admin_logs') }}" method="POST" onsubmit="return confirm('{{ _('logs_clear_confirm') }}');" style="display:inline;">
+                <button type="submit" class="btn btn-danger">{{ _('logs_clear_btn') }}</button>
+            </form>
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary">&larr; {{ _('leaderboard_back') }}</a>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="admin-card mb-4">
+        <form method="GET" action="{{ url_for('admin.admin_logs') }}" class="filter-bar-form">
+            <div class="filter-group">
+                <label for="category-select">{{ _('logs_filter_category') }}</label>
+                <select name="category" id="category-select" class="form-control" onchange="this.form.submit()">
+                    <option value="ALL" {% if not category or category == 'ALL' %}selected{% endif %}>-- All Categories --</option>
+                    <option value="AUTH" {% if category == 'AUTH' %}selected{% endif %}>AUTH</option>
+                    <option value="CONTEST" {% if category == 'CONTEST' %}selected{% endif %}>CONTEST</option>
+                    <option value="QUESTION" {% if category == 'QUESTION' %}selected{% endif %}>QUESTION</option>
+                    <option value="TEAM" {% if category == 'TEAM' %}selected{% endif %}>TEAM</option>
+                    <option value="STORAGE" {% if category == 'STORAGE' %}selected{% endif %}>STORAGE</option>
+                    <option value="SYSTEM" {% if category == 'SYSTEM' %}selected{% endif %}>SYSTEM</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="level-select">{{ _('logs_filter_level') }}</label>
+                <select name="level" id="level-select" class="form-control" onchange="this.form.submit()">
+                    <option value="ALL" {% if not level or level == 'ALL' %}selected{% endif %}>-- All Levels --</option>
+                    <option value="INFO" {% if level == 'INFO' %}selected{% endif %}>INFO</option>
+                    <option value="WARNING" {% if level == 'WARNING' %}selected{% endif %}>WARNING</option>
+                    <option value="ERROR" {% if level == 'ERROR' %}selected{% endif %}>ERROR</option>
+                    <option value="CRITICAL" {% if level == 'CRITICAL' %}selected{% endif %}>CRITICAL</option>
+                </select>
+            </div>
+
+            <div class="filter-group flex-grow">
+                <label for="search-input">Search:</label>
+                <div class="input-search-wrap">
+                    <input type="text" name="search" id="search-input" class="form-control" placeholder="{{ _('logs_search_placeholder') }}" value="{{ search }}">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    {% if category or level or search %}
+                        <a href="{{ url_for('admin.admin_logs') }}" class="btn btn-secondary">Reset</a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Logs Table -->
+    <div class="admin-card">
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>{{ _('logs_timestamp') }}</th>
+                        <th>{{ _('logs_level') }}</th>
+                        <th>{{ _('logs_category') }}</th>
+                        <th>{{ _('logs_action') }}</th>
+                        <th>{{ _('logs_user_ip') }}</th>
+                        <th>{{ _('logs_message') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for l in logs %}
+                    <tr>
+                        <td class="text-nowrap"><small><code>{{ l.timestamp }}</code></small></td>
+                        <td>
+                            {% if l.level == 'INFO' %}
+                                <span class="badge badge-info">INFO</span>
+                            {% elif l.level == 'WARNING' %}
+                                <span class="badge badge-warning">WARNING</span>
+                            {% elif l.level in ['ERROR', 'CRITICAL'] %}
+                                <span class="badge badge-danger">{{ l.level }}</span>
+                            {% else %}
+                                <span class="badge badge-secondary">{{ l.level }}</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="badge badge-dark">{{ l.category }}</span></td>
+                        <td><code>{{ l.action }}</code></td>
+                        <td>
+                            <strong>{{ l.username }}</strong>
+                            {% if l.ip_address != '-' %}
+                                <br><small class="text-muted">{{ l.ip_address }}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ l.message }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">{{ _('logs_no_entries') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        {% if total_pages > 1 %}
+        <div class="pagination-bar flex-between py-3 px-3">
+            <span class="text-muted">{{ _('logs_page_info', page=page, total_pages=total_pages, total_logs=total_logs) }}</span>
+            <div class="flex-gap">
+                {% if page > 1 %}
+                    <a href="{{ url_for('admin.admin_logs', page=page-1, category=category, level=level, search=search) }}" class="btn btn-secondary btn-sm">&larr; {{ _('logs_page_prev') }}</a>
+                {% endif %}
+                {% if page < total_pages %}
+                    <a href="{{ url_for('admin.admin_logs', page=page+1, category=category, level=level, search=search) }}" class="btn btn-secondary btn-sm">{{ _('logs_page_next') }} &rarr;</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

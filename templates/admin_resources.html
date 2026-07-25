@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="admin-container fade-in">
-    <div class="dashboard-header flex-header">
+    <div class="dashboard-header flex-header mb-4">
         <div>
             <h1>{{ _('resources_title') }}</h1>
             <p>{{ _('resources_sub') }}</p>
@@ -12,9 +12,9 @@
         <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary">&larr; {{ _('leaderboard_back') }}</a>
     </div>
 
-    <!-- Judge Performance Overview Stats -->
+    <!-- Judge Performance Overview 4-Card Top Grid -->
     <h2 class="section-title">📊 {{ _('resources_judge_perf') }}</h2>
-    <div class="stats-grid mb-4">
+    <div class="resources-stats-grid">
         <div class="stat-card">
             <h3>{{ _('resources_avg_exec_time') }}</h3>
             <p class="stat-number">{{ resources.judge_metrics.avg_exec_time_ms }} ms</p>
@@ -33,9 +33,10 @@
         </div>
     </div>
 
-    <div class="grid-2-cols mb-4">
+    <!-- Side-by-Side Row 1: Containers & Database Connection Pools -->
+    <div class="resources-grid-2">
         <!-- Docker Containers & Database Services -->
-        <div class="admin-card">
+        <div class="resource-card">
             <h3 class="card-title">🐳 {{ _('resources_containers') }}</h3>
             {% if resources.containers %}
             <div class="table-scroll">
@@ -66,12 +67,12 @@
             </div>
             {% else %}
                 <div class="services-status-box">
-                    <p class="text-muted mb-2"><small>{{ _('resources_no_containers') }}</small></p>
-                    <div class="flex-between py-2 border-bottom">
+                    <p class="text-muted mb-3"><small>{{ _('resources_no_containers') }}</small></p>
+                    <div class="info-row">
                         <span><strong>Main PostgreSQL Engine</strong> (<code>sqlrace_main</code>)</span>
                         <span class="badge badge-success">🟢 Size: {{ resources.db_metrics.main_db_size }}</span>
                     </div>
-                    <div class="flex-between py-2">
+                    <div class="info-row">
                         <span><strong>Sandbox PostgreSQL Engine</strong> (<code>sqlrace_sandbox</code>)</span>
                         <span class="badge badge-info">🟢 Size: {{ resources.db_metrics.sandbox_db_size }}</span>
                     </div>
@@ -79,8 +80,8 @@
             {% endif %}
         </div>
 
-        <!-- Database Pool & Storage Metrics -->
-        <div class="admin-card">
+        <!-- Database Connection Pools -->
+        <div class="resource-card">
             <h3 class="card-title">🗄️ {{ _('resources_db_pools') }}</h3>
             <div class="pool-metric-box mb-3">
                 <div class="flex-between">
@@ -112,38 +113,38 @@
         </div>
     </div>
 
-    <!-- Judge Evaluation Breakdown & Host System Load -->
-    <div class="grid-2-cols mb-4">
-        <!-- Submissions Status Breakdown -->
-        <div class="admin-card">
+    <!-- Side-by-Side Row 2: Submissions Breakdown & Host System Load -->
+    <div class="resources-grid-2">
+        <!-- Submissions Evaluation Breakdown -->
+        <div class="resource-card">
             <h3 class="card-title">⚡ Submissions Evaluation Breakdown</h3>
-            <div class="flex-between py-2 border-bottom">
+            <div class="info-row">
                 <span>Total Evaluated Submissions:</span>
                 <strong>{{ resources.judge_metrics.total_subs }}</strong>
             </div>
-            <div class="flex-between py-2 border-bottom">
+            <div class="info-row">
                 <span>Submissions (Last 24 Hours):</span>
                 <strong>{{ resources.judge_metrics.subs_24h }}</strong>
             </div>
-            <div class="flex-between py-2 border-bottom">
+            <div class="info-row">
                 <span>Accepted (AC):</span>
                 <span class="badge badge-success">{{ resources.judge_metrics.accepted_subs }}</span>
             </div>
-            <div class="flex-between py-2 border-bottom">
+            <div class="info-row">
                 <span>Wrong Answer (WA):</span>
                 <span class="badge badge-warning">{{ resources.judge_metrics.wa_subs }}</span>
             </div>
-            <div class="flex-between py-2">
+            <div class="info-row">
                 <span>Runtime Error (RE):</span>
                 <span class="badge badge-danger">{{ resources.judge_metrics.re_subs }}</span>
             </div>
         </div>
 
         <!-- Host System Load -->
-        <div class="admin-card">
+        <div class="resource-card">
             <h3 class="card-title">🖥️ {{ _('resources_sys_load') }}</h3>
-            <div class="mb-3">
-                <div class="flex-between mb-1">
+            <div class="mb-4">
+                <div class="flex-between mb-2">
                     <strong>{{ _('resources_cpu_usage') }}:</strong>
                     <span>{{ resources.system.cpu_percent }}% ({{ resources.system.cpu_cores }} Cores)</span>
                 </div>
@@ -153,7 +154,7 @@
             </div>
 
             <div>
-                <div class="flex-between mb-1">
+                <div class="flex-between mb-2">
                     <strong>{{ _('resources_ram_usage') }}:</strong>
                     <span>{{ resources.system.ram_percent }}% ({{ resources.system.ram_used_formatted }} / {{ resources.system.ram_total_formatted }})</span>
                 </div>
@@ -176,4 +177,5 @@
     }, 5000);
 </script>
 {% endblock %}
+
 

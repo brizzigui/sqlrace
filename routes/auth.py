@@ -136,11 +136,22 @@ def format_join_duration(created_at):
             
     return duration_str, date_formatted
 
+import uuid
+
 @bp.route('/avatar/<username>.svg')
 def team_avatar(username):
-    svg = generate_identicon_svg(username, size=120)
+    v_param = request.args.get('v')
+    if v_param:
+        seed = f"{username}_{v_param}"
+    else:
+        with get_main_db() as cur:
+            cur.execute("SELECT avatar_seed FROM teams WHERE username = %s;", (username,))
+            row = cur.fetchone()
+            seed = f"{username}_{row[0]}" if (row and row[0]) else username
+            
+    svg = generate_identicon_svg(seed, size=120)
     response = Response(svg, mimetype='image/svg+xml')
-    response.headers['Cache-Control'] = 'public, max-age=86400'
+    response.headers['Cache-Control'] = 'no-cache, max-age=0' if v_param else 'public, max-age=86400'
     return response
 
 @bp.route('/profile')
@@ -148,17 +159,27 @@ def team_avatar(username):
 def my_profile():
     return redirect(url_for('auth.team_profile', team_id=session['team_id']))
 
+@bp.route('/profile/regen_avatar', methods=['POST'])
+@login_required
+def regen_avatar():
+    team_id = session.get('team_id')
+    new_seed = uuid.uuid4().hex[:12]
+    with get_main_db() as cur:
+        cur.execute("UPDATE teams SET avatar_seed = %s WHERE id = %s;", (new_seed, team_id))
+    flash(_('profile_avatar_regenerated'), 'success')
+    return redirect(url_for('auth.team_profile', team_id=team_id))
+
 @bp.route('/team/<int:team_id>')
 def team_profile(team_id):
     with get_main_db() as cur:
-        cur.execute("SELECT id, username, created_at, is_admin FROM teams WHERE id = %s;", (team_id,))
+        cur.execute("SELECT id, username, created_at, is_admin, avatar_seed FROM teams WHERE id = %s;", (team_id,))
         team_row = cur.fetchone()
         
         if not team_row:
             flash(_('profile_team_not_found'), 'danger')
             return redirect(url_for('leaderboard.global_leaderboard'))
             
-        t_id, username, created_at, is_admin = team_row
+        t_id, username, created_at, is_admin, avatar_seed = team_row
         
         cur.execute("SELECT COUNT(*) FROM submissions WHERE team_id = %s;", (team_id,))
         total_submissions = cur.fetchone()[0]
@@ -192,6 +213,7 @@ def team_profile(team_id):
         'username': username,
         'created_at': created_at,
         'is_admin': is_admin,
+        'avatar_seed': avatar_seed or '',
         'joined_duration': duration_str,
         'joined_date': date_formatted,
         'solved_count': solved_count,
@@ -200,4 +222,5 @@ def team_profile(team_id):
     }
     
     return render_template('team_profile.html', team=team_data, solved_questions=solved_questions)
+
 

@@ -146,7 +146,7 @@ def global_leaderboard():
     with get_main_db() as cur:
         # Rank by solved count DESC, total submissions ASC (meaning fewer attempts to solve issues is better), then team name ASC
         cur.execute("""
-            SELECT t.id, t.username,
+            SELECT t.id, t.username, t.avatar_seed,
                    (SELECT COUNT(DISTINCT question_id) FROM submissions WHERE team_id = t.id AND status = 'Accepted') as solved_count,
                    (SELECT COUNT(*) FROM submissions WHERE team_id = t.id) as total_submissions
             FROM teams t
@@ -160,8 +160,9 @@ def global_leaderboard():
             'rank': idx + 1,
             'team_id': row[0],
             'username': row[1],
-            'solved_count': row[2],
-            'total_submissions': row[3]
+            'avatar_seed': row[2] or '',
+            'solved_count': row[3],
+            'total_submissions': row[4]
         })
         
     return render_template('global_leaderboard.html', leaderboard=leaderboard_data)

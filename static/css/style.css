@@ -2513,13 +2513,22 @@ code[class*="language-"] {
 }
 
 /* Leaderboard & Table Avatars */
+.team-cell-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    vertical-align: middle;
+    line-height: 1;
+}
+
 .team-profile-link {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     color: var(--text-primary);
     text-decoration: none;
     transition: var(--transition-smooth);
+    line-height: 1;
 }
 
 .team-profile-link:hover {
@@ -2539,7 +2548,7 @@ code[class*="language-"] {
     object-fit: cover;
     border: 1px solid rgba(255, 255, 255, 0.12);
     transition: var(--transition-smooth);
-    vertical-align: middle;
+    flex-shrink: 0;
 }
 
 /* Profile Page Layout */

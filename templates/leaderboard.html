@@ -47,13 +47,15 @@
                                     {% if row.rank == 1 %}🥇{% elif row.rank == 2 %}🥈{% elif row.rank == 3 %}🥉{% else %}{{ row.rank }}{% endif %}
                                 </td>
                                 <td class="team-name-col">
-                                    <a href="{{ url_for('auth.team_profile', team_id=row.team_id) }}" class="team-profile-link">
-                                        <img src="{{ url_for('auth.team_avatar', username=row.username) }}" alt="Avatar" class="table-avatar">
-                                        <strong>{{ row.username }}</strong>
-                                    </a>
-                                    {% if session.get('team_id') == row.team_id %}
-                                         <span class="my-team-label">({{ _('admin_you') }})</span>
-                                    {% endif %}
+                                    <div class="team-cell-wrapper">
+                                        <a href="{{ url_for('auth.team_profile', team_id=row.team_id) }}" class="team-profile-link">
+                                            <img src="{{ url_for('auth.team_avatar', username=row.username) }}" alt="Avatar" class="table-avatar">
+                                            <strong>{{ row.username }}</strong>
+                                        </a>
+                                        {% if session.get('team_id') == row.team_id %}
+                                             <span class="my-team-label">({{ _('admin_you') }})</span>
+                                        {% endif %}
+                                    </div>
                                 </td>
                                 <td class="solved-col">{{ row.solved_count }}</td>
                                 <td class="penalty-col">{{ row.total_penalty }}</td>

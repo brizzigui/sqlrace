@@ -235,6 +235,8 @@ TRANSLATIONS = {
         'profile_joined_1_day_ago': 'Joined 1 day ago',
         'profile_joined_1_month_ago': 'Joined 1 month ago',
         'profile_joined_1_year_ago': 'Joined 1 year ago',
+        'profile_regen_avatar': 'Regenerate Avatar',
+        'profile_avatar_regenerated': 'Profile avatar regenerated successfully!',
         
         # Flash / API messages
         'flash_contest_fields_required': 'Contest title, start time, and end time are required.',
@@ -506,6 +508,8 @@ TRANSLATIONS = {
         'profile_joined_1_day_ago': 'Entrou há 1 dia',
         'profile_joined_1_month_ago': 'Entrou há 1 mês',
         'profile_joined_1_year_ago': 'Entrou há 1 ano',
+        'profile_regen_avatar': 'Gerar Novo Avatar',
+        'profile_avatar_regenerated': 'Avatar do perfil gerado novamente com sucesso!',
         
         # Flash / API messages
         'flash_contest_fields_required': 'Título, horário de início e horário de término da competição são obrigatórios.',

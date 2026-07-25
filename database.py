@@ -135,8 +135,9 @@ def init_db():
         """)
 
         # Migration queries for existing databases
-        # 0. Add created_at column to teams if it does not exist
+        # 0. Add created_at and avatar_seed columns to teams if they do not exist
         cur.execute("ALTER TABLE teams ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;")
+        cur.execute("ALTER TABLE teams ADD COLUMN IF NOT EXISTS avatar_seed VARCHAR(100);")
 
         # 1. Add visibility column to questions if it does not exist
         cur.execute("ALTER TABLE questions ADD COLUMN IF NOT EXISTS visibility VARCHAR(20) NOT NULL DEFAULT 'public';")

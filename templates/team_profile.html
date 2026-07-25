@@ -10,8 +10,15 @@
 
     <!-- Main Profile Card Header -->
     <div class="profile-card-header">
-        <div class="profile-avatar-container">
-            <img src="{{ url_for('auth.team_avatar', username=team.username) }}" alt="{{ team.username }}" class="profile-avatar-large">
+        <div class="profile-avatar-container" style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+            <img src="{{ url_for('auth.team_avatar', username=team.username, v=team.avatar_seed) }}" alt="{{ team.username }}" class="profile-avatar-large">
+            {% if session.get('team_id') == team.id %}
+                <form action="{{ url_for('auth.regen_avatar') }}" method="POST" style="margin: 0;">
+                    <button type="submit" class="btn btn-outline btn-sm regen-avatar-btn" style="padding: 4px 12px; font-size: 0.82rem; white-space: nowrap;">
+                        🎲 {{ _('profile_regen_avatar') }}
+                    </button>
+                </form>
+            {% endif %}
         </div>
         <div class="profile-info-container">
             <div class="profile-title-row">
@@ -78,51 +85,49 @@
         </div>
 
         {% if solved_questions %}
-            <div class="leaderboard-card">
-                <div class="table-scroll">
-                    <table class="data-table">
+            <div class="leaderboard-card" style="margin-top: 16px;">
+                <div class="leaderboard-table-wrapper">
+                    <table class="leaderboard-table">
                         <thead>
                             <tr>
-                                <th style="width: 80px; text-align: center;">#</th>
+                                <th style="width: 140px; text-align: center;">{{ _('questions_status') }}</th>
+                                <th style="width: 80px;">{{ _('questions_id') }}</th>
                                 <th>{{ _('questions_name') }}</th>
-                                <th style="width: 140px; text-align: center;">{{ _('admin_difficulty') }}</th>
-                                <th style="width: 180px; text-align: center;">Solved Date</th>
-                                <th style="width: 130px; text-align: center;">{{ _('questions_action') }}</th>
+                                <th style="width: 120px;">{{ _('admin_difficulty') }}</th>
+                                <th style="width: 160px; text-align: center;">Solved Date</th>
+                                <th style="width: 150px; text-align: center;">{{ _('questions_action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for q in solved_questions %}
-                                <tr>
-                                    <td style="text-align: center; font-weight: 600; color: var(--text-muted);">
-                                        {{ loop.index }}
+                                <tr class="leaderboard-row">
+                                    <td style="text-align: center; vertical-align: middle; padding: 16px 8px;">
+                                        <span class="badge active-badge" style="font-weight: 600;">🟢 <span class="status-text">{{ _('status_accepted') }}</span></span>
                                     </td>
-                                    <td>
-                                        <div class="question-title-cell">
-                                            {% if q.visibility == 'public' %}
-                                                <a href="{{ url_for('contest.practice_question_details', question_id=q.id) }}" class="question-link">
-                                                    <strong>{{ q.title }}</strong>
-                                                </a>
-                                            {% else %}
-                                                <strong>{{ q.title }}</strong>
-                                                <span class="badge restricted-badge" style="margin-left: 8px; font-size: 0.75rem;">{{ _('admin_restricted') }}</span>
-                                            {% endif %}
-                                        </div>
+                                    <td style="vertical-align: middle; padding: 16px 8px;">#{{ q.id }}</td>
+                                    <td style="vertical-align: middle; padding: 16px 8px;">
+                                        {% if q.visibility == 'public' %}
+                                            <a href="{{ url_for('contest.practice_question_details', question_id=q.id) }}" style="text-decoration: none;">
+                                                <strong style="color: var(--text-primary); font-size: 1.05rem;">{{ q.title }}</strong>
+                                            </a>
+                                        {% else %}
+                                            <strong style="color: var(--text-primary); font-size: 1.05rem;">{{ q.title }}</strong>
+                                            <span class="badge restricted-badge" style="margin-left: 8px; font-size: 0.75rem;">{{ _('admin_restricted') }}</span>
+                                        {% endif %}
                                     </td>
-                                    <td style="text-align: center;">
-                                        <span class="difficulty-badge diff-{{ q.difficulty }}">
-                                            {% if q.difficulty == 1 %}⭐ Easy{% elif q.difficulty == 2 %}⭐⭐ Medium{% elif q.difficulty == 3 %}⭐⭐⭐ Hard{% elif q.difficulty == 4 %}⭐⭐⭐⭐ Expert{% else %}⭐⭐⭐⭐⭐ Master{% endif %}
-                                        </span>
+                                    <td style="vertical-align: middle; padding: 16px 8px; color: var(--color-upcoming); font-size: 1rem; letter-spacing: 2px;">
+                                        {{ "★" * q.difficulty }}
                                     </td>
-                                    <td style="text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
+                                    <td style="text-align: center; vertical-align: middle; padding: 16px 8px; color: var(--text-secondary); font-size: 0.9rem;">
                                         {% if q.solved_at %}
-                                            {{ q.solved_at.strftime('%b %d, %Y %H:%M') }}
+                                            {{ q.solved_at.strftime('%Y-%m-%d %H:%M') }}
                                         {% else %}
                                             -
                                         {% endif %}
                                     </td>
-                                    <td style="text-align: center;">
+                                    <td style="text-align: center; vertical-align: middle; padding: 16px 8px;">
                                         {% if q.visibility == 'public' %}
-                                            <a href="{{ url_for('contest.practice_question_details', question_id=q.id) }}" class="btn btn-sm btn-outline">
+                                            <a href="{{ url_for('contest.practice_question_details', question_id=q.id) }}" class="btn btn-outline" style="padding: 6px 16px; font-size: 0.9rem; display: inline-block;">
                                                 {{ _('questions_solve') }}
                                             </a>
                                         {% else %}

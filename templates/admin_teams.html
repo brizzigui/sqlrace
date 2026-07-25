@@ -34,13 +34,15 @@
                             <tr class="team-row" data-username="{{ team[1]|lower }}">
                                 <td>{{ team[0] }}</td>
                                 <td>
-                                    <a href="{{ url_for('auth.team_profile', team_id=team[0]) }}" class="team-profile-link">
-                                        <img src="{{ url_for('auth.team_avatar', username=team[1]) }}" alt="Avatar" class="table-avatar">
-                                        <strong>{{ team[1] }}</strong>
-                                    </a>
-                                    {% if team[0] == session.get('team_id') %}
-                                        <span class="badge active-badge" style="font-size: 0.75rem; padding: 2px 6px; margin-left: 6px; border-radius: 4px; vertical-align: middle;">{{ _('admin_you') }}</span>
-                                    {% endif %}
+                                    <div class="team-cell-wrapper">
+                                        <a href="{{ url_for('auth.team_profile', team_id=team[0]) }}" class="team-profile-link">
+                                            <img src="{{ url_for('auth.team_avatar', username=team[1]) }}" alt="Avatar" class="table-avatar">
+                                            <strong>{{ team[1] }}</strong>
+                                        </a>
+                                        {% if team[0] == session.get('team_id') %}
+                                            <span class="badge active-badge" style="font-size: 0.75rem; padding: 2px 6px; margin-left: 2px; border-radius: 4px; vertical-align: middle;">{{ _('admin_you') }}</span>
+                                        {% endif %}
+                                    </div>
                                 </td>
                                 <td><span style="color: var(--text-secondary); font-size: 0.9rem;">{{ team[2].strftime('%Y-%m-%d %H:%M:%S') }}</span></td>
                                 <td>

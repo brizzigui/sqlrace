@@ -4,24 +4,31 @@
 
 {% block content %}
 <div class="editor-workspace fade-in">
+    <!-- Mobile 3-Tab Segmented Navigation Bar (Visible only on Mobile < 992px) -->
+    <div class="mobile-workspace-tabs">
+        <button type="button" class="mobile-tab-btn active" data-tab="question" onclick="switchMobileTab('question', this)">
+            <span class="tab-icon">📖</span> {{ _('tab_question') }}
+        </button>
+        <button type="button" class="mobile-tab-btn" data-tab="solution" onclick="switchMobileTab('solution', this)">
+            <span class="tab-icon">💻</span> {{ _('tab_solution') }}
+        </button>
+        <button type="button" class="mobile-tab-btn" data-tab="results" onclick="switchMobileTab('results', this)">
+            <span class="tab-icon">📊</span> {{ _('tab_results') }}
+        </button>
+    </div>
+
     <!-- Left Pane: Problem Description and Schema -->
-    <div class="workspace-panel panel-left">
+    <div class="workspace-panel panel-left" id="mobile-panel-question">
         <div class="panel-header">
             {% if practice_mode %}
                 <a href="{{ url_for('contest.questions_list') }}" class="back-link">&larr; {{ _('editor_back_questions') }}</a>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <a href="#editor-section-panel" class="mobile-jump-btn" onclick="document.getElementById('editor-section-panel').scrollIntoView({behavior:'smooth'}); return false;">{{ _('editor_jump_editor') }}</a>
-                    <div class="contest-timer-small" style="color: var(--text-muted);">
-                        {{ _('practice_mode_label') }}
-                    </div>
+                <div class="contest-timer-small" style="color: var(--text-muted);">
+                    {{ _('practice_mode_label') }}
                 </div>
             {% else %}
                 <a href="{{ url_for('contest.contest_dashboard', contest_id=contest.id) }}" class="back-link">&larr; {{ _('editor_back') }}</a>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <a href="#editor-section-panel" class="mobile-jump-btn" onclick="document.getElementById('editor-section-panel').scrollIntoView({behavior:'smooth'}); return false;">{{ _('editor_jump_editor') }}</a>
-                    <div class="contest-timer-small">
-                        {{ _('editor_ends_in') }}: <span class="contest-timer" data-endtime="{{ contest.end_time }}" data-starttime="{{ contest.start_time }}">{{ _('loading') }}</span>
-                    </div>
+                <div class="contest-timer-small">
+                    {{ _('editor_ends_in') }}: <span class="contest-timer" data-endtime="{{ contest.end_time }}" data-starttime="{{ contest.start_time }}">{{ _('loading') }}</span>
                 </div>
             {% endif %}
         </div>
@@ -49,10 +56,9 @@
     </div>
 
     <!-- Right Pane: SQL Editor and Output Consoles -->
-    <div class="workspace-panel panel-right" id="editor-section-panel">
-        <div class="panel-header">
+    <div class="workspace-panel panel-right" id="mobile-panel-right">
+        <div class="panel-header desktop-only-header">
             <span class="editor-label">{{ _('editor_label') }}</span>
-            <a href="#problem-intro-heading" class="mobile-jump-btn" onclick="document.getElementById('problem-intro-heading').scrollIntoView({behavior:'smooth'}); return false;">{{ _('editor_jump_statement') }}</a>
         </div>
         
         <div class="panel-body split-vertical">

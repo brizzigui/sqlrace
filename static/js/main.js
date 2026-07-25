@@ -209,6 +209,11 @@ function initSubmissionHandler() {
         runBtn.disabled = true;
         spinner.classList.remove('hidden');
 
+        // On mobile, automatically switch to Results tab on submission
+        if (window.innerWidth < 992) {
+            switchMobileTab('results');
+        }
+
         // Clean output console
         emptyState.classList.add('hidden');
         statusBanner.className = 'status-banner hidden';
@@ -579,4 +584,67 @@ function updateCuteStars(rating, className) {
         }
     });
 }
+
+/* --------------------------------------------------------------------------
+   Mobile 3-Tab Workspace Switcher (< 992px)
+   -------------------------------------------------------------------------- */
+function switchMobileTab(tabName, btnElement) {
+    if (window.innerWidth >= 992) return; // Native dual-pane on Desktop
+
+    const buttons = document.querySelectorAll('.mobile-tab-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+
+    let targetBtn = btnElement;
+    if (!targetBtn) {
+        targetBtn = document.querySelector(`.mobile-tab-btn[data-tab="${tabName}"]`);
+    }
+    if (targetBtn) {
+        targetBtn.classList.add('active');
+    }
+
+    const panelQuestion = document.getElementById('mobile-panel-question');
+    const panelRight = document.getElementById('mobile-panel-right');
+    const editorSection = document.querySelector('.editor-section');
+    const consoleSection = document.querySelector('.console-section');
+
+    if (!panelQuestion || !panelRight) return;
+
+    if (tabName === 'question') {
+        panelQuestion.style.display = 'flex';
+        panelRight.style.display = 'none';
+    } else if (tabName === 'solution') {
+        panelQuestion.style.display = 'none';
+        panelRight.style.display = 'flex';
+        if (editorSection) editorSection.style.display = 'flex';
+        if (consoleSection) consoleSection.style.display = 'none';
+        if (window.sqlCodeMirror) {
+            setTimeout(() => window.sqlCodeMirror.refresh(), 50);
+        }
+    } else if (tabName === 'results') {
+        panelQuestion.style.display = 'none';
+        panelRight.style.display = 'flex';
+        if (editorSection) editorSection.style.display = 'none';
+        if (consoleSection) consoleSection.style.display = 'flex';
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+window.addEventListener('resize', () => {
+    if (window.innerWidth >= 992) {
+        const panelQuestion = document.getElementById('mobile-panel-question');
+        const panelRight = document.getElementById('mobile-panel-right');
+        const editorSection = document.querySelector('.editor-section');
+        const consoleSection = document.querySelector('.console-section');
+        if (panelQuestion) panelQuestion.style.display = '';
+        if (panelRight) panelRight.style.display = '';
+        if (editorSection) editorSection.style.display = '';
+        if (consoleSection) consoleSection.style.display = '';
+    } else {
+        const activeTabBtn = document.querySelector('.mobile-tab-btn.active');
+        const activeTab = activeTabBtn ? activeTabBtn.getAttribute('data-tab') : 'question';
+        switchMobileTab(activeTab);
+    }
+});
+
 

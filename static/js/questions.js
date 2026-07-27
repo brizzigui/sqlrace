@@ -1,5 +1,95 @@
 let currentPage = 1;
 const pageSize = 10;
+let currentSortColumn = 'id';
+let currentSortOrder = 'asc';
+let currentStatusFilter = 'all';
+let currentDifficultyFilter = 'all';
+
+function toggleFiltersPanel() {
+    const drawer = document.getElementById('arena-filters-drawer');
+    const btn = document.getElementById('btn-toggle-filters');
+    if (!drawer) return;
+    drawer.classList.toggle('open');
+    if (btn) btn.classList.toggle('active');
+}
+
+function setStatusFilter(val) {
+    currentStatusFilter = val;
+    const container = document.getElementById('status-pills-container');
+    if (container) {
+        container.querySelectorAll('.filter-pill').forEach(btn => {
+            if (btn.getAttribute('data-value') === val) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+    applyQuestionsFilterAndSort(true);
+}
+
+function setDifficultyFilter(val) {
+    currentDifficultyFilter = val;
+    const container = document.getElementById('difficulty-pills-container');
+    if (container) {
+        container.querySelectorAll('.filter-pill').forEach(btn => {
+            if (btn.getAttribute('data-value') === val) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+    applyQuestionsFilterAndSort(true);
+}
+
+function resetAllFilters() {
+    const searchInput = document.getElementById('questions-search-input');
+    if (searchInput) searchInput.value = '';
+    
+    setStatusFilter('all');
+    setDifficultyFilter('all');
+    
+    currentSortColumn = 'id';
+    currentSortOrder = 'asc';
+    updateSortIcons();
+    
+    applyQuestionsFilterAndSort(true);
+}
+
+function sortQuestionsBy(column) {
+    if (currentSortColumn === column) {
+        currentSortOrder = (currentSortOrder === 'asc') ? 'desc' : 'asc';
+    } else {
+        currentSortColumn = column;
+        if (column === 'solved' || column === 'difficulty') {
+            currentSortOrder = 'desc';
+        } else {
+            currentSortOrder = 'asc';
+        }
+    }
+    updateSortIcons();
+    applyQuestionsFilterAndSort(true);
+}
+
+function updateSortIcons() {
+    const columns = ['status', 'id', 'title', 'difficulty', 'solved'];
+    columns.forEach(col => {
+        const icon = document.getElementById(`sort-icon-${col}`);
+        const th = document.getElementById(`th-${col}`);
+        if (!icon || !th) return;
+        
+        if (col === currentSortColumn) {
+            th.classList.add('active-sort');
+            icon.classList.add('active');
+            icon.textContent = (currentSortOrder === 'asc') ? '▲' : '▼';
+        } else {
+            th.classList.remove('active-sort');
+            icon.classList.remove('active');
+            icon.textContent = '↕';
+        }
+    });
+}
 
 function applyQuestionsFilterAndSort(resetPage = true) {
     if (resetPage) {
@@ -9,23 +99,30 @@ function applyQuestionsFilterAndSort(resetPage = true) {
     const searchInput = document.getElementById('questions-search-input');
     const searchQuery = searchInput ? searchInput.value.trim().toLowerCase() : '';
     
-    const statusFilterEl = document.getElementById('questions-status-filter');
-    const statusFilter = statusFilterEl ? statusFilterEl.value : 'all';
-    
-    const diffFilterEl = document.getElementById('questions-difficulty-filter');
-    const difficultyFilter = diffFilterEl ? diffFilterEl.value : 'all';
-    
-    const sortSelectEl = document.getElementById('questions-sort-select');
-    const sortValue = sortSelectEl ? sortSelectEl.value : 'id_asc';
-    
     const tbody = document.getElementById('questions-tbody');
     if (!tbody) return;
     
-    const rows = Array.from(tbody.querySelectorAll('.question-item-row'));
+    const rows = Array.from(tbody.querySelectorAll('.questions-table-row'));
     const noMatchesRow = document.getElementById('no-matching-questions-row');
     const noQuestionsRow = document.getElementById('no-questions-row');
     
     if (noQuestionsRow) return;
+    
+    // Update active filter badge counter
+    let activeFilterCount = 0;
+    if (searchQuery) activeFilterCount++;
+    if (currentStatusFilter !== 'all') activeFilterCount++;
+    if (currentDifficultyFilter !== 'all') activeFilterCount++;
+    
+    const badge = document.getElementById('active-filters-badge');
+    if (badge) {
+        if (activeFilterCount > 0) {
+            badge.textContent = activeFilterCount;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
     
     // 1. Filter rows
     let matchingRows = rows.filter(row => {
@@ -35,11 +132,17 @@ function applyQuestionsFilterAndSort(resetPage = true) {
         const difficulty = row.getAttribute('data-difficulty') || '';
         
         const matchSearch = !searchQuery || title.includes(searchQuery) || id.includes(searchQuery) || (`#${id}`).includes(searchQuery);
-        const matchStatus = (statusFilter === 'all') || (status === statusFilter);
-        const matchDifficulty = (difficultyFilter === 'all') || (difficulty === difficultyFilter);
+        const matchStatus = (currentStatusFilter === 'all') || (status === currentStatusFilter);
+        const matchDifficulty = (currentDifficultyFilter === 'all') || (difficulty === currentDifficultyFilter);
         
         return matchSearch && matchStatus && matchDifficulty;
     });
+    
+    const statusWeight = {
+        'Accepted': 3,
+        'Attempted': 2,
+        'Unattempted': 1
+    };
     
     // 2. Sort matching rows
     matchingRows.sort((a, b) => {
@@ -51,18 +154,31 @@ function applyQuestionsFilterAndSort(resetPage = true) {
         const bDiff = parseInt(b.getAttribute('data-difficulty'), 10) || 0;
         const aSolved = parseInt(a.getAttribute('data-solved'), 10) || 0;
         const bSolved = parseInt(b.getAttribute('data-solved'), 10) || 0;
+        const aStatus = a.getAttribute('data-status') || '';
+        const bStatus = b.getAttribute('data-status') || '';
         
-        switch(sortValue) {
-            case 'id_asc': return aId - bId;
-            case 'id_desc': return bId - aId;
-            case 'title_asc': return aTitle.localeCompare(bTitle);
-            case 'title_desc': return bTitle.localeCompare(aTitle);
-            case 'diff_asc': return (aDiff - bDiff) || (aId - bId);
-            case 'diff_desc': return (bDiff - aDiff) || (aId - bId);
-            case 'solved_desc': return (bSolved - aSolved) || (aId - bId);
-            case 'solved_asc': return (aSolved - bSolved) || (aId - bId);
-            default: return aId - bId;
+        let result = 0;
+        switch(currentSortColumn) {
+            case 'id':
+                result = aId - bId;
+                break;
+            case 'title':
+                result = aTitle.localeCompare(bTitle);
+                break;
+            case 'difficulty':
+                result = (aDiff - bDiff) || (aId - bId);
+                break;
+            case 'solved':
+                result = (aSolved - bSolved) || (aId - bId);
+                break;
+            case 'status':
+                result = ((statusWeight[aStatus] || 0) - (statusWeight[bStatus] || 0)) || (aId - bId);
+                break;
+            default:
+                result = aId - bId;
         }
+        
+        return (currentSortOrder === 'asc') ? result : -result;
     });
     
     // Re-append matching rows to tbody in sorted order
@@ -86,7 +202,7 @@ function applyQuestionsFilterAndSort(resetPage = true) {
     // Display only matching rows for current page
     matchingRows.forEach((row, idx) => {
         if (idx >= startIndex && idx < endIndex) {
-            row.style.display = '';
+            row.style.display = 'table-row';
         } else {
             row.style.display = 'none';
         }
@@ -94,7 +210,7 @@ function applyQuestionsFilterAndSort(resetPage = true) {
     
     // Show/hide no matches notification
     if (noMatchesRow) {
-        noMatchesRow.style.display = (totalMatching === 0) ? '' : 'none';
+        noMatchesRow.style.display = (totalMatching === 0) ? 'table-row' : 'none';
     }
     
     // 4. Update pagination controls
@@ -133,9 +249,7 @@ function updatePaginationControls(page, totalPages, totalCount, startIdx, endIdx
         if (startPage > 2) {
             const ellipsis = document.createElement('span');
             ellipsis.textContent = '...';
-            ellipsis.style.color = 'var(--text-muted)';
-            ellipsis.style.alignSelf = 'center';
-            ellipsis.style.padding = '0 4px';
+            ellipsis.className = 'pagination-ellipsis';
             pagesContainer.appendChild(ellipsis);
         }
     }
@@ -149,9 +263,7 @@ function updatePaginationControls(page, totalPages, totalCount, startIdx, endIdx
         if (endPage < totalPages - 1) {
             const ellipsis = document.createElement('span');
             ellipsis.textContent = '...';
-            ellipsis.style.color = 'var(--text-muted)';
-            ellipsis.style.alignSelf = 'center';
-            ellipsis.style.padding = '0 4px';
+            ellipsis.className = 'pagination-ellipsis';
             pagesContainer.appendChild(ellipsis);
         }
         const pBtn = createPageBtn(totalPages, page);
@@ -162,9 +274,7 @@ function updatePaginationControls(page, totalPages, totalCount, startIdx, endIdx
 function createPageBtn(p, activePage) {
     const pBtn = document.createElement('button');
     pBtn.type = 'button';
-    pBtn.className = `btn btn-sm ${p === activePage ? 'btn-primary' : 'btn-outline'}`;
-    pBtn.style.padding = '4px 10px';
-    pBtn.style.fontSize = '0.85rem';
+    pBtn.className = `pagination-num-btn ${p === activePage ? 'active' : ''}`;
     pBtn.textContent = p;
     pBtn.onclick = () => {
         currentPage = p;
@@ -179,5 +289,6 @@ function changePage(delta) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    updateSortIcons();
     applyQuestionsFilterAndSort(true);
 });

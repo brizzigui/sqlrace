@@ -10,100 +10,136 @@
     </div>
 
     <!-- Filters & Search Control Bar -->
-    <div class="leaderboard-card" style="margin-top: 24px; padding: 16px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 8px;">
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
-            <!-- Search Box -->
-            <div style="flex: 1; min-width: 220px;">
-                <input type="text" id="questions-search-input" placeholder="{{ _('questions_search_placeholder') }}" oninput="applyQuestionsFilterAndSort(true)" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-main); color: var(--text-primary); font-size: 0.9rem;">
+    <div class="arena-controls-card">
+        <div class="arena-search-bar">
+            <!-- Search Input with inline SVG search icon -->
+            <div class="search-input-wrapper">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="questions-search-input" placeholder="{{ _('questions_search_placeholder') }}" oninput="applyQuestionsFilterAndSort(true)" spellcheck="false" autocomplete="off">
             </div>
-            <!-- Status Filter -->
-            <div style="min-width: 150px;">
-                <select id="questions-status-filter" onchange="applyQuestionsFilterAndSort(true)" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-main); color: var(--text-primary); font-size: 0.88rem; cursor: pointer;">
-                    <option value="all">{{ _('questions_filter_status') }}</option>
-                    <option value="Accepted">🟢 {{ _('status_accepted') }}</option>
-                    <option value="Attempted">🔴 {{ _('status_attempted') }}</option>
-                    <option value="Unattempted">⚪ {{ _('status_unattempted') }}</option>
-                </select>
+
+            <!-- Filters Toggle Button -->
+            <button type="button" id="btn-toggle-filters" class="btn-filters-toggle" onclick="toggleFiltersPanel()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                </svg>
+                <span>{{ _('questions_filters_btn') }}</span>
+                <span id="active-filters-badge" class="filters-badge hidden">0</span>
+            </button>
+        </div>
+
+        <!-- Collapsible Complex Filters Drawer -->
+        <div id="arena-filters-drawer" class="filters-drawer">
+            <div class="drawer-grid">
+                <!-- Filter Group 1: Status -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <span>🟢 {{ _('questions_status') }}</span>
+                    </label>
+                    <div class="filter-pills" id="status-pills-container">
+                        <button type="button" class="filter-pill active" data-value="all" onclick="setStatusFilter('all')">{{ _('questions_all') }}</button>
+                        <button type="button" class="filter-pill" data-value="Accepted" onclick="setStatusFilter('Accepted')">🟢 {{ _('status_accepted') }}</button>
+                        <button type="button" class="filter-pill" data-value="Attempted" onclick="setStatusFilter('Attempted')">🔴 {{ _('status_attempted') }}</button>
+                        <button type="button" class="filter-pill" data-value="Unattempted" onclick="setStatusFilter('Unattempted')">⚪ {{ _('status_unattempted') }}</button>
+                    </div>
+                </div>
+
+                <!-- Filter Group 2: Difficulty -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <span>⭐ {{ _('admin_difficulty') }}</span>
+                    </label>
+                    <div class="filter-pills" id="difficulty-pills-container">
+                        <button type="button" class="filter-pill active" data-value="all" onclick="setDifficultyFilter('all')">{{ _('questions_all') }}</button>
+                        <button type="button" class="filter-pill" data-value="1" onclick="setDifficultyFilter('1')">★ 1</button>
+                        <button type="button" class="filter-pill" data-value="2" onclick="setDifficultyFilter('2')">★★ 2</button>
+                        <button type="button" class="filter-pill" data-value="3" onclick="setDifficultyFilter('3')">★★★ 3</button>
+                        <button type="button" class="filter-pill" data-value="4" onclick="setDifficultyFilter('4')">★★★★ 4</button>
+                        <button type="button" class="filter-pill" data-value="5" onclick="setDifficultyFilter('5')">★★★★★ 5</button>
+                    </div>
+                </div>
             </div>
-            <!-- Difficulty Filter -->
-            <div style="min-width: 150px;">
-                <select id="questions-difficulty-filter" onchange="applyQuestionsFilterAndSort(true)" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-main); color: var(--text-primary); font-size: 0.88rem; cursor: pointer;">
-                    <option value="all">{{ _('questions_filter_difficulty') }}</option>
-                    <option value="1">★ (1)</option>
-                    <option value="2">★★ (2)</option>
-                    <option value="3">★★★ (3)</option>
-                    <option value="4">★★★★ (4)</option>
-                    <option value="5">★★★★★ (5)</option>
-                </select>
-            </div>
-            <!-- Sort Select -->
-            <div style="min-width: 180px;">
-                <select id="questions-sort-select" onchange="applyQuestionsFilterAndSort(true)" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-main); color: var(--text-primary); font-size: 0.88rem; cursor: pointer;">
-                    <option value="id_asc">{{ _('questions_sort_id_asc') }}</option>
-                    <option value="id_desc">{{ _('questions_sort_id_desc') }}</option>
-                    <option value="title_asc">{{ _('questions_sort_title_asc') }}</option>
-                    <option value="title_desc">{{ _('questions_sort_title_desc') }}</option>
-                    <option value="diff_asc">{{ _('questions_sort_diff_asc') }}</option>
-                    <option value="diff_desc">{{ _('questions_sort_diff_desc') }}</option>
-                    <option value="solved_desc">{{ _('questions_sort_solved_desc') }}</option>
-                    <option value="solved_asc">{{ _('questions_sort_solved_asc') }}</option>
-                </select>
+
+            <!-- Drawer Footer: Reset Filters -->
+            <div class="drawer-footer">
+                <button type="button" class="btn-clear-filters" onclick="resetAllFilters()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    <span>{{ _('questions_clear_filters') }}</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Questions Table -->
-    <div class="leaderboard-card" style="margin-top: 16px;">
+    <!-- Questions Table Card -->
+    <div class="leaderboard-card mt-3">
         <div class="leaderboard-table-wrapper">
             <table class="leaderboard-table">
                 <thead>
                     <tr>
-                        <th style="width: 140px; text-align: center;">{{ _('questions_status') }}</th>
-                        <th style="width: 80px;">{{ _('questions_id') }}</th>
-                        <th>{{ _('questions_name') }}</th>
-                        <th style="width: 120px;">{{ _('admin_difficulty') }}</th>
-                        <th style="width: 100px; text-align: center;">{{ _('questions_solved') }}</th>
-                        <th style="width: 150px; text-align: center;">{{ _('questions_action') }}</th>
+                        <th id="th-status" class="sortable-th col-status" onclick="sortQuestionsBy('status')" title="Click to sort by Status">
+                            {{ _('questions_status') }} <span class="sort-icon" id="sort-icon-status">↕</span>
+                        </th>
+                        <th id="th-id" class="sortable-th active-sort col-id" onclick="sortQuestionsBy('id')" title="Click to sort by ID">
+                            {{ _('questions_id') }} <span class="sort-icon active" id="sort-icon-id">▲</span>
+                        </th>
+                        <th id="th-title" class="sortable-th" onclick="sortQuestionsBy('title')" title="Click to sort by Title">
+                            {{ _('questions_name') }} <span class="sort-icon" id="sort-icon-title">↕</span>
+                        </th>
+                        <th id="th-difficulty" class="sortable-th col-difficulty" onclick="sortQuestionsBy('difficulty')" title="Click to sort by Difficulty">
+                            {{ _('admin_difficulty') }} <span class="sort-icon" id="sort-icon-difficulty">↕</span>
+                        </th>
+                        <th id="th-solved" class="sortable-th col-solved" onclick="sortQuestionsBy('solved')" title="Click to sort by Solved Count">
+                            {{ _('questions_solved') }} <span class="sort-icon" id="sort-icon-solved">↕</span>
+                        </th>
+                        <th class="col-action">
+                            {{ _('questions_action') }}
+                        </th>
                     </tr>
                 </thead>
                 <tbody id="questions-tbody">
                     {% if questions %}
                         {% for q in questions %}
-                            <tr class="leaderboard-row question-item-row" data-id="{{ q.id }}" data-title="{{ q.title | lower }}" data-status="{{ q.status }}" data-difficulty="{{ q.difficulty }}" data-solved="{{ q.solved }}">
-                                <td style="text-align: center; vertical-align: middle; padding: 16px 8px;">
+                            <tr class="leaderboard-row questions-table-row" data-id="{{ q.id }}" data-title="{{ q.title | lower }}" data-status="{{ q.status }}" data-difficulty="{{ q.difficulty }}" data-solved="{{ q.solved }}">
+                                <td class="cell-status">
                                     {% if q.status == 'Accepted' %}
-                                        <span class="badge active-badge" style="font-weight: 600;">🟢 <span class="status-text">{{ _('status_accepted') }}</span></span>
+                                        <span class="badge active-badge font-weight-bold">🟢 <span class="status-text">{{ _('status_accepted') }}</span></span>
                                     {% elif q.status == 'Attempted' %}
-                                        <span class="badge" style="background: var(--color-failed-bg); border: 1px solid var(--color-failed-border); color: var(--color-failed); font-weight: 600; padding: 4px 8px; border-radius: 4px;">🔴 <span class="status-text">{{ _('status_attempted') }}</span></span>
+                                        <span class="badge badge-attempted-custom">🔴 <span class="status-text">{{ _('status_attempted') }}</span></span>
                                     {% else %}
-                                        <span class="badge" style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); color: var(--text-muted); font-weight: 500; padding: 4px 8px; border-radius: 4px;">⚪ <span class="status-text">{{ _('status_unattempted') }}</span></span>
+                                        <span class="badge badge-unattempted-custom">⚪ <span class="status-text">{{ _('status_unattempted') }}</span></span>
                                     {% endif %}
                                 </td>
-                                <td style="vertical-align: middle; padding: 16px 8px;">#{{ q.id }}</td>
-                                <td style="vertical-align: middle; padding: 16px 8px;">
-                                    <strong style="color: var(--text-primary); font-size: 1.05rem;">{{ q.title }}</strong>
+                                <td class="cell-id">#{{ q.id }}</td>
+                                <td class="cell-title">
+                                    <strong class="text-primary-title">{{ q.title }}</strong>
                                 </td>
-                                <td style="vertical-align: middle; padding: 16px 8px; color: var(--color-upcoming); font-size: 1rem; letter-spacing: 2px;">
+                                <td class="cell-difficulty">
                                     {{ "★" * q.difficulty }}
                                 </td>
-                                <td style="vertical-align: middle; text-align: center; padding: 16px 8px; color: var(--text-secondary); font-weight: 600; font-size: 0.95rem;">
-                                    {{ q.solved }}
+                                <td class="cell-solved">
+                                    👥 {{ q.solved }}
                                 </td>
-                                <td style="text-align: center; vertical-align: middle; padding: 16px 8px;">
-                                    <a href="{{ url_for('contest.practice_question_details', question_id=q.id) }}" class="btn btn-outline" style="padding: 6px 16px; font-size: 0.9rem; display: inline-block;">
+                                <td class="cell-action">
+                                    <a href="{{ url_for('contest.practice_question_details', question_id=q.id) }}" class="btn btn-outline btn-solve-custom">
                                         {{ _('questions_solve') }}
                                     </a>
                                 </td>
                             </tr>
                         {% endfor %}
-                        <tr id="no-matching-questions-row" style="display: none;">
-                            <td colspan="6" class="text-muted text-center" style="padding: 40px; font-size: 1.1rem;">
+                        <tr id="no-matching-questions-row" class="hidden-row">
+                            <td colspan="6" class="text-muted text-center padding-empty-state">
                                 {{ _('questions_no_matches') }}
                             </td>
                         </tr>
                     {% else %}
                         <tr id="no-questions-row">
-                            <td colspan="6" class="text-muted text-center" style="padding: 40px; font-size: 1.1rem;">
+                            <td colspan="6" class="text-muted text-center padding-empty-state">
                                 {{ _('questions_no_questions') }}
                             </td>
                         </tr>
@@ -114,12 +150,20 @@
     </div>
 
     <!-- Pagination Controls Bar -->
-    <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 16px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 8px;">
-        <span id="pagination-info-text" data-showing-template="{{ _('questions_page_showing') }}" style="color: var(--text-muted); font-size: 0.88rem;"></span>
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <button type="button" id="btn-prev-page" class="btn btn-outline" style="padding: 4px 12px; font-size: 0.85rem;" onclick="changePage(-1)">{{ _('questions_prev') }}</button>
-            <div id="pagination-pages-list" style="display: flex; gap: 4px;"></div>
-            <button type="button" id="btn-next-page" class="btn btn-outline" style="padding: 4px 12px; font-size: 0.85rem;" onclick="changePage(1)">{{ _('questions_next') }}</button>
+    <div class="pagination-bar">
+        <span id="pagination-info-text" data-showing-template="{{ _('questions_page_showing') }}" class="pagination-info"></span>
+        <div class="pagination-controls">
+            <button type="button" id="btn-prev-page" class="pagination-btn" onclick="changePage(-1)" aria-label="{{ _('questions_prev') }}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            <div id="pagination-pages-list" class="pages-list"></div>
+            <button type="button" id="btn-next-page" class="pagination-btn" onclick="changePage(1)" aria-label="{{ _('questions_next') }}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
         </div>
     </div>
 </div>

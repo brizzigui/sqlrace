@@ -9,8 +9,51 @@
         <p>{{ _('questions_sub') }}</p>
     </div>
 
+    <!-- Filters & Search Control Bar -->
+    <div class="leaderboard-card" style="margin-top: 24px; padding: 16px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 8px;">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+            <!-- Search Box -->
+            <div style="flex: 1; min-width: 220px;">
+                <input type="text" id="questions-search-input" placeholder="{{ _('questions_search_placeholder') }}" oninput="applyQuestionsFilterAndSort(true)" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-main); color: var(--text-primary); font-size: 0.9rem;">
+            </div>
+            <!-- Status Filter -->
+            <div style="min-width: 150px;">
+                <select id="questions-status-filter" onchange="applyQuestionsFilterAndSort(true)" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-main); color: var(--text-primary); font-size: 0.88rem; cursor: pointer;">
+                    <option value="all">{{ _('questions_filter_status') }}</option>
+                    <option value="Accepted">🟢 {{ _('status_accepted') }}</option>
+                    <option value="Attempted">🔴 {{ _('status_attempted') }}</option>
+                    <option value="Unattempted">⚪ {{ _('status_unattempted') }}</option>
+                </select>
+            </div>
+            <!-- Difficulty Filter -->
+            <div style="min-width: 150px;">
+                <select id="questions-difficulty-filter" onchange="applyQuestionsFilterAndSort(true)" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-main); color: var(--text-primary); font-size: 0.88rem; cursor: pointer;">
+                    <option value="all">{{ _('questions_filter_difficulty') }}</option>
+                    <option value="1">★ (1)</option>
+                    <option value="2">★★ (2)</option>
+                    <option value="3">★★★ (3)</option>
+                    <option value="4">★★★★ (4)</option>
+                    <option value="5">★★★★★ (5)</option>
+                </select>
+            </div>
+            <!-- Sort Select -->
+            <div style="min-width: 180px;">
+                <select id="questions-sort-select" onchange="applyQuestionsFilterAndSort(true)" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-main); color: var(--text-primary); font-size: 0.88rem; cursor: pointer;">
+                    <option value="id_asc">{{ _('questions_sort_id_asc') }}</option>
+                    <option value="id_desc">{{ _('questions_sort_id_desc') }}</option>
+                    <option value="title_asc">{{ _('questions_sort_title_asc') }}</option>
+                    <option value="title_desc">{{ _('questions_sort_title_desc') }}</option>
+                    <option value="diff_asc">{{ _('questions_sort_diff_asc') }}</option>
+                    <option value="diff_desc">{{ _('questions_sort_diff_desc') }}</option>
+                    <option value="solved_desc">{{ _('questions_sort_solved_desc') }}</option>
+                    <option value="solved_asc">{{ _('questions_sort_solved_asc') }}</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
     <!-- Questions Table -->
-    <div class="leaderboard-card" style="margin-top: 24px;">
+    <div class="leaderboard-card" style="margin-top: 16px;">
         <div class="leaderboard-table-wrapper">
             <table class="leaderboard-table">
                 <thead>
@@ -23,10 +66,10 @@
                         <th style="width: 150px; text-align: center;">{{ _('questions_action') }}</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="questions-tbody">
                     {% if questions %}
                         {% for q in questions %}
-                            <tr class="leaderboard-row">
+                            <tr class="leaderboard-row question-item-row" data-id="{{ q.id }}" data-title="{{ q.title | lower }}" data-status="{{ q.status }}" data-difficulty="{{ q.difficulty }}" data-solved="{{ q.solved }}">
                                 <td style="text-align: center; vertical-align: middle; padding: 16px 8px;">
                                     {% if q.status == 'Accepted' %}
                                         <span class="badge active-badge" style="font-weight: 600;">🟢 <span class="status-text">{{ _('status_accepted') }}</span></span>
@@ -53,8 +96,13 @@
                                 </td>
                             </tr>
                         {% endfor %}
+                        <tr id="no-matching-questions-row" style="display: none;">
+                            <td colspan="6" class="text-muted text-center" style="padding: 40px; font-size: 1.1rem;">
+                                {{ _('questions_no_matches') }}
+                            </td>
+                        </tr>
                     {% else %}
-                        <tr>
+                        <tr id="no-questions-row">
                             <td colspan="6" class="text-muted text-center" style="padding: 40px; font-size: 1.1rem;">
                                 {{ _('questions_no_questions') }}
                             </td>
@@ -64,5 +112,19 @@
             </table>
         </div>
     </div>
+
+    <!-- Pagination Controls Bar -->
+    <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 16px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 8px;">
+        <span id="pagination-info-text" data-showing-template="{{ _('questions_page_showing') }}" style="color: var(--text-muted); font-size: 0.88rem;"></span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <button type="button" id="btn-prev-page" class="btn btn-outline" style="padding: 4px 12px; font-size: 0.85rem;" onclick="changePage(-1)">{{ _('questions_prev') }}</button>
+            <div id="pagination-pages-list" style="display: flex; gap: 4px;"></div>
+            <button type="button" id="btn-next-page" class="btn btn-outline" style="padding: 4px 12px; font-size: 0.85rem;" onclick="changePage(1)">{{ _('questions_next') }}</button>
+        </div>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/questions.js') }}"></script>
 {% endblock %}

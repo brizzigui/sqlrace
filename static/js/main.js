@@ -647,4 +647,36 @@ window.addEventListener('resize', () => {
     }
 });
 
+/* --------------------------------------------------------------------------
+   Quick Copy Handler for Schema / Database Population Script
+   -------------------------------------------------------------------------- */
+function copySchemaScript(btn) {
+    const codeEl = document.getElementById('schema-sql-code');
+    if (!codeEl) return;
+    const textToCopy = codeEl.textContent || codeEl.innerText;
+    
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        const textSpan = btn.querySelector('.copy-text');
+        const originalText = textSpan ? textSpan.textContent : btn.textContent;
+        const copiedLabel = (window.JS_TRANSLATIONS && window.JS_TRANSLATIONS.copied) ? window.JS_TRANSLATIONS.copied : 'Copied!';
+        
+        btn.classList.add('copied');
+        if (textSpan) {
+            textSpan.textContent = copiedLabel;
+        } else {
+            btn.textContent = `✓ ${copiedLabel}`;
+        }
+        
+        setTimeout(() => {
+            btn.classList.remove('copied');
+            if (textSpan) {
+                textSpan.textContent = originalText;
+            } else {
+                btn.textContent = originalText;
+            }
+        }, 2000);
+    });
+}
+
+
 

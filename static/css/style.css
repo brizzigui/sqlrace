@@ -986,9 +986,46 @@ textarea {
     background: rgba(0, 0, 0, 0.3) !important;
 }
 
+.schema-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
 .schema-viewer h3 {
     font-size: 1.1rem;
-    margin-bottom: 12px;
+    margin-bottom: 0;
+}
+
+.copy-schema-btn {
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    font-family: inherit;
+    border-radius: 6px;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.copy-schema-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(0, 242, 254, 0.08);
+}
+
+.copy-schema-btn.copied {
+    border-color: var(--color-accepted);
+    color: var(--color-accepted);
+    background: var(--color-accepted-bg);
 }
 
 .schema-viewer p {

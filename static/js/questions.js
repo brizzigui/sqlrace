@@ -6,6 +6,108 @@ let currentStatusFilters = new Set();
 let currentDifficultyFilters = new Set();
 let currentAuthorFilters = new Set();
 
+let allAuthorsData = []; // Array of { value, name, count, isUnassigned } sorted by count desc
+let visibleAuthorsCount = 3; // Initially show top 3 authors
+
+function initAuthorFilters() {
+    const tbody = document.getElementById('questions-tbody');
+    if (!tbody) return;
+    
+    const rows = Array.from(tbody.querySelectorAll('.questions-table-row'));
+    const countsMap = new Map();
+    let unassignedCount = 0;
+    
+    rows.forEach(row => {
+        const author = (row.getAttribute('data-author') || '').trim();
+        if (author) {
+            countsMap.set(author, (countsMap.get(author) || 0) + 1);
+        } else {
+            unassignedCount++;
+        }
+    });
+    
+    allAuthorsData = [];
+    countsMap.forEach((count, author) => {
+        allAuthorsData.push({
+            value: author,
+            name: author,
+            count: count,
+            isUnassigned: false
+        });
+    });
+    
+    // Sort by count descending, then by name ascending
+    allAuthorsData.sort((a, b) => (b.count - a.count) || a.name.localeCompare(b.name));
+    
+    if (unassignedCount > 0) {
+        const container = document.getElementById('author-pills-container');
+        const unassignedText = (container && container.getAttribute('data-unassigned-text')) || 'Unassigned';
+        allAuthorsData.push({
+            value: 'unassigned',
+            name: unassignedText,
+            count: unassignedCount,
+            isUnassigned: true
+        });
+    }
+    
+    visibleAuthorsCount = 3;
+    renderAuthorPills();
+}
+
+function renderAuthorPills() {
+    const container = document.getElementById('author-pills-container');
+    if (!container) return;
+    
+    const allText = container.getAttribute('data-all-text') || 'All';
+    const showMoreText = container.getAttribute('data-show-more-text') || 'Show More';
+    
+    container.innerHTML = '';
+    
+    // 1. All pill
+    const allBtn = document.createElement('button');
+    allBtn.type = 'button';
+    allBtn.className = `filter-pill ${currentAuthorFilters.size === 0 ? 'active' : ''}`;
+    allBtn.setAttribute('data-value', 'all');
+    allBtn.textContent = allText;
+    container.appendChild(allBtn);
+    
+    // 2. Authors up to visibleAuthorsCount
+    const authorsToShow = allAuthorsData.slice(0, visibleAuthorsCount);
+    authorsToShow.forEach(auth => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        const isActive = currentAuthorFilters.has(auth.value);
+        btn.className = `filter-pill ${isActive ? 'active' : ''}`;
+        btn.setAttribute('data-value', auth.value);
+        
+        if (auth.isUnassigned) {
+            btn.textContent = `⚪ ${auth.name} (${auth.count})`;
+        } else {
+            btn.textContent = `👤 ${auth.name} (${auth.count})`;
+        }
+        container.appendChild(btn);
+    });
+    
+    // 3. Show More button if there are remaining authors
+    if (visibleAuthorsCount < allAuthorsData.length) {
+        const showMoreBtn = document.createElement('button');
+        showMoreBtn.type = 'button';
+        showMoreBtn.className = 'filter-pill btn-show-more-authors';
+        showMoreBtn.id = 'btn-show-more-authors';
+        showMoreBtn.style.background = 'rgba(0, 242, 254, 0.08)';
+        showMoreBtn.style.borderColor = 'var(--primary-color)';
+        showMoreBtn.style.color = 'var(--primary-color)';
+        showMoreBtn.style.fontWeight = '600';
+        showMoreBtn.textContent = `+ ${showMoreText}`;
+        container.appendChild(showMoreBtn);
+    }
+}
+
+function showMoreAuthors() {
+    visibleAuthorsCount += 3;
+    renderAuthorPills();
+}
+
 function toggleFiltersPanel() {
     const drawer = document.getElementById('arena-filters-drawer');
     const btn = document.getElementById('btn-toggle-filters');
@@ -99,7 +201,7 @@ function setAuthorFilter(val) {
     const container = document.getElementById('author-pills-container');
     if (container) {
         const allBtn = container.querySelector('.filter-pill[data-value="all"]');
-        const specificBtns = container.querySelectorAll('.filter-pill:not([data-value="all"])');
+        const specificBtns = container.querySelectorAll('.filter-pill:not([data-value="all"]):not(#btn-show-more-authors)');
         
         if (currentAuthorFilters.size === 0) {
             if (allBtn) allBtn.classList.add('active');
@@ -145,14 +247,9 @@ function resetAllFilters() {
         });
     }
     
-    // Reset author pills UI
-    const authorContainer = document.getElementById('author-pills-container');
-    if (authorContainer) {
-        authorContainer.querySelectorAll('.filter-pill').forEach(btn => {
-            if (btn.getAttribute('data-value') === 'all') btn.classList.add('active');
-            else btn.classList.remove('active');
-        });
-    }
+    // Reset author filters & pills UI
+    visibleAuthorsCount = 3;
+    renderAuthorPills();
     
     currentSortColumn = 'id';
     currentSortOrder = 'asc';
@@ -402,5 +499,22 @@ function changePage(delta) {
 
 document.addEventListener('DOMContentLoaded', () => {
     updateSortIcons();
+    initAuthorFilters();
     applyQuestionsFilterAndSort(true);
+    
+    const authorContainer = document.getElementById('author-pills-container');
+    if (authorContainer) {
+        authorContainer.addEventListener('click', (e) => {
+            const pill = e.target.closest('.filter-pill');
+            if (!pill) return;
+            if (pill.id === 'btn-show-more-authors') {
+                showMoreAuthors();
+                return;
+            }
+            const val = pill.getAttribute('data-value');
+            if (val !== null) {
+                setAuthorFilter(val);
+            }
+        });
+    }
 });

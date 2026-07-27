@@ -67,25 +67,11 @@
                     <label class="filter-label">
                         <span>👤 {{ _('questions_author') }}</span>
                     </label>
-                    <div class="filter-pills" id="author-pills-container">
-                        <button type="button" class="filter-pill active" data-value="all" onclick="setAuthorFilter('all')">{{ _('questions_all') }}</button>
-                        {% set unique_authors = [] %}
-                        {% set ns = namespace(has_empty_author=false) %}
-                        {% if questions %}
-                            {% for q in questions %}
-                                {% if q.author and q.author not in unique_authors %}
-                                    {% set _ = unique_authors.append(q.author) %}
-                                {% elif not q.author %}
-                                    {% set ns.has_empty_author = true %}
-                                {% endif %}
-                            {% endfor %}
-                        {% endif %}
-                        {% for author in unique_authors %}
-                            <button type="button" class="filter-pill" data-value="{{ author }}" onclick="setAuthorFilter({{ author | tojson }})">👤 {{ author }}</button>
-                        {% endfor %}
-                        {% if ns.has_empty_author %}
-                            <button type="button" class="filter-pill" data-value="unassigned" onclick="setAuthorFilter('unassigned')">⚪ {{ _('questions_no_author') }}</button>
-                        {% endif %}
+                    <div class="filter-pills" id="author-pills-container"
+                         data-all-text="{{ _('questions_all') }}"
+                         data-unassigned-text="{{ _('questions_no_author') }}"
+                         data-show-more-text="{{ _('questions_show_more') }}">
+                        <button type="button" class="filter-pill active" data-value="all">{{ _('questions_all') }}</button>
                     </div>
                 </div>
             </div>

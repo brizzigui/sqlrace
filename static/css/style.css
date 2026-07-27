@@ -4449,7 +4449,62 @@ code[class*="language-"] {
 .btn-solve-custom { padding: 6px 16px; font-size: 0.88rem; display: inline-block; }
 .hidden-row { display: none; }
 .padding-empty-state { padding: 40px; font-size: 1.05rem; }
-.badge-attempted-custom { background: var(--color-failed-bg); border: 1px solid var(--color-failed-border); color: var(--color-failed); font-weight: 600; padding: 4px 8px; border-radius: 4px; }
-.badge-unattempted-custom { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); color: var(--text-muted); font-weight: 500; padding: 4px 8px; border-radius: 4px; }
+.cell-status {
+    text-align: center;
+    vertical-align: middle;
+    padding: 14px 10px;
+    white-space: nowrap;
+}
+
+.cell-status .badge,
+.cell-status .status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.badge-accepted-custom,
+.active-badge {
+    background: var(--color-accepted-bg);
+    border: 1px solid var(--color-accepted-border);
+    color: var(--color-accepted);
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.badge-attempted-custom {
+    background: var(--color-failed-bg);
+    border: 1px solid var(--color-failed-border);
+    color: var(--color-failed);
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.badge-unattempted-custom {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
 
 

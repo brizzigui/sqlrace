@@ -4,13 +4,17 @@ from flask import Flask, redirect, url_for, render_template, jsonify
 from flask_session import Session
 from dotenv import load_dotenv
 from database import init_pools
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 load_dotenv()
 
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-sqlrace-key')
-    
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+    )
+
     # Configure Server-side Session using filesystem to prevent tamper-prone cookie session
     app.config['SESSION_TYPE'] = 'filesystem'
     app.config['SESSION_PERMANENT'] = True

@@ -590,6 +590,14 @@ textarea {
     text-decoration: underline;
 }
 
+.btn-warning-text {
+    color: var(--color-upcoming, #f59e0b);
+}
+
+.btn-warning-text:hover {
+    text-decoration: underline;
+}
+
 .auth-submit-btn {
     margin-top: 10px;
 }

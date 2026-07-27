@@ -83,6 +83,21 @@
             </div>
         </form>
     </div>
+
+    <!-- Clear User Solutions Danger Zone Card -->
+    <div class="admin-card" style="margin-top: 24px; border: 1px solid rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.03);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h3 style="margin: 0 0 6px 0; color: var(--color-upcoming, #f59e0b); font-size: 1.05rem; font-weight: 600;">{{ _('admin_clear_solutions') }}</h3>
+                <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">{{ _('admin_clear_solutions_desc') }}</p>
+            </div>
+            <form action="{{ url_for('admin.clear_question_solutions', question_id=question.id) }}" method="POST" onsubmit="return confirm('{{ _('admin_clear_solutions_confirm') }}');" style="margin: 0;">
+                <button type="submit" class="btn btn-outline" style="color: var(--color-upcoming, #f59e0b); border-color: rgba(245, 158, 11, 0.4); font-size: 0.85rem; padding: 8px 16px; display: inline-flex; align-items: center; gap: 6px;">
+                    <span>🗑️</span> {{ _('admin_clear_solutions') }}
+                </button>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}
 

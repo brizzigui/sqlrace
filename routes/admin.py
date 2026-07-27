@@ -316,6 +316,29 @@ def delete_question(question_id):
         flash(_('flash_question_delete_failed', error=str(e)), "danger")
     return redirect(url_for('admin.admin_questions'))
 
+@bp.route('/admin/question/clear_solutions/<int:question_id>', methods=['POST'])
+@admin_required
+def clear_question_solutions(question_id):
+    try:
+        with get_main_db() as cur:
+            cur.execute("SELECT title FROM questions WHERE id = %s;", (question_id,))
+            q = cur.fetchone()
+            if not q:
+                flash(_('error_question_not_found'), "danger")
+                return redirect(url_for('admin.admin_questions'))
+            q_title = q[0]
+            
+            cur.execute("DELETE FROM submissions WHERE question_id = %s;", (question_id,))
+            deleted_count = cur.rowcount
+            
+        log_audit('QUESTION', 'CLEAR_SOLUTIONS', f"Cleared {deleted_count} user solution(s) for question '{q_title}' (ID: {question_id})", level='WARNING', user_id=session.get('team_id'), username=session.get('username'), ip_address=request.remote_addr)
+        flash(_('flash_question_solutions_cleared', title=q_title), "warning")
+    except Exception as e:
+        flash(_('flash_question_solutions_clear_failed', error=str(e)), "danger")
+    
+    redirect_url = request.referrer or url_for('admin.admin_questions')
+    return redirect(redirect_url)
+
 @bp.route('/admin/question/edit/<int:question_id>', methods=['GET'])
 @admin_required
 def edit_question_view(question_id):

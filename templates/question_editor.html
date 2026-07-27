@@ -42,7 +42,7 @@
                     </div>
                     {% if question.author %}
                         <div class="author-display" style="color: var(--text-muted); font-size: 0.85rem;">
-                            ✍️ {{ _('questions_author') }}: <strong style="color: var(--text-primary);">{{ question.author }}</strong>
+                            {{ _('questions_author_by') }} <strong style="color: var(--text-primary);">{{ question.author }}</strong>
                         </div>
                     {% endif %}
                 </div>

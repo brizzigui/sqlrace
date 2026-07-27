@@ -4206,7 +4206,7 @@ code[class*="language-"] {
 }
 
 .filters-drawer.open {
-    max-height: 300px;
+    max-height: 600px;
     opacity: 1;
     margin-top: 16px;
     padding-top: 16px;

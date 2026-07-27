@@ -61,6 +61,33 @@
                         <button type="button" class="filter-pill" data-value="5" onclick="setDifficultyFilter('5')">★★★★★ 5</button>
                     </div>
                 </div>
+
+                <!-- Filter Group 3: Author -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <span>👤 {{ _('questions_author') }}</span>
+                    </label>
+                    <div class="filter-pills" id="author-pills-container">
+                        <button type="button" class="filter-pill active" data-value="all" onclick="setAuthorFilter('all')">{{ _('questions_all') }}</button>
+                        {% set unique_authors = [] %}
+                        {% set ns = namespace(has_empty_author=false) %}
+                        {% if questions %}
+                            {% for q in questions %}
+                                {% if q.author and q.author not in unique_authors %}
+                                    {% set _ = unique_authors.append(q.author) %}
+                                {% elif not q.author %}
+                                    {% set ns.has_empty_author = true %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {% for author in unique_authors %}
+                            <button type="button" class="filter-pill" data-value="{{ author }}" onclick="setAuthorFilter({{ author | tojson }})">👤 {{ author }}</button>
+                        {% endfor %}
+                        {% if ns.has_empty_author %}
+                            <button type="button" class="filter-pill" data-value="unassigned" onclick="setAuthorFilter('unassigned')">⚪ {{ _('questions_no_author') }}</button>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
 
             <!-- Drawer Footer: Reset Filters -->
@@ -105,7 +132,7 @@
                 <tbody id="questions-tbody">
                     {% if questions %}
                         {% for q in questions %}
-                            <tr class="leaderboard-row questions-table-row" data-id="{{ q.id }}" data-title="{{ q.title | lower }}" data-status="{{ q.status }}" data-difficulty="{{ q.difficulty }}" data-solved="{{ q.solved }}">
+                            <tr class="leaderboard-row questions-table-row" data-id="{{ q.id }}" data-title="{{ q.title | lower }}" data-status="{{ q.status }}" data-difficulty="{{ q.difficulty }}" data-solved="{{ q.solved }}" data-author="{{ q.author or '' }}">
                                 <td class="cell-status">
                                     {% if q.status == 'Accepted' %}
                                         <span class="badge active-badge font-weight-bold">🟢 <span class="status-text">{{ _('status_accepted') }}</span></span>
@@ -118,6 +145,11 @@
                                 <td class="cell-id">#{{ q.id }}</td>
                                 <td class="cell-title">
                                     <strong class="text-primary-title">{{ q.title }}</strong>
+                                    {% if q.author %}
+                                        <div class="question-author-sub" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                                            {{ _('questions_author_by') }} <strong>{{ q.author }}</strong>
+                                        </div>
+                                    {% endif %}
                                 </td>
                                 <td class="cell-difficulty">
                                     {{ "★" * q.difficulty }}

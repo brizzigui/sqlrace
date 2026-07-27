@@ -4,6 +4,7 @@ let currentSortColumn = 'id';
 let currentSortOrder = 'asc';
 let currentStatusFilters = new Set();
 let currentDifficultyFilters = new Set();
+let currentAuthorFilters = new Set();
 
 function toggleFiltersPanel() {
     const drawer = document.getElementById('arena-filters-drawer');
@@ -83,12 +84,48 @@ function setDifficultyFilter(val) {
     applyQuestionsFilterAndSort(true);
 }
 
+function setAuthorFilter(val) {
+    if (val === 'all') {
+        currentAuthorFilters.clear();
+    } else {
+        if (currentAuthorFilters.has(val)) {
+            currentAuthorFilters.delete(val);
+        } else {
+            currentAuthorFilters.add(val);
+        }
+    }
+    
+    // Update author pills UI
+    const container = document.getElementById('author-pills-container');
+    if (container) {
+        const allBtn = container.querySelector('.filter-pill[data-value="all"]');
+        const specificBtns = container.querySelectorAll('.filter-pill:not([data-value="all"])');
+        
+        if (currentAuthorFilters.size === 0) {
+            if (allBtn) allBtn.classList.add('active');
+            specificBtns.forEach(btn => btn.classList.remove('active'));
+        } else {
+            if (allBtn) allBtn.classList.remove('active');
+            specificBtns.forEach(btn => {
+                const bVal = btn.getAttribute('data-value');
+                if (currentAuthorFilters.has(bVal)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+    }
+    applyQuestionsFilterAndSort(true);
+}
+
 function resetAllFilters() {
     const searchInput = document.getElementById('questions-search-input');
     if (searchInput) searchInput.value = '';
     
     currentStatusFilters.clear();
     currentDifficultyFilters.clear();
+    currentAuthorFilters.clear();
     
     // Reset status pills UI
     const statusContainer = document.getElementById('status-pills-container');
@@ -103,6 +140,15 @@ function resetAllFilters() {
     const diffContainer = document.getElementById('difficulty-pills-container');
     if (diffContainer) {
         diffContainer.querySelectorAll('.filter-pill').forEach(btn => {
+            if (btn.getAttribute('data-value') === 'all') btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+    }
+    
+    // Reset author pills UI
+    const authorContainer = document.getElementById('author-pills-container');
+    if (authorContainer) {
+        authorContainer.querySelectorAll('.filter-pill').forEach(btn => {
             if (btn.getAttribute('data-value') === 'all') btn.classList.add('active');
             else btn.classList.remove('active');
         });
@@ -171,6 +217,7 @@ function applyQuestionsFilterAndSort(resetPage = true) {
     if (searchQuery) activeFilterCount++;
     activeFilterCount += currentStatusFilters.size;
     activeFilterCount += currentDifficultyFilters.size;
+    activeFilterCount += currentAuthorFilters.size;
     
     const badge = document.getElementById('active-filters-badge');
     if (badge) {
@@ -188,12 +235,19 @@ function applyQuestionsFilterAndSort(resetPage = true) {
         const title = (row.getAttribute('data-title') || '').toLowerCase();
         const status = row.getAttribute('data-status') || '';
         const difficulty = row.getAttribute('data-difficulty') || '';
+        const author = row.getAttribute('data-author') || '';
         
-        const matchSearch = !searchQuery || title.includes(searchQuery) || id.includes(searchQuery) || (`#${id}`).includes(searchQuery);
+        const matchSearch = !searchQuery || title.includes(searchQuery) || id.includes(searchQuery) || (`#${id}`).includes(searchQuery) || author.toLowerCase().includes(searchQuery);
         const matchStatus = (currentStatusFilters.size === 0) || currentStatusFilters.has(status);
         const matchDifficulty = (currentDifficultyFilters.size === 0) || currentDifficultyFilters.has(difficulty);
+        const matchAuthor = (currentAuthorFilters.size === 0) || Array.from(currentAuthorFilters).some(filterVal => {
+            if (filterVal === 'unassigned') {
+                return !author;
+            }
+            return author === filterVal;
+        });
         
-        return matchSearch && matchStatus && matchDifficulty;
+        return matchSearch && matchStatus && matchDifficulty && matchAuthor;
     });
     
     const statusWeight = {

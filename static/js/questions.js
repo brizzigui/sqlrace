@@ -2,8 +2,8 @@ let currentPage = 1;
 const pageSize = 10;
 let currentSortColumn = 'id';
 let currentSortOrder = 'asc';
-let currentStatusFilter = 'all';
-let currentDifficultyFilter = 'all';
+let currentStatusFilters = new Set();
+let currentDifficultyFilters = new Set();
 
 function toggleFiltersPanel() {
     const drawer = document.getElementById('arena-filters-drawer');
@@ -14,31 +14,71 @@ function toggleFiltersPanel() {
 }
 
 function setStatusFilter(val) {
-    currentStatusFilter = val;
+    if (val === 'all') {
+        currentStatusFilters.clear();
+    } else {
+        if (currentStatusFilters.has(val)) {
+            currentStatusFilters.delete(val);
+        } else {
+            currentStatusFilters.add(val);
+        }
+    }
+    
+    // Update status pills UI
     const container = document.getElementById('status-pills-container');
     if (container) {
-        container.querySelectorAll('.filter-pill').forEach(btn => {
-            if (btn.getAttribute('data-value') === val) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
+        const allBtn = container.querySelector('.filter-pill[data-value="all"]');
+        const specificBtns = container.querySelectorAll('.filter-pill:not([data-value="all"])');
+        
+        if (currentStatusFilters.size === 0) {
+            allBtn.classList.add('active');
+            specificBtns.forEach(btn => btn.classList.remove('active'));
+        } else {
+            allBtn.classList.remove('active');
+            specificBtns.forEach(btn => {
+                const bVal = btn.getAttribute('data-value');
+                if (currentStatusFilters.has(bVal)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
     }
     applyQuestionsFilterAndSort(true);
 }
 
 function setDifficultyFilter(val) {
-    currentDifficultyFilter = val;
+    if (val === 'all') {
+        currentDifficultyFilters.clear();
+    } else {
+        if (currentDifficultyFilters.has(val)) {
+            currentDifficultyFilters.delete(val);
+        } else {
+            currentDifficultyFilters.add(val);
+        }
+    }
+    
+    // Update difficulty pills UI
     const container = document.getElementById('difficulty-pills-container');
     if (container) {
-        container.querySelectorAll('.filter-pill').forEach(btn => {
-            if (btn.getAttribute('data-value') === val) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
+        const allBtn = container.querySelector('.filter-pill[data-value="all"]');
+        const specificBtns = container.querySelectorAll('.filter-pill:not([data-value="all"])');
+        
+        if (currentDifficultyFilters.size === 0) {
+            allBtn.classList.add('active');
+            specificBtns.forEach(btn => btn.classList.remove('active'));
+        } else {
+            allBtn.classList.remove('active');
+            specificBtns.forEach(btn => {
+                const bVal = btn.getAttribute('data-value');
+                if (currentDifficultyFilters.has(bVal)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
     }
     applyQuestionsFilterAndSort(true);
 }
@@ -47,8 +87,26 @@ function resetAllFilters() {
     const searchInput = document.getElementById('questions-search-input');
     if (searchInput) searchInput.value = '';
     
-    setStatusFilter('all');
-    setDifficultyFilter('all');
+    currentStatusFilters.clear();
+    currentDifficultyFilters.clear();
+    
+    // Reset status pills UI
+    const statusContainer = document.getElementById('status-pills-container');
+    if (statusContainer) {
+        statusContainer.querySelectorAll('.filter-pill').forEach(btn => {
+            if (btn.getAttribute('data-value') === 'all') btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+    }
+    
+    // Reset difficulty pills UI
+    const diffContainer = document.getElementById('difficulty-pills-container');
+    if (diffContainer) {
+        diffContainer.querySelectorAll('.filter-pill').forEach(btn => {
+            if (btn.getAttribute('data-value') === 'all') btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+    }
     
     currentSortColumn = 'id';
     currentSortOrder = 'asc';
@@ -111,8 +169,8 @@ function applyQuestionsFilterAndSort(resetPage = true) {
     // Update active filter badge counter
     let activeFilterCount = 0;
     if (searchQuery) activeFilterCount++;
-    if (currentStatusFilter !== 'all') activeFilterCount++;
-    if (currentDifficultyFilter !== 'all') activeFilterCount++;
+    activeFilterCount += currentStatusFilters.size;
+    activeFilterCount += currentDifficultyFilters.size;
     
     const badge = document.getElementById('active-filters-badge');
     if (badge) {
@@ -132,8 +190,8 @@ function applyQuestionsFilterAndSort(resetPage = true) {
         const difficulty = row.getAttribute('data-difficulty') || '';
         
         const matchSearch = !searchQuery || title.includes(searchQuery) || id.includes(searchQuery) || (`#${id}`).includes(searchQuery);
-        const matchStatus = (currentStatusFilter === 'all') || (status === currentStatusFilter);
-        const matchDifficulty = (currentDifficultyFilter === 'all') || (difficulty === currentDifficultyFilter);
+        const matchStatus = (currentStatusFilters.size === 0) || currentStatusFilters.has(status);
+        const matchDifficulty = (currentDifficultyFilters.size === 0) || currentDifficultyFilters.has(difficulty);
         
         return matchSearch && matchStatus && matchDifficulty;
     });

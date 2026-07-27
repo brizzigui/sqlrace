@@ -4293,6 +4293,7 @@ code[class*="language-"] {
     cursor: pointer;
     user-select: none;
     transition: var(--transition-smooth);
+    white-space: nowrap;
 }
 
 .sortable-th:hover {
@@ -4307,8 +4308,10 @@ code[class*="language-"] {
 .sort-icon {
     font-size: 0.75rem;
     opacity: 0.4;
-    margin-left: 4px;
+    margin-left: 6px;
     display: inline-block;
+    vertical-align: middle;
+    white-space: nowrap;
     transition: var(--transition-smooth);
 }
 
@@ -4328,8 +4331,8 @@ code[class*="language-"] {
 
 .col-status { width: 140px; text-align: center; }
 .col-id { width: 90px; }
-.col-difficulty { width: 130px; }
-.col-solved { width: 110px; text-align: center; }
+.col-difficulty { width: 150px; }
+.col-solved { width: 130px; text-align: center; }
 .col-action { width: 140px; text-align: center; }
 
 .cell-status { text-align: center; vertical-align: middle; padding: 14px 10px; }

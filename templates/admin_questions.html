@@ -52,6 +52,11 @@
                 </div>
                 
                 <div class="form-group">
+                    <label for="q_author">{{ _('questions_author') }}</label>
+                    <input type="text" id="q_author" name="author" placeholder="{{ _('placeholder_question_author') }}">
+                </div>
+                
+                <div class="form-group">
                     <label for="q_description">{{ _('admin_statement') }}</label>
                     <textarea id="q_description" name="description" rows="5" placeholder="{{ _('placeholder_question_desc') }}" required></textarea>
                 </div>
@@ -99,6 +104,7 @@
                             <th>{{ _('admin_question_title') }}</th>
                             <th style="width: 100px;">{{ _('admin_difficulty') }}</th>
                             <th style="width: 100px;">{{ _('admin_visibility') }}</th>
+                            <th style="width: 80px; text-align: center;">{{ _('questions_solved') }}</th>
                             <th>{{ _('admin_associate') }}</th>
                             <th style="width: 120px; text-align: center;">{{ _('admin_action') }}</th>
                         </tr>
@@ -115,6 +121,7 @@
                                             {{ _('admin_public') if q[2] == 'public' else _('admin_restricted') }}
                                         </span>
                                     </td>
+                                    <td style="text-align: center; font-weight: 600; color: var(--text-secondary);">{{ q[5] }}</td>
                                     <td><small style="color: var(--text-secondary);">{{ q[4] }}</small></td>
                                     <td style="text-align: center; vertical-align: middle;">
                                         <div style="display: flex; gap: 8px; align-items: center; justify-content: center;">
@@ -129,7 +136,7 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="6" class="text-muted text-center">{{ _('admin_no_questions') }}</td>
+                                <td colspan="7" class="text-muted text-center">{{ _('admin_no_questions') }}</td>
                             </tr>
                         {% endif %}
                     </tbody>

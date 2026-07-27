@@ -48,6 +48,10 @@
                 <input type="text" id="q_title" name="title" value="{{ question.title }}" placeholder="{{ _('placeholder_question_title') }}" required>
             </div>
             <div class="form-group">
+                <label for="q_author">{{ _('questions_author') }}</label>
+                <input type="text" id="q_author" name="author" value="{{ question.author or '' }}" placeholder="{{ _('placeholder_question_author') }}">
+            </div>
+            <div class="form-group">
                 <label for="q_description">{{ _('admin_statement') }}</label>
                 <textarea id="q_description" name="description" rows="5" placeholder="{{ _('placeholder_question_desc') }}" required>{{ question.description }}</textarea>
             </div>

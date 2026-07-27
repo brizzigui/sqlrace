@@ -93,6 +93,7 @@ def init_db():
             solution_sql TEXT NOT NULL,
             visibility VARCHAR(20) NOT NULL DEFAULT 'public',
             difficulty INT NOT NULL DEFAULT 1 CHECK (difficulty BETWEEN 1 AND 5),
+            author VARCHAR(255),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """)
@@ -159,7 +160,10 @@ def init_db():
         # 2. Add difficulty column to questions if it does not exist
         cur.execute("ALTER TABLE questions ADD COLUMN IF NOT EXISTS difficulty INT NOT NULL DEFAULT 1 CHECK (difficulty BETWEEN 1 AND 5);")
         
-        # 3. Add contest_id column to submissions if it does not exist
+        # 3. Add author column to questions if it does not exist
+        cur.execute("ALTER TABLE questions ADD COLUMN IF NOT EXISTS author VARCHAR(255);")
+        
+        # 4. Add contest_id column to submissions if it does not exist
         cur.execute("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS contest_id INT REFERENCES contests(id) ON DELETE CASCADE;")
 
         # 4. Add timing columns to submissions table for judging performance metrics

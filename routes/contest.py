@@ -63,12 +63,15 @@ def contest_dashboard(contest_id):
             ON CONFLICT DO NOTHING;
         """, (contest_id, team_id))
             
-        # Fetch questions for this contest via the join table
+        # Fetch questions for this contest via the join table with solved count
         cur.execute("""
-            SELECT q.id, q.title, q.difficulty 
+            SELECT q.id, q.title, q.difficulty, q.author,
+                   COUNT(DISTINCT CASE WHEN s.status = 'Accepted' THEN s.team_id END) AS solved_count
             FROM questions q
             JOIN contest_questions cq ON q.id = cq.question_id
+            LEFT JOIN submissions s ON q.id = s.question_id AND s.contest_id = cq.contest_id
             WHERE cq.contest_id = %s 
+            GROUP BY q.id, q.title, q.difficulty, q.author
             ORDER BY q.id ASC;
         """, (contest_id,))
         questions = cur.fetchall()
@@ -76,7 +79,7 @@ def contest_dashboard(contest_id):
         # Check status for each question
         question_list = []
         for q in questions:
-            q_id, q_title, q_difficulty = q
+            q_id, q_title, q_difficulty, q_author, q_solved = q
             cur.execute("""
                 SELECT status FROM submissions 
                 WHERE team_id = %s AND question_id = %s AND contest_id = %s
@@ -95,7 +98,9 @@ def contest_dashboard(contest_id):
             question_list.append({
                 'id': q_id,
                 'title': q_title,
-                'difficulty': q[2],
+                'difficulty': q_difficulty,
+                'author': q_author or '',
+                'solved': q_solved,
                 'status': status
             })
             
@@ -136,7 +141,7 @@ def question_details(contest_id, question_id):
             
         # Validate that the question belongs to this contest
         cur.execute("""
-            SELECT q.id, q.title, q.description, q.init_sql, q.difficulty 
+            SELECT q.id, q.title, q.description, q.init_sql, q.difficulty, q.author
             FROM questions q
             JOIN contest_questions cq ON q.id = cq.question_id
             WHERE q.id = %s AND cq.contest_id = %s;
@@ -164,7 +169,8 @@ def question_details(contest_id, question_id):
         'title': question[1],
         'description': question[2],
         'init_sql': question[3],
-        'difficulty': question[4]
+        'difficulty': question[4],
+        'author': question[5] or ''
     }
     
     # Format submissions
@@ -264,13 +270,21 @@ def submit_query(contest_id, question_id):
 def questions_list():
     team_id = session.get('team_id')
     with get_main_db() as cur:
-        # Fetch all public questions
-        cur.execute("SELECT id, title, description, difficulty FROM questions WHERE visibility = 'public' ORDER BY id ASC;")
+        # Fetch all public questions with solved count
+        cur.execute("""
+            SELECT q.id, q.title, q.description, q.difficulty, q.author,
+                   COUNT(DISTINCT CASE WHEN s.status = 'Accepted' THEN s.team_id END) AS solved_count
+            FROM questions q
+            LEFT JOIN submissions s ON q.id = s.question_id
+            WHERE q.visibility = 'public'
+            GROUP BY q.id, q.title, q.description, q.difficulty, q.author
+            ORDER BY q.id ASC;
+        """)
         questions = cur.fetchall()
         
         question_list = []
         for q in questions:
-            q_id, q_title, q_desc, q_diff = q
+            q_id, q_title, q_desc, q_diff, q_author, q_solved = q
             
             # Check user's submissions status
             cur.execute("""
@@ -292,7 +306,9 @@ def questions_list():
                 'id': q_id,
                 'title': q_title,
                 'description': q_desc,
-                'difficulty': q[3],
+                'difficulty': q_diff,
+                'author': q_author or '',
+                'solved': q_solved,
                 'status': status
             })
             
@@ -303,7 +319,7 @@ def questions_list():
 def practice_question_details(question_id):
     team_id = session.get('team_id')
     with get_main_db() as cur:
-        cur.execute("SELECT id, title, description, init_sql, difficulty FROM questions WHERE id = %s AND visibility = 'public';", (question_id,))
+        cur.execute("SELECT id, title, description, init_sql, difficulty, author FROM questions WHERE id = %s AND visibility = 'public';", (question_id,))
         question = cur.fetchone()
         if not question:
             flash(_('flash_question_restricted'), 'danger')
@@ -323,7 +339,8 @@ def practice_question_details(question_id):
         'title': question[1],
         'description': question[2],
         'init_sql': question[3],
-        'difficulty': question[4]
+        'difficulty': question[4],
+        'author': question[5] or ''
     }
     
     formatted_subs = []

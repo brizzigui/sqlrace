@@ -76,14 +76,17 @@ def admin_contests():
 @admin_required
 def admin_questions():
     with get_main_db() as cur:
-        # Get questions with their associated contests and difficulty
+        # Get questions with their associated contests, difficulty, solved count and author
         cur.execute("""
             SELECT q.id, q.title, q.visibility, q.difficulty,
-                   COALESCE(string_agg(c.title, ', '), 'None') as contests_list
+                   COALESCE(string_agg(c.title, ', '), 'None') as contests_list,
+                   COUNT(DISTINCT CASE WHEN s.status = 'Accepted' THEN s.team_id END) as solved_count,
+                   q.author
             FROM questions q
             LEFT JOIN contest_questions cq ON q.id = cq.question_id
             LEFT JOIN contests c ON cq.contest_id = c.id
-            GROUP BY q.id, q.title, q.visibility, q.difficulty
+            LEFT JOIN submissions s ON q.id = s.question_id
+            GROUP BY q.id, q.title, q.visibility, q.difficulty, q.author
             ORDER BY q.id DESC;
         """)
         questions = cur.fetchall()
@@ -222,6 +225,7 @@ def edit_contest(contest_id):
 def create_question():
     title = request.form.get('title', '').strip()
     description = request.form.get('description', '').strip()
+    author = request.form.get('author', '').strip()
     init_sql = request.form.get('init_sql', '').strip()
     solution_sql = request.form.get('solution_sql', '').strip()
     visibility = request.form.get('visibility', 'public').strip()
@@ -239,9 +243,9 @@ def create_question():
     try:
         with get_main_db() as cur:
             cur.execute("""
-                INSERT INTO questions (title, description, init_sql, solution_sql, visibility, difficulty)
-                VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;
-            """, (title, description, init_sql, solution_sql, visibility, difficulty))
+                INSERT INTO questions (title, description, init_sql, solution_sql, visibility, difficulty, author)
+                VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id;
+            """, (title, description, init_sql, solution_sql, visibility, difficulty, author))
             q_id = cur.fetchone()[0]
             
         log_audit('QUESTION', 'CREATE_QUESTION', f"Created question '{title}' (ID: {q_id})", level='INFO', user_id=session.get('team_id'), username=session.get('username'), ip_address=request.remote_addr)
@@ -344,7 +348,7 @@ def clear_question_solutions(question_id):
 def edit_question_view(question_id):
     with get_main_db() as cur:
         cur.execute("""
-            SELECT id, title, description, init_sql, solution_sql, visibility, difficulty 
+            SELECT id, title, description, init_sql, solution_sql, visibility, difficulty, author 
             FROM questions WHERE id = %s;
         """, (question_id,))
         question = cur.fetchone()
@@ -359,7 +363,8 @@ def edit_question_view(question_id):
         'init_sql': question[3],
         'solution_sql': question[4],
         'visibility': question[5],
-        'difficulty': question[6]
+        'difficulty': question[6],
+        'author': question[7] or ''
     }
     return render_template('admin_edit_question.html', question=q_data)
 
@@ -368,6 +373,7 @@ def edit_question_view(question_id):
 def edit_question(question_id):
     title = request.form.get('title', '').strip()
     description = request.form.get('description', '').strip()
+    author = request.form.get('author', '').strip()
     init_sql = request.form.get('init_sql', '').strip()
     solution_sql = request.form.get('solution_sql', '').strip()
     visibility = request.form.get('visibility', 'public').strip()
@@ -386,9 +392,9 @@ def edit_question(question_id):
         with get_main_db() as cur:
             cur.execute("""
                 UPDATE questions 
-                SET title = %s, description = %s, init_sql = %s, solution_sql = %s, visibility = %s, difficulty = %s 
+                SET title = %s, description = %s, init_sql = %s, solution_sql = %s, visibility = %s, difficulty = %s, author = %s 
                 WHERE id = %s;
-            """, (title, description, init_sql, solution_sql, visibility, difficulty, question_id))
+            """, (title, description, init_sql, solution_sql, visibility, difficulty, author, question_id))
         log_audit('QUESTION', 'EDIT_QUESTION', f"Updated question '{title}' (ID: {question_id})", level='INFO', user_id=session.get('team_id'), username=session.get('username'), ip_address=request.remote_addr)
         flash(_('flash_question_updated', title=title), "success")
     except Exception as e:

@@ -36,8 +36,15 @@
         <div class="panel-body scrollable">
             <div class="problem-intro" id="problem-intro-heading">
                 <h1>{{ question.title }}</h1>
-                <div class="difficulty-display" style="color: var(--color-upcoming); font-size: 0.95rem; margin-top: 4px; letter-spacing: 2px;">
-                    {{ "★" * question.difficulty }}
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; flex-wrap: wrap; gap: 8px;">
+                    <div class="difficulty-display" style="color: var(--color-upcoming); font-size: 0.95rem; letter-spacing: 2px;">
+                        {{ "★" * question.difficulty }}
+                    </div>
+                    {% if question.author %}
+                        <div class="author-display" style="color: var(--text-muted); font-size: 0.85rem;">
+                            ✍️ {{ _('questions_author') }}: <strong style="color: var(--text-primary);">{{ question.author }}</strong>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             

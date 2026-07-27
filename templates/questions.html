@@ -19,6 +19,7 @@
                         <th style="width: 80px;">{{ _('questions_id') }}</th>
                         <th>{{ _('questions_name') }}</th>
                         <th style="width: 120px;">{{ _('admin_difficulty') }}</th>
+                        <th style="width: 100px; text-align: center;">{{ _('questions_solved') }}</th>
                         <th style="width: 150px; text-align: center;">{{ _('questions_action') }}</th>
                     </tr>
                 </thead>
@@ -42,6 +43,9 @@
                                 <td style="vertical-align: middle; padding: 16px 8px; color: var(--color-upcoming); font-size: 1rem; letter-spacing: 2px;">
                                     {{ "★" * q.difficulty }}
                                 </td>
+                                <td style="vertical-align: middle; text-align: center; padding: 16px 8px; color: var(--text-secondary); font-weight: 600; font-size: 0.95rem;">
+                                    {{ q.solved }}
+                                </td>
                                 <td style="text-align: center; vertical-align: middle; padding: 16px 8px;">
                                     <a href="{{ url_for('contest.practice_question_details', question_id=q.id) }}" class="btn btn-outline" style="padding: 6px 16px; font-size: 0.9rem; display: inline-block;">
                                         {{ _('questions_solve') }}
@@ -51,7 +55,7 @@
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td colspan="4" class="text-muted text-center" style="padding: 40px; font-size: 1.1rem;">
+                            <td colspan="6" class="text-muted text-center" style="padding: 40px; font-size: 1.1rem;">
                                 {{ _('questions_no_questions') }}
                             </td>
                         </tr>

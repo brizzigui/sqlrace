@@ -32,7 +32,10 @@
                                 <span class="question-number">#{{ loop.index }}</span>
                                 <div class="question-text-details">
                                     <h3>{{ q.title }}</h3>
-                                    <span style="color: var(--color-upcoming); font-size: 0.85rem;">{{ "★" * q.difficulty }}</span>
+                                    <div style="display: flex; gap: 12px; align-items: center; font-size: 0.85rem; margin-top: 2px;">
+                                        <span style="color: var(--color-upcoming);">{{ "★" * q.difficulty }}</span>
+                                        <span style="color: var(--text-muted); font-size: 0.8rem;">👥 {{ _('questions_solved') }}: {{ q.solved }}</span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="question-item-actions">

@@ -858,9 +858,9 @@ TRANSLATIONS = {
 from flask import session
 
 def translate(key, **kwargs):
-    lang = session.get('lang', 'en')
-    lang_dict = TRANSLATIONS.get(lang, TRANSLATIONS['en'])
-    msg = lang_dict.get(key, TRANSLATIONS['en'].get(key, key))
+    lang = session.get('lang', 'pt')
+    lang_dict = TRANSLATIONS.get(lang, TRANSLATIONS['pt'])
+    msg = lang_dict.get(key, TRANSLATIONS['pt'].get(key, key))
     if kwargs:
         try:
             return msg.format(**kwargs)

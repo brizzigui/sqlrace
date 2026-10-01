@@ -41,11 +41,11 @@ def create_app():
 
     @app.context_processor
     def inject_translation():
-        lang = session.get('lang', 'en')
+        lang = session.get('lang', 'pt')
         def translate(key, **kwargs):
-            lang_dict = TRANSLATIONS.get(lang, TRANSLATIONS['en'])
+            lang_dict = TRANSLATIONS.get(lang, TRANSLATIONS['pt'])
             # Return value or default to key
-            val = lang_dict.get(key, TRANSLATIONS['en'].get(key, key))
+            val = lang_dict.get(key, TRANSLATIONS['pt'].get(key, key))
             if kwargs:
                 try:
                     return val.format(**kwargs)

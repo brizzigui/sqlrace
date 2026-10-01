@@ -194,7 +194,7 @@ def format_join_duration(created_at):
     delta = now - created_at
     days = delta.days
     
-    lang = session.get('lang', 'en')
+    lang = session.get('lang', 'pt')
     if lang == 'pt':
         date_formatted = created_at.strftime("%d/%m/%Y")
     else:

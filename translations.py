@@ -366,7 +366,33 @@ TRANSLATIONS = {
         'flash_logs_clear_failed': 'Failed to clear logs: {error}',
         'logs_page_prev': 'Previous',
         'logs_page_next': 'Next',
-        'logs_page_info': 'Page {page} of {total_pages} ({total_logs} total logs)'
+        'logs_page_info': 'Page {page} of {total_pages} ({total_logs} total logs)',
+
+        # Password Management & Admin Reset
+        'admin_reset_password': 'Reset Password',
+        'admin_reset_password_confirm': 'Are you sure you want to reset the password for team "{username}"? An 8-letter temporary password will be generated.',
+        'admin_temp_password_title': 'Temporary Password Generated',
+        'admin_temp_password_info': 'A temporary 8-letter password was generated for team "{username}". Share this password with the user. They will be forced to choose a new password upon logging in.',
+        'admin_copy_password': 'Copy Password',
+        'admin_copied': 'Copied!',
+        'admin_temp_password_active': 'Temp Password',
+        'flash_password_reset_success': 'Password for team "{username}" was reset. Temporary password: {temp_password}',
+        'flash_password_reset_failed': 'Failed to reset password: {error}',
+        'flash_must_change_password': 'You are logged in with a temporary password. Please set a new definitive password to continue.',
+        'flash_current_password_incorrect': 'Current password is incorrect.',
+        'flash_passwords_do_not_match': 'New passwords do not match.',
+        'flash_password_changed_success': 'Password changed successfully.',
+        'auth_change_password': 'Change Password',
+        'auth_current_password': 'Current Password',
+        'auth_new_password': 'New Password',
+        'auth_confirm_new_password': 'Confirm New Password',
+        'auth_change_password_sub': 'Enter your current password and choose a new permanent password.',
+        'auth_forced_change_password_title': 'Set Definitive Password',
+        'auth_forced_change_password_sub': 'Your password was reset by an administrator. You must set a new definitive password before accessing the system.',
+        'auth_update_password_btn': 'Update Password',
+        'auth_set_new_password_btn': 'Set New Password',
+        'auth_password_change_required': 'Password Change Required',
+        'profile_change_password': 'Change Password'
     },
     'pt': {
         # Nav Header
@@ -735,7 +761,33 @@ TRANSLATIONS = {
         'flash_logs_clear_failed': 'Falha ao limpar logs: {error}',
         'logs_page_prev': 'Anterior',
         'logs_page_next': 'Próxima',
-        'logs_page_info': 'Página {page} de {total_pages} ({total_logs} logs no total)'
+        'logs_page_info': 'Página {page} de {total_pages} ({total_logs} logs no total)',
+
+        # Password Management & Admin Reset
+        'admin_reset_password': 'Redefinir Senha',
+        'admin_reset_password_confirm': 'Tem certeza que deseja redefinir a senha da equipe "{username}"? Uma senha temporária de 8 letras será gerada.',
+        'admin_temp_password_title': 'Senha Temporária Gerada',
+        'admin_temp_password_info': 'Uma senha temporária de 8 letras foi gerada para a equipe "{username}". Forneça esta senha ao usuário. Ele será obrigado a definir uma nova senha ao entrar.',
+        'admin_copy_password': 'Copiar Senha',
+        'admin_copied': 'Copiado!',
+        'admin_temp_password_active': 'Senha Temporária',
+        'flash_password_reset_success': 'A senha da equipe "{username}" foi redefinida. Senha temporária: {temp_password}',
+        'flash_password_reset_failed': 'Falha ao redefinir senha: {error}',
+        'flash_must_change_password': 'Você entrou com uma senha temporária. Por favor, defina uma nova senha definitiva para continuar.',
+        'flash_current_password_incorrect': 'A senha atual está incorreta.',
+        'flash_passwords_do_not_match': 'As novas senhas não coincidem.',
+        'flash_password_changed_success': 'Senha alterada com sucesso.',
+        'auth_change_password': 'Alterar Senha',
+        'auth_current_password': 'Senha Atual',
+        'auth_new_password': 'Nova Senha',
+        'auth_confirm_new_password': 'Confirmar Nova Senha',
+        'auth_change_password_sub': 'Digite sua senha atual e escolha uma nova senha definitiva.',
+        'auth_forced_change_password_title': 'Definir Senha Definitiva',
+        'auth_forced_change_password_sub': 'Sua senha foi redefinida por um administrador. Você deve definir uma nova senha definitiva antes de acessar o sistema.',
+        'auth_update_password_btn': 'Atualizar Senha',
+        'auth_set_new_password_btn': 'Definir Nova Senha',
+        'auth_password_change_required': 'Troca de Senha Obrigatória',
+        'profile_change_password': 'Alterar Senha'
     }
 }
 

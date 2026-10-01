@@ -4063,3 +4063,13 @@ code[class*="language-"] {
         font-size: 0.8rem;
     }
 }
+
+.btn-warning-text {
+    color: #f59e0b;
+}
+
+.btn-warning-text:hover {
+    text-decoration: underline;
+    color: #fbbf24;
+}
+

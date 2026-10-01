@@ -69,7 +69,8 @@ def init_db():
             username VARCHAR(100) UNIQUE NOT NULL,
             password_hash VARCHAR(255) NOT NULL,
             is_admin BOOLEAN DEFAULT FALSE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            must_change_password BOOLEAN DEFAULT FALSE
         );
         """)
         
@@ -149,9 +150,10 @@ def init_db():
         """)
 
         # Migration queries for existing databases
-        # 0. Add created_at and avatar_seed columns to teams if they do not exist
+        # 0. Add created_at, avatar_seed, and must_change_password columns to teams if they do not exist
         cur.execute("ALTER TABLE teams ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;")
         cur.execute("ALTER TABLE teams ADD COLUMN IF NOT EXISTS avatar_seed VARCHAR(100);")
+        cur.execute("ALTER TABLE teams ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN DEFAULT FALSE;")
 
         # 1. Add visibility column to questions if it does not exist
         cur.execute("ALTER TABLE questions ADD COLUMN IF NOT EXISTS visibility VARCHAR(20) NOT NULL DEFAULT 'public';")
@@ -220,4 +222,5 @@ def log_audit(category, action, message, level='INFO', user_id=None, username=No
             """, (category, action, message, level, user_id, username, ip_address))
     except Exception as e:
         print(f"Failed to record audit log: {e}")
+
 

@@ -27,6 +27,20 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+@bp.before_app_request
+def enforce_password_change():
+    """
+    Enforces that any user flagged with must_change_password must update
+    their password before accessing any other application resource.
+    """
+    if session.get('team_id') and session.get('must_change_password'):
+        if request.path.startswith('/static/'):
+            return None
+        allowed_endpoints = {'auth.change_password', 'auth.logout', 'set_lang'}
+        if request.endpoint and request.endpoint in allowed_endpoints:
+            return None
+        return redirect(url_for('auth.change_password'))
+
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
     if 'team_id' in session:
@@ -81,15 +95,19 @@ def login():
             return render_template('login.html')
             
         with get_main_db() as cur:
-            cur.execute("SELECT id, username, password_hash, is_admin FROM teams WHERE username = %s;", (username,))
+            cur.execute("SELECT id, username, password_hash, is_admin, COALESCE(must_change_password, FALSE) FROM teams WHERE username = %s;", (username,))
             user = cur.fetchone()
             
         if user and check_password_hash(user[2], password):
             session['team_id'] = user[0]
             session['username'] = user[1]
             session['is_admin'] = user[3]
+            session['must_change_password'] = bool(user[4])
             log_audit('AUTH', 'LOGIN_SUCCESS', f"Team '{username}' logged in successfully", level='INFO', user_id=user[0], username=username, ip_address=request.remote_addr)
             flash(_('flash_login_success', username=username), 'success')
+            if session['must_change_password']:
+                flash(_('flash_must_change_password'), 'warning')
+                return redirect(url_for('auth.change_password'))
             if user[3]:
                 return redirect(url_for('admin.admin_dashboard'))
             return redirect(url_for('contest.contests_list'))
@@ -108,6 +126,61 @@ def logout():
     session.clear()
     flash(_('flash_logout_info'), 'info')
     return redirect(url_for('auth.login'))
+
+@bp.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    team_id = session.get('team_id')
+    is_forced = bool(session.get('must_change_password', False))
+    
+    if request.method == 'POST':
+        current_password = request.form.get('current_password', '').strip()
+        new_password = request.form.get('new_password', '').strip()
+        confirm_password = request.form.get('confirm_password', '').strip()
+        
+        with get_main_db() as cur:
+            cur.execute("SELECT id, username, password_hash, is_admin, COALESCE(must_change_password, FALSE) FROM teams WHERE id = %s;", (team_id,))
+            user = cur.fetchone()
+            
+        if not user:
+            flash(_('flash_login_first'), 'danger')
+            return redirect(url_for('auth.login'))
+            
+        # If not forced, require current password verification
+        if not is_forced:
+            if not current_password:
+                flash(_('flash_auth_required'), 'danger')
+                return render_template('change_password.html', is_forced=is_forced)
+            if not check_password_hash(user[2], current_password):
+                flash(_('flash_current_password_incorrect'), 'danger')
+                return render_template('change_password.html', is_forced=is_forced)
+                
+        if not new_password or not confirm_password:
+            flash(_('flash_auth_required'), 'danger')
+            return render_template('change_password.html', is_forced=is_forced)
+            
+        if new_password != confirm_password:
+            flash(_('flash_passwords_do_not_match'), 'danger')
+            return render_template('change_password.html', is_forced=is_forced)
+            
+        # Update password and clear must_change_password flag
+        hashed_pw = generate_password_hash(new_password)
+        with get_main_db() as cur:
+            cur.execute("UPDATE teams SET password_hash = %s, must_change_password = FALSE WHERE id = %s;", (hashed_pw, team_id))
+            
+        session['must_change_password'] = False
+        username = user[1]
+        log_audit('AUTH', 'PASSWORD_CHANGE', f"Team '{username}' successfully changed their password", level='INFO', user_id=team_id, username=username, ip_address=request.remote_addr)
+        flash(_('flash_password_changed_success'), 'success')
+        
+        if is_forced:
+            if user[3]: # is_admin
+                return redirect(url_for('admin.admin_dashboard'))
+            return redirect(url_for('contest.contests_list'))
+        else:
+            return redirect(url_for('auth.team_profile', team_id=team_id))
+            
+    return render_template('change_password.html', is_forced=is_forced)
 
 from flask import Response
 from datetime import datetime

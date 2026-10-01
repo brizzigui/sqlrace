@@ -10,6 +10,30 @@
         <p>{{ _('admin_teams_subtitle') }}</p>
     </div>
 
+    {% if temp_password_info %}
+    <!-- Temporary Password Card -->
+    <div class="admin-card temp-password-banner" style="border: 1px solid rgba(245, 158, 11, 0.5); background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(30, 41, 59, 0.85) 100%); margin-bottom: 24px; position: relative; border-radius: 12px; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <span style="font-size: 1.4rem;">🔑</span>
+                    <h3 style="margin: 0; color: #fbbf24; font-size: 1.15rem; font-weight: 700;">{{ _('admin_temp_password_title') }}</h3>
+                </div>
+                <p style="color: var(--text-secondary); margin: 0 0 16px 0; font-size: 0.9rem; max-width: 650px;">
+                    {{ _('admin_temp_password_info', username=temp_password_info.username) }}
+                </p>
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <div style="background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 8px; padding: 8px 18px; font-family: var(--font-mono); font-size: 1.25rem; letter-spacing: 3px; font-weight: 700; color: #fef08a; user-select: all;" id="temp-password-text">{{ temp_password_info.password }}</div>
+                    <button type="button" class="btn btn-primary" onclick="copyTempPassword()" id="copy-pwd-btn" style="padding: 8px 16px; font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">
+                        <span>📋</span> <span id="copy-btn-label">{{ _('admin_copy_password') }}</span>
+                    </button>
+                </div>
+            </div>
+            <button type="button" onclick="this.closest('.temp-password-banner').remove()" class="alert-close" style="color: var(--text-muted); font-size: 1.5rem; background: none; border: none; cursor: pointer; padding: 4px 8px; line-height: 1;">&times;</button>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Teams List Card -->
     <div class="admin-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 16px; flex-wrap: wrap;">
@@ -25,7 +49,7 @@
                         <th>{{ _('admin_team_username') }}</th>
                         <th style="width: 200px;">{{ _('admin_created_at') }}</th>
                         <th style="width: 150px;">{{ _('admin_role') }}</th>
-                        <th style="width: 100px; text-align: center;">{{ _('admin_action') or 'Action' }}</th>
+                        <th style="width: 200px; text-align: center;">{{ _('admin_action') or 'Action' }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -42,6 +66,9 @@
                                         {% if team[0] == session.get('team_id') %}
                                             <span class="badge active-badge" style="font-size: 0.75rem; padding: 2px 6px; margin-left: 2px; border-radius: 4px; vertical-align: middle;">{{ _('admin_you') }}</span>
                                         {% endif %}
+                                        {% if team[4] %}
+                                            <span class="badge" style="font-size: 0.72rem; padding: 2px 6px; margin-left: 4px; border-radius: 4px; background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); vertical-align: middle;" title="{{ _('admin_temp_password_info', username=team[1]) }}">🔑 {{ _('admin_temp_password_active') }}</span>
+                                        {% endif %}
                                     </div>
                                 </td>
                                 <td><span style="color: var(--text-secondary); font-size: 0.9rem;">{{ team[2].strftime('%Y-%m-%d %H:%M:%S') }}</span></td>
@@ -57,10 +84,13 @@
                                         </form>
                                     {% endif %}
                                 </td>
-                                <td style="text-align: center; vertical-align: middle;">
-                                    {% if team[0] == session.get('team_id') %}
-                                        <span style="color: var(--text-muted); font-size: 0.85rem;">-</span>
-                                    {% else %}
+                                <td style="text-align: center; vertical-align: middle; white-space: nowrap;">
+                                    <form action="{{ url_for('admin.reset_team_password', team_id=team[0]) }}" method="POST" onsubmit="return confirm('{{ _('admin_reset_password_confirm', username=team[1]) }}');" style="margin: 0; display: inline;">
+                                        <button type="submit" class="btn-text btn-warning-text" style="font-size: 0.85rem; margin-right: 8px;" title="{{ _('admin_reset_password') }}">
+                                            🔑 {{ _('admin_reset_password') }}
+                                        </button>
+                                    </form>
+                                    {% if team[0] != session.get('team_id') %}
                                         <form action="{{ url_for('admin.delete_team', team_id=team[0]) }}" method="POST" onsubmit="return confirm('{{ _('admin_delete_team_confirm') }}');" style="margin: 0; display: inline;">
                                             <button type="submit" class="btn-text btn-danger-text" style="font-size: 0.85rem;">{{ _('admin_delete') or 'Delete' }}</button>
                                         </form>
@@ -92,6 +122,22 @@ function filterTeams() {
             row.style.display = '';
         } else {
             row.style.display = 'none';
+        }
+    });
+}
+
+function copyTempPassword() {
+    const el = document.getElementById('temp-password-text');
+    if (!el) return;
+    const pwdText = el.innerText.trim();
+    navigator.clipboard.writeText(pwdText).then(() => {
+        const btnLabel = document.getElementById('copy-btn-label');
+        if (btnLabel) {
+            const orig = btnLabel.innerText;
+            btnLabel.innerText = "{{ _('admin_copied') }}";
+            setTimeout(() => {
+                btnLabel.innerText = orig;
+            }, 2500);
         }
     });
 }

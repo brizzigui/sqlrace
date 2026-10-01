@@ -3,9 +3,12 @@ import shutil
 import math
 import subprocess
 import uuid
+import secrets
+import string
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
 from translations import translate as _
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash
 from routes.auth import admin_required
 from database import get_main_db, log_audit, main_pool, sandbox_pool
 from datetime import datetime
@@ -23,6 +26,10 @@ def format_bytes(size):
     p = math.pow(1024, i)
     s = round(size / p, 2)
     return f"{s} {size_name[i]}"
+
+def generate_temporary_password(length=8):
+    """Generates an 8-letter random ASCII alphabetic string."""
+    return ''.join(secrets.choice(string.ascii_letters) for _ in range(length))
 
 @bp.route('/admin')
 @admin_required
@@ -95,10 +102,11 @@ def admin_questions():
 def admin_teams():
     with get_main_db() as cur:
         # Get all registered teams
-        cur.execute("SELECT id, username, created_at, is_admin FROM teams ORDER BY id ASC;")
+        cur.execute("SELECT id, username, created_at, is_admin, COALESCE(must_change_password, FALSE) FROM teams ORDER BY id ASC;")
         teams = cur.fetchall()
         
-    return render_template('admin_teams.html', teams=teams)
+    temp_password_info = session.pop('temp_password_info', None)
+    return render_template('admin_teams.html', teams=teams, temp_password_info=temp_password_info)
 
 @bp.route('/admin/contest/create', methods=['POST'])
 @admin_required
@@ -407,6 +415,30 @@ def delete_team(team_id):
         flash(_('flash_team_deleted'), "warning")
     except Exception as e:
         flash(_('flash_team_delete_failed', error=str(e)), "danger")
+        
+    return redirect(url_for('admin.admin_teams'))
+
+@bp.route('/admin/team/reset_password/<int:team_id>', methods=['POST'])
+@admin_required
+def reset_team_password(team_id):
+    try:
+        with get_main_db() as cur:
+            cur.execute("SELECT id, username FROM teams WHERE id = %s;", (team_id,))
+            team = cur.fetchone()
+            if not team:
+                flash("Team not found.", "danger")
+                return redirect(url_for('admin.admin_teams'))
+                
+            temp_password = generate_temporary_password(8)
+            hashed_pw = generate_password_hash(temp_password)
+            cur.execute("UPDATE teams SET password_hash = %s, must_change_password = TRUE WHERE id = %s;", (hashed_pw, team_id))
+            
+        username = team[1]
+        session['temp_password_info'] = {'username': username, 'password': temp_password}
+        log_audit('AUTH', 'RESET_PASSWORD', f"Admin '{session.get('username')}' reset password for team '{username}'", level='WARNING', user_id=session.get('team_id'), username=session.get('username'), ip_address=request.remote_addr)
+        flash(_('flash_password_reset_success', username=username, temp_password=temp_password), "success")
+    except Exception as e:
+        flash(_('flash_password_reset_failed', error=str(e)), "danger")
         
     return redirect(url_for('admin.admin_teams'))
 

@@ -86,7 +86,7 @@ def admin_questions():
         # Get questions with their associated contests, difficulty, solved count and author
         cur.execute("""
             SELECT q.id, q.title, q.visibility, q.difficulty,
-                   COALESCE(string_agg(c.title, ', '), 'None') as contests_list,
+                   COALESCE(string_agg(DISTINCT c.title, ', ' ORDER BY c.title), 'None') as contests_list,
                    COUNT(DISTINCT CASE WHEN s.status = 'Accepted' THEN s.team_id END) as solved_count,
                    q.author
             FROM questions q
@@ -140,10 +140,11 @@ def create_contest():
             contest_id = cur.fetchone()[0]
             
             # Associate selected questions
-            for q_id in question_ids:
+            for q_id in set(question_ids):
                 cur.execute("""
                     INSERT INTO contest_questions (contest_id, question_id)
-                    VALUES (%s, %s);
+                    VALUES (%s, %s)
+                    ON CONFLICT DO NOTHING;
                 """, (contest_id, int(q_id)))
             
         log_audit('CONTEST', 'CREATE_CONTEST', f"Created contest '{title}' (ID: {contest_id})", level='INFO', user_id=session.get('team_id'), username=session.get('username'), ip_address=request.remote_addr)
@@ -184,10 +185,11 @@ def edit_contest(contest_id):
                 
                 # Update questions association
                 cur.execute("DELETE FROM contest_questions WHERE contest_id = %s;", (contest_id,))
-                for q_id in question_ids:
+                for q_id in set(question_ids):
                     cur.execute("""
                         INSERT INTO contest_questions (contest_id, question_id)
-                        VALUES (%s, %s);
+                        VALUES (%s, %s)
+                        ON CONFLICT DO NOTHING;
                     """, (contest_id, int(q_id)))
                     
             log_audit('CONTEST', 'EDIT_CONTEST', f"Updated contest '{title}' (ID: {contest_id})", level='INFO', user_id=session.get('team_id'), username=session.get('username'), ip_address=request.remote_addr)

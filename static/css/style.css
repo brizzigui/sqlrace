@@ -562,6 +562,39 @@ textarea {
     border-color: var(--border-hover);
 }
 
+.btn-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #0b0f19;
+    font-weight: 700;
+    border: 1px solid rgba(245, 158, 11, 0.5);
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.25);
+    transition: var(--transition-smooth);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-warning:hover:not(:disabled) {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: #0b0f19;
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.45);
+    transform: translateY(-1px);
+}
+
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+}
+
+.btn-xs {
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    border-radius: 4px;
+}
+
 .btn-block {
     display: block;
     width: 100%;
@@ -662,7 +695,7 @@ textarea {
 
 .contest-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 24px;
 }
 
@@ -691,11 +724,24 @@ textarea {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    gap: 12px;
 }
 
 .contest-card-header h3 {
     font-size: 1.25rem;
     font-weight: 700;
+    margin: 0;
+    line-height: 1.35;
+    word-break: break-word;
+    flex: 1 1 auto;
+}
+
+.contest-card-badges {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
 }
 
 .badge {
@@ -735,9 +781,10 @@ textarea {
 .upcoming-card .contest-timer { color: var(--color-upcoming); }
 
 .contest-actions {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto;
 }
 
 /* Contest Dashboard Layout */
@@ -4508,17 +4555,35 @@ code[class*="language-"] {
 
 /* Blind Mode Badges & Utilities */
 .badge-frozen {
-    background: rgba(56, 189, 248, 0.2);
-    border: 1px solid #38bdf8;
-    color: #38bdf8;
-    font-weight: 600;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.6);
+    color: #fbbf24;
+    font-weight: 700;
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .badge-blind {
-    background: rgba(56, 189, 248, 0.2);
-    border: 1px solid #38bdf8;
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.6);
     color: #38bdf8;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .badge-blind-sub {
@@ -4529,5 +4594,8 @@ code[class*="language-"] {
     color: #38bdf8;
     border: 1px solid rgba(56, 189, 248, 0.4);
     font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
 }
 

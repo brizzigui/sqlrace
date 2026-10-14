@@ -86,9 +86,28 @@
 .spotlight-avatar {
     width: 52px;
     height: 52px;
-    border-radius: 10px;
+    border-radius: 12px;
     border: 2px solid var(--primary-color);
-    background: #000;
+    background: #090d16;
+    object-fit: cover;
+    flex-shrink: 0;
+    transition: var(--transition-smooth);
+}
+
+.table-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: #090d16;
+    flex-shrink: 0;
+}
+
+.cell-pending {
+    background: rgba(245, 158, 11, 0.12) !important;
+    border: 1px solid rgba(245, 158, 11, 0.45) !important;
+    color: #fbbf24 !important;
 }
 
 .spotlight-details h3 {
@@ -256,7 +275,7 @@
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
             <a href="{{ url_for('leaderboard.show_leaderboard', contest_id=contest.id) }}" class="btn btn-outline" target="_blank">
-                🌐 Ver Placar Público
+                🌐 {{ _('contest_scoreboard') }}
             </a>
         </div>
     </div>
@@ -269,7 +288,7 @@
                 <div>
                     <strong>{{ _('reveal_already_published') }}</strong>
                     <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: var(--text-secondary);">
-                        Todos os participantes agora têm acesso ao placar final completo com as submissões do blind.
+                        {{ _('reveal_already_published_desc') }}
                     </p>
                 </div>
             </div>
@@ -280,9 +299,9 @@
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <span style="font-size: 1.5rem;">🔒</span>
                     <div>
-                        <strong>Modo de Revelação Privada (Admin)</strong>
+                        <strong>{{ _('reveal_private_mode_title') }}</strong>
                         <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: var(--text-secondary);">
-                            O placar permanece congelado para todos os outros usuários. As revelações e animações nesta tela são estritamente locais até que você clique em <strong>"{{ _('reveal_publish_btn') }}"</strong>.
+                            {{ _('reveal_private_mode_desc') }}
                         </p>
                     </div>
                 </div>
@@ -330,17 +349,17 @@
     <!-- Spotlight / Event Bar -->
     <div class="reveal-spotlight" id="reveal-spotlight">
         <div class="spotlight-info">
-            <img id="spotlight-avatar" src="{{ url_for('static', filename='favicon.svg') }}" alt="Avatar" class="spotlight-avatar">
+            <img id="spotlight-avatar" src="{{ url_for('static', filename='favicon.svg') }}" alt="" class="spotlight-avatar" onerror="this.onerror=null; this.src='{{ url_for('static', filename='favicon.svg') }}';">
             <div class="spotlight-details">
-                <h3 id="spotlight-team-name">Pronto para iniciar a revelação</h3>
+                <h3 id="spotlight-team-name">{{ _('reveal_ready_title') }}</h3>
                 <div class="spotlight-meta" id="spotlight-desc">
-                    Pressione "Próxima Submissão" ou a barra de espaço para começar a revelar a partir do último colocado.
+                    {{ _('reveal_ready_desc') }}
                 </div>
             </div>
         </div>
         <div id="spotlight-outcome-box">
             <div class="spotlight-outcome" style="background: rgba(255,255,255,0.08); color: var(--text-muted);">
-                Aguardando início...
+                {{ _('reveal_waiting') }}
             </div>
         </div>
     </div>
@@ -382,7 +401,7 @@
                     {{ _('admin_cancel') }}
                 </button>
                 <button type="submit" class="btn btn-success" style="font-weight: 700;">
-                    ✓ Confirmar e Liberar Placar
+                    {{ _('reveal_confirm_publish_btn') }}
                 </button>
             </div>
         </form>
@@ -398,6 +417,13 @@ const RAW_INITIAL_BOARD = {{ initial_board | tojson }};
 const QUESTIONS = {{ questions | tojson }};
 const BLIND_SUBMISSIONS = {{ blind_submissions | tojson }};
 const IS_REVEALED = {{ 'true' if contest.revealed else 'false' }};
+
+// Canonical Flask Avatar URL pattern via url_for
+const AVATAR_URL_TEMPLATE = "{{ url_for('auth.team_avatar', username='__USER__') }}";
+
+function getAvatarUrl(username) {
+    return AVATAR_URL_TEMPLATE.replace('__USER__', encodeURIComponent(username));
+}
 
 // State Variables
 let currentTeams = [];
@@ -459,9 +485,9 @@ function resetReveal() {
     const spotlightOutcome = document.getElementById('spotlight-outcome-box');
     const spotlightAvatar = document.getElementById('spotlight-avatar');
 
-    if (spotlightTitle) spotlightTitle.textContent = "Pronto para iniciar a revelação";
-    if (spotlightDesc) spotlightDesc.textContent = "Pressione 'Próxima Submissão' ou a barra de espaço para começar.";
-    if (spotlightOutcome) spotlightOutcome.innerHTML = `<div class="spotlight-outcome" style="background: rgba(255,255,255,0.08); color: var(--text-muted);">Aguardando...</div>`;
+    if (spotlightTitle) spotlightTitle.textContent = "{{ _('reveal_ready_title') }}";
+    if (spotlightDesc) spotlightDesc.textContent = "{{ _('reveal_ready_desc') }}";
+    if (spotlightOutcome) spotlightOutcome.innerHTML = `<div class="spotlight-outcome" style="background: rgba(255,255,255,0.08); color: var(--text-muted);">{{ _('reveal_waiting') }}</div>`;
     if (spotlightAvatar) spotlightAvatar.src = "{{ url_for('static', filename='favicon.svg') }}";
 
     const nextBtn = document.getElementById('btn-reveal-next');
@@ -517,7 +543,7 @@ function renderTable() {
 
         let nameCell = `<td class="team-name-col">
             <div class="team-cell-wrapper">
-                <img src="/avatar/${encodeURIComponent(team.username)}" alt="Avatar" class="table-avatar">
+                <img src="${getAvatarUrl(team.username)}" alt="" class="table-avatar" onerror="this.onerror=null; this.src='/static/favicon.svg';">
                 <strong>${escapeHtml(team.username)}</strong>
             </div>
         </td>`;
@@ -535,7 +561,7 @@ function renderTable() {
             td.className = 'cell-problem';
 
             if (prob.pending_blind > 0) {
-                td.classList.add('cell-pending-wrap');
+                td.className = 'cell-problem cell-pending';
                 td.innerHTML = `
                     <div class="cell-blind-pending">
                         ? <span class="pending-count">${prob.pending_blind}</span>
@@ -630,6 +656,7 @@ function revealNext() {
     const cellEl = document.getElementById(`cell-${targetTeam.team_id}-${sub.question_id}`);
     if (cellEl) {
         if (prob.pending_blind > 0) {
+            cellEl.className = 'cell-problem cell-pending';
             cellEl.innerHTML = `<div class="cell-blind-pending">? <span class="pending-count">${prob.pending_blind}</span></div>`;
         } else if (prob.solved) {
             cellEl.className = 'cell-problem cell-accepted';
@@ -643,6 +670,9 @@ function revealNext() {
                 <div class="cell-tries">-${prob.attempts}</div>
                 <div class="cell-min">--</div>
             `;
+        } else {
+            cellEl.className = 'cell-problem cell-empty';
+            cellEl.innerHTML = `<span class="cell-dot">&middot;</span>`;
         }
     }
 
@@ -681,7 +711,10 @@ function updateSpotlight(team, sub, isAccepted, rankChanged, oldRank, newRank) {
     const spotlightOutcome = document.getElementById('spotlight-outcome-box');
     const spotlightAvatar = document.getElementById('spotlight-avatar');
 
-    if (spotlightAvatar) spotlightAvatar.src = `/avatar/${encodeURIComponent(team.username)}`;
+    if (spotlightAvatar) {
+        spotlightAvatar.src = getAvatarUrl(team.username);
+        spotlightAvatar.onerror = function() { this.src = '/static/favicon.svg'; };
+    }
     if (spotlightTitle) spotlightTitle.textContent = team.username;
 
     if (spotlightDesc) {
@@ -885,11 +918,14 @@ function onRevealCompleted() {
 
     if (nextBtn) {
         nextBtn.disabled = true;
-        nextBtn.textContent = '✓ Revelação Concluída';
+        nextBtn.textContent = "{{ _('reveal_completed_btn') }}";
     }
 
     if (champion) {
-        if (spotlightAvatar) spotlightAvatar.src = `/avatar/${encodeURIComponent(champion.username)}`;
+        if (spotlightAvatar) {
+            spotlightAvatar.src = getAvatarUrl(champion.username);
+            spotlightAvatar.onerror = function() { this.src = '/static/favicon.svg'; };
+        }
         if (spotlightTitle) spotlightTitle.textContent = `👑 CAMPEÃO: ${champion.username}!`;
         if (spotlightDesc) spotlightDesc.textContent = `1º Lugar com ${champion.solved_count} problemas resolvidos e ${champion.total_penalty} minutos de penalidade.`;
         if (spotlightOutcome) {

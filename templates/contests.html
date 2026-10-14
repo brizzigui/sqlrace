@@ -18,10 +18,10 @@
                     <div class="contest-card active-card">
                         <div class="contest-card-header">
                             <h3>{{ c.title }}</h3>
-                            <div style="display: flex; gap: 4px; align-items: center;">
+                            <div class="contest-card-badges">
                                 <span class="badge active-badge">{{ _('arena_running') }}</span>
                                 {% if c.in_blind %}
-                                    <span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8;">❄️ Blind</span>
+                                    <span class="badge badge-blind">❄️ Blind</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -52,7 +52,9 @@
                     <div class="contest-card upcoming-card">
                         <div class="contest-card-header">
                             <h3>{{ c.title }}</h3>
-                            <span class="badge upcoming-badge">{{ _('arena_starts_soon') }}</span>
+                            <div class="contest-card-badges">
+                                <span class="badge upcoming-badge">{{ _('arena_starts_soon') }}</span>
+                            </div>
                         </div>
                         <p class="contest-desc">{{ c.description or _('default_no_description') }}</p>
                         <div class="contest-meta">
@@ -81,10 +83,10 @@
                     <div class="contest-card past-card">
                         <div class="contest-card-header">
                             <h3>{{ c.title }}</h3>
-                            <div style="display: flex; gap: 4px; align-items: center;">
+                            <div class="contest-card-badges">
                                 <span class="badge past-badge">{{ _('arena_ended') }}</span>
                                 {% if c.delayed_pending %}
-                                    <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b;">❄️ {{ _('admin_blind_frozen_status') }}</span>
+                                    <span class="badge badge-frozen">❄️ {{ _('admin_blind_frozen_status') }}</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -96,7 +98,7 @@
                             <a href="{{ url_for('contest.contest_dashboard', contest_id=c.id) }}" class="btn btn-outline btn-block">{{ _('arena_review') }}</a>
                             <a href="{{ url_for('leaderboard.show_leaderboard', contest_id=c.id) }}" class="btn btn-primary btn-block">{{ _('arena_leaderboard') }}</a>
                             {% if session.get('is_admin') and c.delayed_pending %}
-                                <a href="{{ url_for('admin.contest_reveal', contest_id=c.id) }}" class="btn btn-warning btn-block" style="margin-top: 6px;">🎉 {{ _('admin_reveal_scoreboard') }}</a>
+                                <a href="{{ url_for('admin.contest_reveal', contest_id=c.id) }}" class="btn btn-warning btn-block">🎉 {{ _('admin_reveal_scoreboard') }}</a>
                             {% endif %}
                         </div>
                     </div>

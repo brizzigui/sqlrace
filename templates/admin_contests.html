@@ -100,9 +100,9 @@
                                     <td>
                                         <strong>{{ c.title }}</strong>
                                         {% if c.delayed_pending %}
-                                            <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; font-size: 0.75rem; margin-left: 6px;">❄️ {{ _('admin_blind_frozen_status') }}</span>
+                                            <span class="badge badge-frozen" style="margin-left: 6px;">❄️ {{ _('admin_blind_frozen_status') }}</span>
                                         {% elif c.in_blind %}
-                                            <span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.75rem; margin-left: 6px;">❄️ Blind</span>
+                                            <span class="badge badge-blind" style="margin-left: 6px;">❄️ Blind</span>
                                         {% endif %}
                                     </td>
                                     <td>{{ c.start_time.strftime('%Y-%m-%d %H:%M') }}</td>

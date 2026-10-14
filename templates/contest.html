@@ -9,9 +9,9 @@
             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                 <h1>{{ contest.title }}</h1>
                 {% if contest.is_frozen %}
-                    <span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.8rem; padding: 4px 8px; border-radius: 4px;">❄️ {{ _('admin_blind_frozen_status') }}</span>
+                    <span class="badge badge-blind">❄️ {{ _('admin_blind_frozen_status') }}</span>
                 {% elif contest.is_admin_view %}
-                    <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; font-size: 0.8rem; padding: 4px 8px; border-radius: 4px;">⚡ {{ _('admin_blind_active') }} (Admin)</span>
+                    <span class="badge badge-frozen">⚡ {{ _('admin_blind_active') }} (Admin)</span>
                 {% endif %}
             </div>
             <p class="contest-subheader">{{ contest.description or _('default_contest_desc') }}</p>

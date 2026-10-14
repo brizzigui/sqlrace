@@ -2,19 +2,53 @@ from flask import Blueprint, render_template, request, jsonify, flash, redirect,
 from translations import translate as _
 from routes.auth import login_required
 from database import get_main_db
-from datetime import datetime
+from datetime import datetime, timedelta
 
 bp = Blueprint('leaderboard', __name__)
 
-def compute_contest_leaderboard(contest_id):
+def compute_contest_leaderboard(contest_id, is_admin=False, freeze_override=None):
+    now = datetime.now()
     with get_main_db() as cur:
-        # Get contest details
-        cur.execute("SELECT id, title, start_time, end_time FROM contests WHERE id = %s;", (contest_id,))
+        # Get contest details including blind configuration
+        cur.execute("""
+            SELECT id, title, start_time, end_time,
+                   COALESCE(blind_duration_minutes, 0),
+                   COALESCE(reveal_mode, 'immediate'),
+                   blind_started_at,
+                   COALESCE(revealed, FALSE)
+            FROM contests WHERE id = %s;
+        """, (contest_id,))
         contest = cur.fetchone()
         if not contest:
             return None, None, None
             
-        contest_id_val, title, start_time, end_time = contest
+        (contest_id_val, title, start_time, end_time, 
+         blind_duration, reveal_mode, blind_started_at, revealed) = contest
+         
+        # Ensure blind_started_at is calculated if duration is set
+        if blind_duration > 0 and not blind_started_at:
+            blind_started_at = end_time - timedelta(minutes=blind_duration)
+            
+        has_blind = (blind_duration > 0 and blind_started_at is not None)
+        
+        # Check automatic release for 'immediate' mode after contest end
+        if has_blind and reveal_mode == 'immediate' and now >= end_time and not revealed:
+            try:
+                cur.execute("UPDATE contests SET revealed = TRUE WHERE id = %s;", (contest_id,))
+                revealed = True
+            except Exception:
+                revealed = True
+                
+        # Determine blind states
+        in_blind_period = has_blind and (blind_started_at <= now < end_time)
+        delayed_pending = has_blind and (now >= end_time) and (reveal_mode == 'delayed') and (not revealed)
+        is_frozen_for_public = has_blind and (in_blind_period or delayed_pending)
+        
+        if freeze_override is not None:
+            is_frozen = freeze_override
+        else:
+            # Admins see real-time scoreboard unless explicit freeze override requested
+            is_frozen = is_frozen_for_public if not is_admin else False
         
         # Get questions for the contest via join table
         cur.execute("""
@@ -37,23 +71,28 @@ def compute_contest_leaderboard(contest_id):
         """, (contest_id,))
         teams = cur.fetchall()
         
-        # Get all submissions within the contest timeframe to this contest, sorted by time
+        # Cutoff timestamp: frozen scoreboard only considers submissions before blind_started_at
+        sub_cutoff = blind_started_at if (is_frozen and blind_started_at) else end_time
+        
         cur.execute("""
-            SELECT s.team_id, s.question_id, s.status, s.submitted_at 
+            SELECT s.id, s.team_id, s.question_id, s.status, s.submitted_at 
             FROM submissions s
-            WHERE s.contest_id = %s AND s.submitted_at BETWEEN %s AND %s
+            WHERE s.contest_id = %s AND s.submitted_at >= %s AND s.submitted_at <= %s
             ORDER BY s.submitted_at ASC;
-        """, (contest_id, start_time, end_time))
+        """, (contest_id, start_time, sub_cutoff))
         submissions = cur.fetchall()
 
     # Map team submissions
     team_subs = {t[0]: {q_id: [] for q_id in q_ids} for t in teams}
     for sub in submissions:
-        t_id, q_id, status, sub_time = sub
+        sub_id, t_id, q_id, status, sub_time = sub
         if t_id in team_subs and q_id in team_subs[t_id]:
+            is_blind_sub = has_blind and (sub_time >= blind_started_at and sub_time <= end_time)
             team_subs[t_id][q_id].append({
+                'id': sub_id,
                 'status': status,
-                'time': sub_time
+                'time': sub_time,
+                'is_blind_submission': is_blind_sub
             })
             
     board_data = []
@@ -107,7 +146,17 @@ def compute_contest_leaderboard(contest_id):
         'id': contest_id_val,
         'title': title,
         'start_time': start_time.isoformat(),
-        'end_time': end_time.isoformat()
+        'end_time': end_time.isoformat(),
+        'blind_duration_minutes': blind_duration,
+        'reveal_mode': reveal_mode,
+        'blind_started_at': blind_started_at.isoformat() if blind_started_at else None,
+        'revealed': revealed,
+        'has_blind': has_blind,
+        'in_blind_period': in_blind_period,
+        'delayed_pending': delayed_pending,
+        'is_frozen': is_frozen,
+        'is_frozen_for_public': is_frozen_for_public,
+        'is_admin_view': (is_admin and is_frozen_for_public)
     }
     
     return contest_data, q_list, board_data
@@ -115,7 +164,17 @@ def compute_contest_leaderboard(contest_id):
 @bp.route('/contest/<int:contest_id>/leaderboard')
 @login_required
 def show_leaderboard(contest_id):
-    contest_data, questions, board_data = compute_contest_leaderboard(contest_id)
+    is_admin = session.get('is_admin', False)
+    view_param = request.args.get('view')
+    freeze_override = None
+    if is_admin and view_param == 'frozen':
+        freeze_override = True
+    elif is_admin and view_param == 'realtime':
+        freeze_override = False
+
+    contest_data, questions, board_data = compute_contest_leaderboard(
+        contest_id, is_admin=is_admin, freeze_override=freeze_override
+    )
     if not contest_data:
         flash(_('flash_contest_not_found'), 'danger')
         return redirect(url_for('contest.contests_list'))
@@ -130,7 +189,17 @@ def show_leaderboard(contest_id):
 @bp.route('/contest/<int:contest_id>/leaderboard/data')
 @login_required
 def leaderboard_json(contest_id):
-    contest_data, questions, board_data = compute_contest_leaderboard(contest_id)
+    is_admin = session.get('is_admin', False)
+    view_param = request.args.get('view')
+    freeze_override = None
+    if is_admin and view_param == 'frozen':
+        freeze_override = True
+    elif is_admin and view_param == 'realtime':
+        freeze_override = False
+
+    contest_data, questions, board_data = compute_contest_leaderboard(
+        contest_id, is_admin=is_admin, freeze_override=freeze_override
+    )
     if not contest_data:
         return jsonify({'error': _('flash_contest_not_found')}), 404
         

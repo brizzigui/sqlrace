@@ -294,7 +294,7 @@ function initSubmissionHandler() {
             }
 
             // Append to History Log
-            prependToHistory(queryValue, result.status, result.error_message, result.submitted_at);
+            prependToHistory(queryValue, result.status, result.error_message, result.submitted_at, result.is_blind_submission);
 
         } catch (err) {
             runBtn.disabled = false;
@@ -307,7 +307,7 @@ function initSubmissionHandler() {
     });
 }
 
-function prependToHistory(query, status, errorMessage, timeStr) {
+function prependToHistory(query, status, errorMessage, timeStr, isBlind = false) {
     const historyContainer = document.querySelector('.history-list');
     if (!historyContainer) return;
 
@@ -322,8 +322,12 @@ function prependToHistory(query, status, errorMessage, timeStr) {
 
     const header = document.createElement('div');
     header.className = 'history-item-header';
+    const blindBadge = isBlind ? '<span class="badge badge-blind-sub" style="font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); margin-left: 6px;">❄️ Blind</span>' : '';
     header.innerHTML = `
-        <span class="status-badge badge-${status.toLowerCase().replace(' ', '')}">${status}</span>
+        <div style="display: flex; align-items: center;">
+            <span class="status-badge badge-${status.toLowerCase().replace(' ', '')}">${status}</span>
+            ${blindBadge}
+        </div>
         <span class="history-time">${timeStr}</span>
     `;
 

@@ -33,6 +33,21 @@
                         <input type="datetime-local" id="end_time" name="end_time" required>
                     </div>
                 </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="blind_duration_minutes">{{ _('admin_blind_duration') }}</label>
+                        <input type="number" id="blind_duration_minutes" name="blind_duration_minutes" min="0" value="0" step="1">
+                        <small style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-top: 4px;">{{ _('admin_blind_duration_help') }}</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="reveal_mode">{{ _('admin_reveal_mode') }}</label>
+                        <select id="reveal_mode" name="reveal_mode" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-surface); color: var(--text-primary); font-size: 0.9rem;">
+                            <option value="immediate">{{ _('admin_reveal_immediate') }}</option>
+                            <option value="delayed">{{ _('admin_reveal_delayed') }}</option>
+                        </select>
+                    </div>
+                </div>
                 
                 <!-- Question Selection with Search -->
                 <div class="form-group">
@@ -69,26 +84,54 @@
                 <table class="admin-table" id="contests-table">
                     <thead>
                         <tr>
-                            <th style="width: 50px;">ID</th>
+                            <th style="width: 45px;">ID</th>
                             <th>{{ _('admin_contest_title') }}</th>
                             <th>{{ _('admin_start') }}</th>
                             <th>{{ _('admin_end') }}</th>
-                            <th style="width: 120px; text-align: center;">{{ _('admin_action') }}</th>
+                            <th>Blind</th>
+                            <th style="width: 150px; text-align: center;">{{ _('admin_action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% if contests %}
                             {% for c in contests %}
-                                <tr class="contest-row" data-name="{{ c[1]|lower }}">
-                                    <td>{{ c[0] }}</td>
-                                    <td><strong>{{ c[1] }}</strong></td>
-                                    <td>{{ c[3].strftime('%Y-%m-%d %H:%M') }}</td>
-                                    <td>{{ c[4].strftime('%Y-%m-%d %H:%M') }}</td>
+                                <tr class="contest-row" data-name="{{ c.title|lower }}">
+                                    <td>{{ c.id }}</td>
+                                    <td>
+                                        <strong>{{ c.title }}</strong>
+                                        {% if c.delayed_pending %}
+                                            <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; font-size: 0.75rem; margin-left: 6px;">❄️ {{ _('admin_blind_frozen_status') }}</span>
+                                        {% elif c.in_blind %}
+                                            <span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.75rem; margin-left: 6px;">❄️ Blind</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ c.start_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>{{ c.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>
+                                        {% if c.has_blind %}
+                                            <span style="font-size: 0.85rem;">{{ c.blind_duration_minutes }}m</span>
+                                            <small style="color: var(--text-muted); display: block; font-size: 0.75rem;">
+                                                {{ 'Immediate' if c.reveal_mode == 'immediate' else 'Delayed' }}
+                                                {% if c.revealed %}
+                                                    <span style="color: var(--color-accepted); font-weight: bold;"> (✓)</span>
+                                                {% endif %}
+                                            </small>
+                                        {% else %}
+                                            <span style="color: var(--text-muted); font-size: 0.85rem;">—</span>
+                                        {% endif %}
+                                    </td>
                                     <td style="text-align: center; vertical-align: middle;">
-                                        <div style="display: flex; gap: 8px; align-items: center; justify-content: center;">
-                                            <a href="{{ url_for('admin.edit_contest', contest_id=c[0]) }}" class="btn-text" style="font-size: 0.85rem; color: var(--primary-color); text-decoration: none;">{{ _('admin_edit') or 'Edit' }}</a>
+                                        <div style="display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap;">
+                                            {% if c.delayed_pending %}
+                                                <a href="{{ url_for('admin.contest_reveal', contest_id=c.id) }}" class="btn btn-xs btn-warning" style="font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; text-decoration: none;">🎉 {{ _('admin_reveal_scoreboard') }}</a>
+                                                <span style="color: var(--border-color);">|</span>
+                                            {% elif c.has_blind and c.is_ended and c.reveal_mode == 'delayed' and c.revealed %}
+                                                <a href="{{ url_for('admin.contest_reveal', contest_id=c.id) }}" class="btn-text" style="font-size: 0.8rem; color: var(--text-muted); text-decoration: none;" title="{{ _('reveal_already_published') }}">🔍 Reveal</a>
+                                                <span style="color: var(--border-color);">|</span>
+                                            {% endif %}
+                                            <a href="{{ url_for('admin.edit_contest', contest_id=c.id) }}" class="btn-text" style="font-size: 0.85rem; color: var(--primary-color); text-decoration: none;">{{ _('admin_edit') or 'Edit' }}</a>
                                             <span style="color: var(--border-color);">|</span>
-                                            <form action="{{ url_for('admin.delete_contest', contest_id=c[0]) }}" method="POST" onsubmit="return confirm('{{ _('admin_delete_confirm_c') }}');" style="margin: 0; display: inline;">
+                                            <form action="{{ url_for('admin.delete_contest', contest_id=c.id) }}" method="POST" onsubmit="return confirm('{{ _('admin_delete_confirm_c') }}');" style="margin: 0; display: inline;">
                                                 <button type="submit" class="btn-text btn-danger-text" style="font-size: 0.85rem;">{{ _('admin_delete') or 'Delete' }}</button>
                                             </form>
                                         </div>
@@ -97,7 +140,7 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="5" class="text-muted text-center">{{ _('admin_no_contests') }}</td>
+                                <td colspan="6" class="text-muted text-center">{{ _('admin_no_contests') }}</td>
                             </tr>
                         {% endif %}
                     </tbody>

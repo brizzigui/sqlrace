@@ -1,5 +1,5 @@
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from translations import translate as _
 from routes.auth import login_required
@@ -13,8 +13,15 @@ bp = Blueprint('contest', __name__)
 def contests_list():
     now = datetime.now()
     with get_main_db() as cur:
-        # Fetch all contests
-        cur.execute("SELECT id, title, description, start_time, end_time FROM contests ORDER BY start_time ASC;")
+        # Fetch all contests including blind settings
+        cur.execute("""
+            SELECT id, title, description, start_time, end_time,
+                   COALESCE(blind_duration_minutes, 0),
+                   COALESCE(reveal_mode, 'immediate'),
+                   blind_started_at,
+                   COALESCE(revealed, FALSE)
+            FROM contests ORDER BY start_time ASC;
+        """)
         all_contests = cur.fetchall()
         
     active = []
@@ -22,16 +29,29 @@ def contests_list():
     past = []
     
     for c in all_contests:
-        start = c[3]
-        end = c[4]
+        c_id, title, desc, start, end, blind_dur, reveal_mode, blind_started_at, revealed = c
+        has_blind = (blind_dur > 0)
+        if has_blind and not blind_started_at:
+            blind_started_at = end - timedelta(minutes=blind_dur)
+            
+        in_blind = has_blind and (blind_started_at and blind_started_at <= now < end)
+        delayed_pending = has_blind and (now >= end) and (reveal_mode == 'delayed') and (not revealed)
+        
         contest_dict = {
-            'id': c[0],
-            'title': c[1],
-            'description': c[2],
+            'id': c_id,
+            'title': title,
+            'description': desc,
             'start_time': start,
             'end_time': end,
             'start_formatted': start.strftime('%Y-%m-%d %H:%M:%S'),
-            'end_formatted': end.strftime('%Y-%m-%d %H:%M:%S')
+            'end_formatted': end.strftime('%Y-%m-%d %H:%M:%S'),
+            'blind_duration_minutes': blind_dur,
+            'reveal_mode': reveal_mode,
+            'blind_started_at': blind_started_at,
+            'revealed': revealed,
+            'has_blind': has_blind,
+            'in_blind': in_blind,
+            'delayed_pending': delayed_pending
         }
         if start <= now <= end:
             active.append(contest_dict)
@@ -46,16 +66,43 @@ def contests_list():
 @login_required
 def contest_dashboard(contest_id):
     team_id = session.get('team_id')
+    is_admin = session.get('is_admin', False)
     now = datetime.now()
     
     with get_main_db() as cur:
-        # Fetch contest details
-        cur.execute("SELECT id, title, description, start_time, end_time FROM contests WHERE id = %s;", (contest_id,))
+        # Fetch contest details with blind configuration
+        cur.execute("""
+            SELECT id, title, description, start_time, end_time,
+                   COALESCE(blind_duration_minutes, 0),
+                   COALESCE(reveal_mode, 'immediate'),
+                   blind_started_at,
+                   COALESCE(revealed, FALSE)
+            FROM contests WHERE id = %s;
+        """, (contest_id,))
         contest = cur.fetchone()
         if not contest:
             flash(_('flash_contest_not_found'), 'danger')
             return redirect(url_for('contest.contests_list'))
             
+        (c_id, c_title, c_desc, start_time, end_time,
+         blind_dur, reveal_mode, blind_started_at, revealed) = contest
+         
+        has_blind = (blind_dur > 0)
+        if has_blind and not blind_started_at:
+            blind_started_at = end_time - timedelta(minutes=blind_dur)
+            
+        # Automatic release for 'immediate' mode
+        if has_blind and reveal_mode == 'immediate' and now >= end_time and not revealed:
+            try:
+                cur.execute("UPDATE contests SET revealed = TRUE WHERE id = %s;", (contest_id,))
+                revealed = True
+            except Exception:
+                revealed = True
+                
+        in_blind_period = has_blind and (blind_started_at and blind_started_at <= now < end_time)
+        delayed_pending = has_blind and (now >= end_time) and (reveal_mode == 'delayed') and (not revealed)
+        is_frozen_for_public = has_blind and (in_blind_period or delayed_pending)
+        
         # Register participant (including admins)
         cur.execute("""
             INSERT INTO contest_participants (contest_id, team_id)
@@ -63,20 +110,23 @@ def contest_dashboard(contest_id):
             ON CONFLICT DO NOTHING;
         """, (contest_id, team_id))
             
+        # Solved count cutoff: if frozen and user is not admin, do not leak blind solves
+        sub_cutoff = blind_started_at if (is_frozen_for_public and not is_admin and blind_started_at) else end_time
+        
         # Fetch questions for this contest via the join table with solved count
         cur.execute("""
             SELECT q.id, q.title, q.difficulty, q.author,
                    COUNT(DISTINCT CASE WHEN s.status = 'Accepted' THEN s.team_id END) AS solved_count
             FROM questions q
             JOIN contest_questions cq ON q.id = cq.question_id
-            LEFT JOIN submissions s ON q.id = s.question_id AND s.contest_id = cq.contest_id
+            LEFT JOIN submissions s ON q.id = s.question_id AND s.contest_id = cq.contest_id AND s.submitted_at <= %s
             WHERE cq.contest_id = %s 
             GROUP BY q.id, q.title, q.difficulty, q.author
             ORDER BY q.id ASC;
-        """, (contest_id,))
+        """, (sub_cutoff, contest_id))
         questions = cur.fetchall()
         
-        # Check status for each question
+        # Check status for each question (user's individual results are always available to themselves)
         question_list = []
         for q in questions:
             q_id, q_title, q_difficulty, q_author, q_solved = q
@@ -104,9 +154,6 @@ def contest_dashboard(contest_id):
                 'status': status
             })
             
-    start_time = contest[3]
-    end_time = contest[4]
-    
     # Calculate contest state
     status_label = "Active"
     if now < start_time:
@@ -115,12 +162,21 @@ def contest_dashboard(contest_id):
         status_label = "Past"
         
     contest_data = {
-        'id': contest[0],
-        'title': contest[1],
-        'description': contest[2],
+        'id': c_id,
+        'title': c_title,
+        'description': c_desc,
         'start_time': start_time.isoformat(),
         'end_time': end_time.isoformat(),
-        'status': status_label
+        'status': status_label,
+        'blind_duration_minutes': blind_dur,
+        'reveal_mode': reveal_mode,
+        'blind_started_at': blind_started_at.isoformat() if blind_started_at else None,
+        'revealed': revealed,
+        'has_blind': has_blind,
+        'in_blind_period': in_blind_period,
+        'delayed_pending': delayed_pending,
+        'is_frozen': is_frozen_for_public if not is_admin else False,
+        'is_admin_view': (is_admin and is_frozen_for_public)
     }
     
     return render_template('contest.html', contest=contest_data, questions=question_list)
@@ -132,8 +188,15 @@ def question_details(contest_id, question_id):
     now = datetime.now()
     
     with get_main_db() as cur:
-        # Validate contest
-        cur.execute("SELECT id, start_time, end_time FROM contests WHERE id = %s;", (contest_id,))
+        # Validate contest with blind configuration
+        cur.execute("""
+            SELECT id, start_time, end_time,
+                   COALESCE(blind_duration_minutes, 0),
+                   COALESCE(reveal_mode, 'immediate'),
+                   blind_started_at,
+                   COALESCE(revealed, FALSE)
+            FROM contests WHERE id = %s;
+        """, (contest_id,))
         contest = cur.fetchone()
         if not contest:
             flash(_('flash_contest_not_found'), 'danger')
@@ -162,6 +225,18 @@ def question_details(contest_id, question_id):
         
     start_time = contest[1]
     end_time = contest[2]
+    blind_dur = contest[3]
+    reveal_mode = contest[4]
+    blind_started_at = contest[5]
+    revealed = bool(contest[6])
+
+    has_blind = (blind_dur > 0)
+    if has_blind and not blind_started_at:
+        blind_started_at = end_time - timedelta(minutes=blind_dur)
+
+    in_blind_period = has_blind and (blind_started_at and blind_started_at <= now < end_time)
+    delayed_pending = has_blind and (now >= end_time) and (reveal_mode == 'delayed') and (not revealed)
+    is_frozen = has_blind and (in_blind_period or delayed_pending)
     
     # Render question workspace
     q_data = {
@@ -173,22 +248,29 @@ def question_details(contest_id, question_id):
         'author': question[5] or ''
     }
     
-    # Format submissions
+    # Format submissions and expose is_blind_submission
     formatted_subs = []
     for sub in submissions:
+        sub_time = sub[4]
+        is_blind = has_blind and (blind_started_at and sub_time >= blind_started_at and sub_time <= end_time)
         formatted_subs.append({
             'id': sub[0],
             'query': sub[1],
             'status': sub[2],
             'error_message': sub[3],
-            'submitted_at': sub[4].strftime('%Y-%m-%d %H:%M:%S')
+            'submitted_at': sub_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'is_blind_submission': is_blind
         })
         
     contest_data = {
         'id': contest_id,
         'is_active': start_time <= now <= end_time,
         'start_time': start_time.isoformat(),
-        'end_time': end_time.isoformat()
+        'end_time': end_time.isoformat(),
+        'has_blind': has_blind,
+        'in_blind_period': in_blind_period,
+        'delayed_pending': delayed_pending,
+        'is_frozen': is_frozen
     }
     
     return render_template('question_editor.html', practice_mode=False, contest=contest_data, question=q_data, submissions=formatted_subs, hide_footer=True)
@@ -213,16 +295,24 @@ def submit_query(contest_id, question_id):
         
     with get_main_db() as cur:
         # Check contest status
-        cur.execute("SELECT start_time, end_time FROM contests WHERE id = %s;", (contest_id,))
+        cur.execute("""
+            SELECT start_time, end_time,
+                   COALESCE(blind_duration_minutes, 0),
+                   blind_started_at
+            FROM contests WHERE id = %s;
+        """, (contest_id,))
         contest = cur.fetchone()
         if not contest:
             return jsonify({'status': 'Runtime Error', 'error_message': _('flash_contest_not_found')}), 404
             
-        start_time, end_time = contest
+        start_time, end_time, blind_dur, blind_started_at = contest
         if now < start_time:
             return jsonify({'status': 'Runtime Error', 'error_message': _('error_contest_upcoming')}), 403
         if now > end_time:
             return jsonify({'status': 'Runtime Error', 'error_message': _('error_contest_ended')}), 403
+
+        if blind_dur > 0 and not blind_started_at:
+            blind_started_at = end_time - timedelta(minutes=blind_dur)
             
         # Get question details associated with contest
         cur.execute("""
@@ -255,6 +345,8 @@ def submit_query(contest_id, question_id):
     serializable_rows = []
     for r in user_rows:
         serializable_rows.append([str(val) if val is not None else None for val in r])
+
+    is_blind_sub = (blind_dur > 0 and blind_started_at is not None and sub_time >= blind_started_at and sub_time <= end_time)
         
     return jsonify({
         'submission_id': sub_id,
@@ -262,7 +354,8 @@ def submit_query(contest_id, question_id):
         'status': status,
         'error_message': error_message,
         'columns': user_cols,
-        'rows': serializable_rows[:100]
+        'rows': serializable_rows[:100],
+        'is_blind_submission': is_blind_sub
     })
 
 @bp.route('/questions')

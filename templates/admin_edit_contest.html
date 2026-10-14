@@ -30,6 +30,39 @@
                     <input type="datetime-local" id="end_time" name="end_time" value="{{ contest.end_time }}" required>
                 </div>
             </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="blind_duration_minutes">{{ _('admin_blind_duration') }}</label>
+                    <input type="number" id="blind_duration_minutes" name="blind_duration_minutes" min="0" value="{{ contest.blind_duration_minutes or 0 }}" step="1">
+                    <small style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-top: 4px;">{{ _('admin_blind_duration_help') }}</small>
+                </div>
+                <div class="form-group">
+                    <label for="reveal_mode">{{ _('admin_reveal_mode') }}</label>
+                    <select id="reveal_mode" name="reveal_mode" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-surface); color: var(--text-primary); font-size: 0.9rem;">
+                        <option value="immediate" {% if contest.reveal_mode == 'immediate' %}selected{% endif %}>{{ _('admin_reveal_immediate') }}</option>
+                        <option value="delayed" {% if contest.reveal_mode == 'delayed' %}selected{% endif %}>{{ _('admin_reveal_delayed') }}</option>
+                    </select>
+                </div>
+            </div>
+            
+            {% if contest.is_ended and contest.reveal_mode == 'delayed' %}
+                <div class="alert alert-info fade-in" style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <strong>🎉 {{ _('reveal_title') }}</strong>
+                        <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: var(--text-secondary);">
+                            {% if contest.revealed %}
+                                {{ _('reveal_already_published') }}
+                            {% else %}
+                                {{ _('blind_delayed_banner_desc') }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <a href="{{ url_for('admin.contest_reveal', contest_id=contest.id) }}" class="btn btn-sm btn-warning">
+                        🎉 {{ _('admin_reveal_scoreboard') }}
+                    </a>
+                </div>
+            {% endif %}
             
             <!-- Question Selection with Search -->
             <div class="form-group">

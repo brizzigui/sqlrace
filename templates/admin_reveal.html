@@ -1,0 +1,979 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ _('reveal_title') }} - {{ contest.title }} - SQL Race{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Reveal Screen Custom Styles */
+.reveal-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 16px;
+}
+
+.reveal-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.reveal-title-wrap h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.reveal-control-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.reveal-btn-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.reveal-stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    font-size: 0.9rem;
+}
+
+.reveal-spotlight {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 18px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.spotlight-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.spotlight-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    border: 2px solid var(--primary-color);
+    background: #000;
+}
+
+.spotlight-details h3 {
+    margin: 0 0 4px 0;
+    font-size: 1.25rem;
+    color: #fff;
+}
+
+.spotlight-meta {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.spotlight-outcome {
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 8px 18px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.outcome-ac {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+    border: 1px solid #22c55e;
+    animation: pulseGlow 1.5s infinite;
+}
+
+.outcome-wa {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border: 1px solid #ef4444;
+}
+
+.outcome-champion {
+    background: linear-gradient(135deg, rgba(234, 179, 8, 0.3), rgba(245, 158, 11, 0.2));
+    color: #fef08a;
+    border: 1px solid #eab308;
+    box-shadow: 0 0 20px rgba(234, 179, 8, 0.4);
+}
+
+@keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 15px rgba(34, 197, 94, 0.3); }
+    50% { box-shadow: 0 0 30px rgba(34, 197, 94, 0.6); }
+}
+
+/* Problem cell blind pending style */
+.cell-blind-pending {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.5);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    animation: pendingPulse 2s infinite ease-in-out;
+}
+
+@keyframes pendingPulse {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50% { transform: scale(1.05); opacity: 1; }
+}
+
+/* Row animations */
+.leaderboard-table tbody tr {
+    transition: transform 0.6s cubic-bezier(0.2, 0.9, 0.3, 1), background-color 0.4s ease;
+}
+
+.row-highlight-active {
+    background: rgba(56, 189, 248, 0.15) !important;
+    box-shadow: inset 0 0 0 2px #38bdf8;
+}
+
+.row-climb-up {
+    background: rgba(34, 197, 94, 0.2) !important;
+    box-shadow: inset 0 0 0 2px #22c55e;
+}
+
+.rank-jump-indicator {
+    display: inline-block;
+    color: #4ade80;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-left: 4px;
+    animation: fadeIn 0.4s ease;
+}
+
+/* Modal styles */
+.reveal-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+.reveal-modal-overlay.active {
+    display: flex;
+}
+
+.reveal-modal {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    max-width: 520px;
+    width: 90%;
+    padding: 24px;
+    box-shadow: var(--shadow-lg);
+}
+
+.reveal-modal h3 {
+    margin: 0 0 12px 0;
+    color: #fff;
+    font-size: 1.3rem;
+}
+
+.reveal-modal p {
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+.confetti-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    pointer-events: none;
+    z-index: 9998;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+
+<div class="reveal-container fade-in">
+    <!-- Top Header -->
+    <div class="reveal-header-bar">
+        <div class="reveal-title-wrap">
+            <a href="{{ url_for('admin.admin_contests') }}" class="back-link" style="color: var(--primary-color); text-decoration: none; display: inline-block; margin-bottom: 8px;">&larr; {{ _('leaderboard_back') }}</a>
+            <h1>
+                🏆 {{ contest.title }} - {{ _('reveal_title') }}
+                {% if contest.revealed %}
+                    <span class="badge" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #22c55e; font-size: 0.85rem; padding: 4px 10px; border-radius: 6px;">
+                        ✓ {{ _('admin_scoreboard_revealed') }}
+                    </span>
+                {% else %}
+                    <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; font-size: 0.85rem; padding: 4px 10px; border-radius: 6px;">
+                        🔒 {{ _('admin_reveal_delayed') }}
+                    </span>
+                {% endif %}
+            </h1>
+            <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem;">
+                {{ _('reveal_subtitle') }}
+            </p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="{{ url_for('leaderboard.show_leaderboard', contest_id=contest.id) }}" class="btn btn-outline" target="_blank">
+                🌐 Ver Placar Público
+            </a>
+        </div>
+    </div>
+
+    <!-- Status Banner -->
+    {% if contest.revealed %}
+        <div class="alert alert-success fade-in" style="margin-bottom: 24px; border-left: 4px solid #22c55e; background: rgba(34, 197, 94, 0.1);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 1.5rem;">✅</span>
+                <div>
+                    <strong>{{ _('reveal_already_published') }}</strong>
+                    <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: var(--text-secondary);">
+                        Todos os participantes agora têm acesso ao placar final completo com as submissões do blind.
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-warning fade-in" style="margin-bottom: 24px; border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.1);">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 1.5rem;">🔒</span>
+                    <div>
+                        <strong>Modo de Revelação Privada (Admin)</strong>
+                        <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: var(--text-secondary);">
+                            O placar permanece congelado para todos os outros usuários. As revelações e animações nesta tela são estritamente locais até que você clique em <strong>"{{ _('reveal_publish_btn') }}"</strong>.
+                        </p>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-success btn-lg" onclick="openPublishModal()" style="font-weight: 700; padding: 10px 20px;">
+                    🚀 {{ _('reveal_publish_btn') }}
+                </button>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Control Toolbar Card -->
+    <div class="reveal-control-card">
+        <div class="reveal-btn-group">
+            <button id="btn-reveal-next" class="btn btn-primary" onclick="revealNext()" style="font-weight: 700; padding: 10px 20px;">
+                ▶ {{ _('reveal_next_submission') }} <small style="opacity: 0.8; margin-left: 4px;">(Espaço)</small>
+            </button>
+            <button id="btn-auto-play" class="btn btn-outline" onclick="toggleAutoPlay()">
+                ⚡ {{ _('reveal_auto_play') }}
+            </button>
+            <button id="btn-reveal-all" class="btn btn-outline" onclick="revealAll()">
+                ⏩ {{ _('reveal_all') }}
+            </button>
+            <button id="btn-reset" class="btn btn-outline" onclick="resetReveal()">
+                🔄 {{ _('reveal_reset') }}
+            </button>
+        </div>
+
+        <div class="reveal-btn-group">
+            <div class="reveal-stat-badge">
+                <span>{{ _('reveal_step_info') }}:</span>
+                <strong id="stat-pending-subs" style="color: #fbbf24; font-size: 1.1rem;">0</strong>
+            </div>
+            {% if not contest.revealed %}
+                <button type="button" id="btn-publish-bar" class="btn btn-success" onclick="openPublishModal()" style="font-weight: 700;">
+                    🚀 {{ _('reveal_publish_btn') }}
+                </button>
+            {% else %}
+                <button class="btn btn-secondary" disabled>
+                    ✓ {{ _('admin_scoreboard_revealed') }}
+                </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Spotlight / Event Bar -->
+    <div class="reveal-spotlight" id="reveal-spotlight">
+        <div class="spotlight-info">
+            <img id="spotlight-avatar" src="{{ url_for('static', filename='favicon.svg') }}" alt="Avatar" class="spotlight-avatar">
+            <div class="spotlight-details">
+                <h3 id="spotlight-team-name">Pronto para iniciar a revelação</h3>
+                <div class="spotlight-meta" id="spotlight-desc">
+                    Pressione "Próxima Submissão" ou a barra de espaço para começar a revelar a partir do último colocado.
+                </div>
+            </div>
+        </div>
+        <div id="spotlight-outcome-box">
+            <div class="spotlight-outcome" style="background: rgba(255,255,255,0.08); color: var(--text-muted);">
+                Aguardando início...
+            </div>
+        </div>
+    </div>
+
+    <!-- The Scoreboard Table -->
+    <div class="leaderboard-card">
+        <div class="leaderboard-table-wrapper">
+            <table class="leaderboard-table" id="reveal-table">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">{{ _('leaderboard_rank') }}</th>
+                        <th>{{ _('leaderboard_team') }}</th>
+                        <th style="width: 100px; text-align: center;">{{ _('leaderboard_solved') }}</th>
+                        <th style="width: 120px; text-align: center;">{{ _('leaderboard_penalty') }}</th>
+                        {% for q in questions %}
+                            <th class="problem-col-header" title="{{ q.title }}">
+                                <span class="problem-letter">{{ loop.index }}</span>
+                                <small class="problem-short-name">{{ q.title[:15] }}{% if q.title|length > 15 %}...{% endif %}</small>
+                            </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody id="reveal-table-body">
+                    <!-- Populated dynamically via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Confirm Publish to Everyone -->
+<div id="publish-modal" class="reveal-modal-overlay">
+    <div class="reveal-modal fade-in">
+        <h3>🚀 {{ _('reveal_publish_btn') }}</h3>
+        <p>{{ _('reveal_publish_confirm') }}</p>
+        <form action="{{ url_for('admin.publish_contest_reveal', contest_id=contest.id) }}" method="POST">
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button type="button" class="btn btn-outline" onclick="closePublishModal()">
+                    {{ _('admin_cancel') }}
+                </button>
+                <button type="submit" class="btn btn-success" style="font-weight: 700;">
+                    ✓ Confirmar e Liberar Placar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Initial Data passed securely from Backend
+const CONTEST_ID = {{ contest.id }};
+const RAW_INITIAL_BOARD = {{ initial_board | tojson }};
+const QUESTIONS = {{ questions | tojson }};
+const BLIND_SUBMISSIONS = {{ blind_submissions | tojson }};
+const IS_REVEALED = {{ 'true' if contest.revealed else 'false' }};
+
+// State Variables
+let currentTeams = [];
+let pendingByTeam = {};
+let autoPlayInterval = null;
+let isFinished = false;
+
+// Initialize on Load
+document.addEventListener('DOMContentLoaded', () => {
+    resetReveal();
+
+    // Keyboard Spacebar Listener for reveal next
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            revealNext();
+        }
+    });
+});
+
+function resetReveal() {
+    stopAutoPlay();
+    isFinished = false;
+
+    // Deep clone initial board
+    currentTeams = JSON.parse(JSON.stringify(RAW_INITIAL_BOARD));
+
+    // Group blind submissions by team in chronological order
+    pendingByTeam = {};
+    currentTeams.forEach(t => {
+        pendingByTeam[t.team_id] = [];
+    });
+
+    BLIND_SUBMISSIONS.forEach(sub => {
+        if (!pendingByTeam[sub.team_id]) {
+            pendingByTeam[sub.team_id] = [];
+        }
+        pendingByTeam[sub.team_id].push(sub);
+    });
+
+    // Mark pending counts on initial problem cells
+    currentTeams.forEach(team => {
+        const teamSubs = pendingByTeam[team.team_id] || [];
+        QUESTIONS.forEach(q => {
+            const prob = team.problems[q.id];
+            if (prob) {
+                const countForProb = teamSubs.filter(s => s.question_id === q.id).length;
+                prob.pending_blind = countForProb;
+            }
+        });
+    });
+
+    renderTable();
+    updatePendingStats();
+
+    // Reset Spotlight
+    const spotlightTitle = document.getElementById('spotlight-team-name');
+    const spotlightDesc = document.getElementById('spotlight-desc');
+    const spotlightOutcome = document.getElementById('spotlight-outcome-box');
+    const spotlightAvatar = document.getElementById('spotlight-avatar');
+
+    if (spotlightTitle) spotlightTitle.textContent = "Pronto para iniciar a revelação";
+    if (spotlightDesc) spotlightDesc.textContent = "Pressione 'Próxima Submissão' ou a barra de espaço para começar.";
+    if (spotlightOutcome) spotlightOutcome.innerHTML = `<div class="spotlight-outcome" style="background: rgba(255,255,255,0.08); color: var(--text-muted);">Aguardando...</div>`;
+    if (spotlightAvatar) spotlightAvatar.src = "{{ url_for('static', filename='favicon.svg') }}";
+
+    const nextBtn = document.getElementById('btn-reveal-next');
+    if (nextBtn) {
+        nextBtn.disabled = false;
+        nextBtn.innerHTML = `▶ {{ _('reveal_next_submission') }} <small style="opacity: 0.8; margin-left: 4px;">(Espaço)</small>`;
+    }
+}
+
+function updatePendingStats() {
+    let totalPending = 0;
+    Object.values(pendingByTeam).forEach(subs => {
+        totalPending += subs.length;
+    });
+
+    const statEl = document.getElementById('stat-pending-subs');
+    if (statEl) {
+        statEl.textContent = totalPending;
+    }
+
+    if (totalPending === 0 && !isFinished) {
+        onRevealCompleted();
+    }
+}
+
+function renderTable() {
+    const tbody = document.getElementById('reveal-table-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    if (currentTeams.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${4 + QUESTIONS.length}" class="text-center text-muted" style="padding: 40px;">Nenhuma equipe registrada.</td></tr>`;
+        return;
+    }
+
+    currentTeams.forEach(team => {
+        const tr = document.createElement('tr');
+        tr.className = 'leaderboard-row';
+        tr.id = `team-row-${team.team_id}`;
+        tr.dataset.teamId = team.team_id;
+
+        // Rank
+        let rankVal = team.rank;
+        if (team.rank === 1) rankVal = '🥇';
+        else if (team.rank === 2) rankVal = '🥈';
+        else if (team.rank === 3) rankVal = '🥉';
+
+        let rankCell = `<td class="rank-col" id="rank-cell-${team.team_id}">
+            <span class="rank-number">${rankVal}</span>
+            <span class="rank-jump-placeholder"></span>
+        </td>`;
+
+        let nameCell = `<td class="team-name-col">
+            <div class="team-cell-wrapper">
+                <img src="/avatar/${encodeURIComponent(team.username)}" alt="Avatar" class="table-avatar">
+                <strong>${escapeHtml(team.username)}</strong>
+            </div>
+        </td>`;
+
+        let solvedCell = `<td class="solved-col" id="solved-cell-${team.team_id}">${team.solved_count}</td>`;
+        let penaltyCell = `<td class="penalty-col" id="penalty-cell-${team.team_id}">${team.total_penalty}</td>`;
+
+        tr.innerHTML = rankCell + nameCell + solvedCell + penaltyCell;
+
+        // Problems
+        QUESTIONS.forEach(q => {
+            const prob = team.problems[q.id] || { solved: false, attempts: 0, penalty: 0, pending_blind: 0 };
+            const td = document.createElement('td');
+            td.id = `cell-${team.team_id}-${q.id}`;
+            td.className = 'cell-problem';
+
+            if (prob.pending_blind > 0) {
+                td.classList.add('cell-pending-wrap');
+                td.innerHTML = `
+                    <div class="cell-blind-pending">
+                        ? <span class="pending-count">${prob.pending_blind}</span>
+                    </div>
+                `;
+            } else if (prob.solved) {
+                td.classList.add('cell-accepted');
+                td.innerHTML = `
+                    <div class="cell-tries">+${prob.attempts - 1}</div>
+                    <div class="cell-min">${prob.penalty}</div>
+                `;
+            } else if (prob.attempts > 0) {
+                td.classList.add('cell-failed');
+                td.innerHTML = `
+                    <div class="cell-tries">-${prob.attempts}</div>
+                    <div class="cell-min">--</div>
+                `;
+            } else {
+                td.classList.add('cell-empty');
+                td.innerHTML = `<span class="cell-dot">&middot;</span>`;
+            }
+
+            tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+    });
+}
+
+function revealNext() {
+    if (isFinished) return;
+
+    // 1. Find the current lowest-ranked team with pending blind submissions
+    let targetTeam = null;
+    let worstRank = -1;
+
+    for (const team of currentTeams) {
+        const pending = pendingByTeam[team.team_id] || [];
+        if (pending.length > 0) {
+            if (team.rank > worstRank) {
+                worstRank = team.rank;
+                targetTeam = team;
+            }
+        }
+    }
+
+    if (!targetTeam) {
+        onRevealCompleted();
+        return;
+    }
+
+    // 2. Take the next submission for that team
+    const sub = pendingByTeam[targetTeam.team_id].shift();
+    if (!sub) {
+        updatePendingStats();
+        return;
+    }
+
+    const prob = targetTeam.problems[sub.question_id];
+    if (prob && prob.pending_blind > 0) {
+        prob.pending_blind -= 1;
+    }
+
+    const oldRank = targetTeam.rank;
+    const oldSolved = targetTeam.solved_count;
+    let isAccepted = false;
+    let rankChanged = false;
+
+    // 3. Process submission impact (if problem wasn't already solved)
+    if (!prob.solved) {
+        if (sub.is_ac) {
+            isAccepted = true;
+            prob.solved = true;
+            prob.attempts += 1;
+            prob.penalty = sub.elapsed_minutes + ((prob.attempts - 1) * 20);
+            targetTeam.solved_count += 1;
+            targetTeam.total_penalty += prob.penalty;
+        } else {
+            prob.attempts += 1;
+        }
+    }
+
+    // 4. Highlight the team row
+    clearRowHighlights();
+    const rowEl = document.getElementById(`team-row-${targetTeam.team_id}`);
+    if (rowEl) {
+        rowEl.classList.add('row-highlight-active');
+        rowEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // 5. Update Problem Cell
+    const cellEl = document.getElementById(`cell-${targetTeam.team_id}-${sub.question_id}`);
+    if (cellEl) {
+        if (prob.pending_blind > 0) {
+            cellEl.innerHTML = `<div class="cell-blind-pending">? <span class="pending-count">${prob.pending_blind}</span></div>`;
+        } else if (prob.solved) {
+            cellEl.className = 'cell-problem cell-accepted';
+            cellEl.innerHTML = `
+                <div class="cell-tries">+${prob.attempts - 1}</div>
+                <div class="cell-min">${prob.penalty}</div>
+            `;
+        } else if (prob.attempts > 0) {
+            cellEl.className = 'cell-problem cell-failed';
+            cellEl.innerHTML = `
+                <div class="cell-tries">-${prob.attempts}</div>
+                <div class="cell-min">--</div>
+            `;
+        }
+    }
+
+    // 6. Update Solved & Penalty in DOM
+    const solvedCell = document.getElementById(`solved-cell-${targetTeam.team_id}`);
+    const penaltyCell = document.getElementById(`penalty-cell-${targetTeam.team_id}`);
+    if (solvedCell) solvedCell.textContent = targetTeam.solved_count;
+    if (penaltyCell) penaltyCell.textContent = targetTeam.total_penalty;
+
+    // 7. Re-sort ranking: solved_count DESC, total_penalty ASC, username ASC
+    currentTeams.sort((a, b) => {
+        if (b.solved_count !== a.solved_count) return b.solved_count - a.solved_count;
+        if (a.total_penalty !== b.total_penalty) return a.total_penalty - b.total_penalty;
+        return a.username.localeCompare(b.username);
+    });
+
+    currentTeams.forEach((t, idx) => {
+        t.rank = idx + 1;
+    });
+
+    const newRank = targetTeam.rank;
+    rankChanged = (newRank < oldRank);
+
+    // 8. Update Spotlight Display
+    updateSpotlight(targetTeam, sub, isAccepted, rankChanged, oldRank, newRank);
+
+    // 9. Reorder Table Rows with Smooth Animation (FLIP Technique)
+    animateRowPositions(targetTeam.team_id, rankChanged, oldRank, newRank);
+
+    updatePendingStats();
+}
+
+function updateSpotlight(team, sub, isAccepted, rankChanged, oldRank, newRank) {
+    const spotlightTitle = document.getElementById('spotlight-team-name');
+    const spotlightDesc = document.getElementById('spotlight-desc');
+    const spotlightOutcome = document.getElementById('spotlight-outcome-box');
+    const spotlightAvatar = document.getElementById('spotlight-avatar');
+
+    if (spotlightAvatar) spotlightAvatar.src = `/avatar/${encodeURIComponent(team.username)}`;
+    if (spotlightTitle) spotlightTitle.textContent = team.username;
+
+    if (spotlightDesc) {
+        spotlightDesc.innerHTML = `Problema <strong>${escapeHtml(sub.question_title)}</strong> (Envio às ${sub.submitted_at})`;
+    }
+
+    if (spotlightOutcome) {
+        if (isAccepted) {
+            let rankText = rankChanged ? `▲ Subiu do ${oldRank}º para o ${newRank}º lugar!` : `Permanece em ${newRank}º lugar.`;
+            spotlightOutcome.innerHTML = `
+                <div class="spotlight-outcome outcome-ac">
+                    <span>🟢 ACCEPTED!</span>
+                    <span style="font-size: 0.95rem; font-weight: normal; margin-left: 6px;">${rankText}</span>
+                </div>
+            `;
+        } else {
+            spotlightOutcome.innerHTML = `
+                <div class="spotlight-outcome outcome-wa">
+                    <span>🔴 REJECTED</span>
+                    <span style="font-size: 0.95rem; font-weight: normal; margin-left: 6px;">Permanece em ${team.rank}º lugar.</span>
+                </div>
+            `;
+        }
+    }
+}
+
+function animateRowPositions(activeTeamId, rankChanged, oldRank, newRank) {
+    const tbody = document.getElementById('reveal-table-body');
+    if (!tbody) return;
+
+    // Record initial top positions
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const firstPositions = {};
+    rows.forEach(r => {
+        firstPositions[r.dataset.teamId] = r.getBoundingClientRect().top;
+    });
+
+    // Reorder DOM elements according to currentTeams order
+    currentTeams.forEach(t => {
+        const row = document.getElementById(`team-row-${t.team_id}`);
+        if (row) {
+            tbody.appendChild(row);
+
+            // Update rank cell text
+            const rankCell = document.getElementById(`rank-cell-${t.team_id}`);
+            if (rankCell) {
+                let rankVal = t.rank;
+                if (t.rank === 1) rankVal = '🥇';
+                else if (t.rank === 2) rankVal = '🥈';
+                else if (t.rank === 3) rankVal = '🥉';
+
+                const rankNumEl = rankCell.querySelector('.rank-number');
+                if (rankNumEl) rankNumEl.textContent = rankVal;
+
+                const jumpEl = rankCell.querySelector('.rank-jump-placeholder');
+                if (t.team_id === activeTeamId && rankChanged && jumpEl) {
+                    jumpEl.innerHTML = `<span class="rank-jump-indicator">▲ +${oldRank - newRank}</span>`;
+                    setTimeout(() => {
+                        jumpEl.innerHTML = '';
+                    }, 3000);
+                }
+            }
+        }
+    });
+
+    // Animate difference (FLIP)
+    currentTeams.forEach(t => {
+        const row = document.getElementById(`team-row-${t.team_id}`);
+        if (row && firstPositions[t.team_id] !== undefined) {
+            const lastPos = row.getBoundingClientRect().top;
+            const deltaY = firstPositions[t.team_id] - lastPos;
+
+            if (deltaY !== 0) {
+                row.style.transition = 'none';
+                row.style.transform = `translateY(${deltaY}px)`;
+                if (t.team_id === activeTeamId) {
+                    row.classList.add('row-climb-up');
+                }
+
+                requestAnimationFrame(() => {
+                    row.style.transition = 'transform 0.7s cubic-bezier(0.2, 0.9, 0.3, 1), background-color 0.5s ease';
+                    row.style.transform = 'translateY(0)';
+                    setTimeout(() => {
+                        row.classList.remove('row-climb-up');
+                    }, 1500);
+                });
+            }
+        }
+    });
+}
+
+function clearRowHighlights() {
+    document.querySelectorAll('.row-highlight-active').forEach(r => r.classList.remove('row-highlight-active'));
+}
+
+function toggleAutoPlay() {
+    if (autoPlayInterval) {
+        stopAutoPlay();
+    } else {
+        startAutoPlay();
+    }
+}
+
+function startAutoPlay() {
+    const btn = document.getElementById('btn-auto-play');
+    if (btn) {
+        btn.textContent = '⏸ ' + "{{ _('reveal_pause') }}";
+        btn.classList.add('btn-primary');
+        btn.classList.remove('btn-outline');
+    }
+    revealNext();
+    autoPlayInterval = setInterval(() => {
+        if (isFinished) {
+            stopAutoPlay();
+        } else {
+            revealNext();
+        }
+    }, 1600);
+}
+
+function stopAutoPlay() {
+    if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+        autoPlayInterval = null;
+    }
+    const btn = document.getElementById('btn-auto-play');
+    if (btn) {
+        btn.textContent = '⚡ ' + "{{ _('reveal_auto_play') }}";
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline');
+    }
+}
+
+function revealAll() {
+    stopAutoPlay();
+    while (!isFinished) {
+        // Fast step without delay
+        let targetTeam = null;
+        let worstRank = -1;
+
+        for (const team of currentTeams) {
+            const pending = pendingByTeam[team.team_id] || [];
+            if (pending.length > 0) {
+                if (team.rank > worstRank) {
+                    worstRank = team.rank;
+                    targetTeam = team;
+                }
+            }
+        }
+
+        if (!targetTeam) {
+            break;
+        }
+
+        const sub = pendingByTeam[targetTeam.team_id].shift();
+        if (!sub) continue;
+
+        const prob = targetTeam.problems[sub.question_id];
+        if (prob && prob.pending_blind > 0) {
+            prob.pending_blind -= 1;
+        }
+
+        if (!prob.solved) {
+            if (sub.is_ac) {
+                prob.solved = true;
+                prob.attempts += 1;
+                prob.penalty = sub.elapsed_minutes + ((prob.attempts - 1) * 20);
+                targetTeam.solved_count += 1;
+                targetTeam.total_penalty += prob.penalty;
+            } else {
+                prob.attempts += 1;
+            }
+        }
+
+        currentTeams.sort((a, b) => {
+            if (b.solved_count !== a.solved_count) return b.solved_count - a.solved_count;
+            if (a.total_penalty !== b.total_penalty) return a.total_penalty - b.total_penalty;
+            return a.username.localeCompare(b.username);
+        });
+
+        currentTeams.forEach((t, idx) => {
+            t.rank = idx + 1;
+        });
+    }
+
+    renderTable();
+    updatePendingStats();
+    onRevealCompleted();
+}
+
+function onRevealCompleted() {
+    isFinished = true;
+    stopAutoPlay();
+
+    const champion = currentTeams.length > 0 ? currentTeams[0] : null;
+    const spotlightTitle = document.getElementById('spotlight-team-name');
+    const spotlightDesc = document.getElementById('spotlight-desc');
+    const spotlightOutcome = document.getElementById('spotlight-outcome-box');
+    const spotlightAvatar = document.getElementById('spotlight-avatar');
+    const nextBtn = document.getElementById('btn-reveal-next');
+
+    if (nextBtn) {
+        nextBtn.disabled = true;
+        nextBtn.textContent = '✓ Revelação Concluída';
+    }
+
+    if (champion) {
+        if (spotlightAvatar) spotlightAvatar.src = `/avatar/${encodeURIComponent(champion.username)}`;
+        if (spotlightTitle) spotlightTitle.textContent = `👑 CAMPEÃO: ${champion.username}!`;
+        if (spotlightDesc) spotlightDesc.textContent = `1º Lugar com ${champion.solved_count} problemas resolvidos e ${champion.total_penalty} minutos de penalidade.`;
+        if (spotlightOutcome) {
+            spotlightOutcome.innerHTML = `
+                <div class="spotlight-outcome outcome-champion">
+                    🏆 {{ _('reveal_champion') }}
+                </div>
+            `;
+        }
+
+        // Highlight champion row
+        clearRowHighlights();
+        const champRow = document.getElementById(`team-row-${champion.team_id}`);
+        if (champRow) {
+            champRow.classList.add('row-highlight-active');
+        }
+
+        // Launch celebratory confetti
+        launchConfetti();
+    }
+}
+
+// Modal handling
+function openPublishModal() {
+    const modal = document.getElementById('publish-modal');
+    if (modal) modal.classList.add('active');
+}
+
+function closePublishModal() {
+    const modal = document.getElementById('publish-modal');
+    if (modal) modal.classList.remove('active');
+}
+
+// Confetti Particle System (Pure Canvas)
+function launchConfetti() {
+    const canvas = document.getElementById('confetti-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const pieces = [];
+    const numberOfPieces = 150;
+    const colors = ['#22c55e', '#38bdf8', '#eab308', '#ec4899', '#a855f7', '#f97316'];
+
+    for (let i = 0; i < numberOfPieces; i++) {
+        pieces.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            rotation: Math.random() * 360,
+            size: Math.random() * 8 + 4,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            speed: Math.random() * 4 + 3,
+            oscillationSpeed: Math.random() * 0.05 + 0.02
+        });
+    }
+
+    let animationId;
+    let frames = 0;
+
+    function renderConfetti() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => {
+            p.y += p.speed;
+            p.rotation += 2;
+            p.x += Math.sin(frames * p.oscillationSpeed) * 1.5;
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rotation * Math.PI) / 180);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            ctx.restore();
+        });
+
+        frames++;
+        if (frames < 300) {
+            animationId = requestAnimationFrame(renderConfetti);
+        } else {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    }
+
+    renderConfetti();
+}
+</script>
+{% endblock %}

@@ -81,6 +81,10 @@ def init_db():
             description TEXT,
             start_time TIMESTAMP NOT NULL,
             end_time TIMESTAMP NOT NULL,
+            blind_duration_minutes INT DEFAULT 0,
+            reveal_mode VARCHAR(20) DEFAULT 'immediate',
+            blind_started_at TIMESTAMP,
+            revealed BOOLEAN DEFAULT FALSE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """)
@@ -174,6 +178,19 @@ def init_db():
 
         # 5. Automatically rotate/prune audit logs older than 7 days
         cur.execute("DELETE FROM audit_logs WHERE timestamp < NOW() - INTERVAL '7 days';")
+
+        # 6. Add blind columns to contests table if they do not exist
+        cur.execute("ALTER TABLE contests ADD COLUMN IF NOT EXISTS blind_duration_minutes INT DEFAULT 0;")
+        cur.execute("ALTER TABLE contests ADD COLUMN IF NOT EXISTS reveal_mode VARCHAR(20) DEFAULT 'immediate';")
+        cur.execute("ALTER TABLE contests ADD COLUMN IF NOT EXISTS blind_started_at TIMESTAMP;")
+        cur.execute("ALTER TABLE contests ADD COLUMN IF NOT EXISTS revealed BOOLEAN DEFAULT FALSE;")
+
+        # Populate blind_started_at for existing contests where it is null
+        cur.execute("""
+        UPDATE contests 
+        SET blind_started_at = end_time - (COALESCE(blind_duration_minutes, 0) || ' minutes')::INTERVAL
+        WHERE blind_started_at IS NULL;
+        """)
 
         # 3. If questions still has contest_id, migrate data to contest_questions and submissions, then drop it
         cur.execute("""

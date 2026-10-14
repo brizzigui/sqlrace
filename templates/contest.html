@@ -6,7 +6,14 @@
 <div class="dashboard-container fade-in">
     <div class="contest-header-bar">
         <div>
-            <h1>{{ contest.title }}</h1>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <h1>{{ contest.title }}</h1>
+                {% if contest.is_frozen %}
+                    <span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.8rem; padding: 4px 8px; border-radius: 4px;">❄️ {{ _('admin_blind_frozen_status') }}</span>
+                {% elif contest.is_admin_view %}
+                    <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; font-size: 0.8rem; padding: 4px 8px; border-radius: 4px;">⚡ {{ _('admin_blind_active') }} (Admin)</span>
+                {% endif %}
+            </div>
             <p class="contest-subheader">{{ contest.description or _('default_contest_desc') }}</p>
         </div>
         <div class="header-right">
@@ -17,8 +24,50 @@
             <a href="{{ url_for('leaderboard.show_leaderboard', contest_id=contest.id) }}" class="btn btn-primary btn-icon">
                 {{ _('contest_scoreboard') }}
             </a>
+            {% if session.get('is_admin') and contest.delayed_pending %}
+                <a href="{{ url_for('admin.contest_reveal', contest_id=contest.id) }}" class="btn btn-warning btn-icon" style="margin-left: 8px;">
+                    🎉 {{ _('blind_admin_go_reveal') }}
+                </a>
+            {% endif %}
         </div>
     </div>
+
+    {% if contest.is_frozen %}
+        <div class="alert alert-info fade-in" style="margin-bottom: 24px; border-left: 4px solid #38bdf8; background: rgba(56, 189, 248, 0.1);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 1.5rem;">❄️</span>
+                <div>
+                    <strong>{{ _('blind_frozen_banner_title') }}</strong>
+                    <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: var(--text-secondary);">
+                        {% if contest.delayed_pending %}
+                            {{ _('blind_delayed_banner_desc') }}
+                        {% else %}
+                            {{ _('blind_frozen_banner_desc') }}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% elif contest.is_admin_view %}
+        <div class="alert alert-warning fade-in" style="margin-bottom: 24px; border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.1);">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 1.5rem;">👁️</span>
+                    <div>
+                        <strong>{{ _('blind_admin_view_banner') }}</strong>
+                        <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: var(--text-secondary);">
+                            {{ _('admin_blind_frozen_status') }}: {{ contest.blind_started_at }}
+                        </p>
+                    </div>
+                </div>
+                {% if contest.delayed_pending %}
+                    <a href="{{ url_for('admin.contest_reveal', contest_id=contest.id) }}" class="btn btn-sm btn-primary">
+                        🎉 {{ _('blind_admin_go_reveal') }}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
 
     <div class="contest-layout">
         <!-- Question List -->

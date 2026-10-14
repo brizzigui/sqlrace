@@ -11,7 +11,8 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash
 from routes.auth import admin_required
 from database import get_main_db, log_audit, main_pool, sandbox_pool
-from datetime import datetime
+from datetime import datetime, timedelta
+from routes.leaderboard import compute_contest_leaderboard
 
 bp = Blueprint('admin', __name__)
 
@@ -68,14 +69,47 @@ def admin_dashboard():
 @bp.route('/admin/contests')
 @admin_required
 def admin_contests():
+    now = datetime.now()
     with get_main_db() as cur:
-        # Get contests
-        cur.execute("SELECT id, title, description, start_time, end_time FROM contests ORDER BY start_time DESC;")
-        contests = cur.fetchall()
+        # Get contests with blind settings
+        cur.execute("""
+            SELECT id, title, description, start_time, end_time,
+                   COALESCE(blind_duration_minutes, 0),
+                   COALESCE(reveal_mode, 'immediate'),
+                   blind_started_at,
+                   COALESCE(revealed, FALSE)
+            FROM contests ORDER BY start_time DESC;
+        """)
+        contests_rows = cur.fetchall()
         
         # Get questions
         cur.execute("SELECT id, title, difficulty, visibility FROM questions ORDER BY id DESC;")
         questions = cur.fetchall()
+        
+    contests = []
+    for c in contests_rows:
+        c_id, c_title, c_desc, c_start, c_end, c_blind_dur, c_reveal_mode, c_blind_started_at, c_revealed = c
+        c_has_blind = (c_blind_dur > 0)
+        if c_has_blind and not c_blind_started_at:
+            c_blind_started_at = c_end - timedelta(minutes=c_blind_dur)
+        c_ended = (now >= c_end)
+        c_in_blind = c_has_blind and (c_blind_started_at and c_blind_started_at <= now < c_end)
+        c_delayed_pending = c_has_blind and c_ended and (c_reveal_mode == 'delayed') and (not c_revealed)
+        contests.append({
+            'id': c_id,
+            'title': c_title,
+            'description': c_desc,
+            'start_time': c_start,
+            'end_time': c_end,
+            'blind_duration_minutes': c_blind_dur,
+            'reveal_mode': c_reveal_mode,
+            'blind_started_at': c_blind_started_at,
+            'revealed': c_revealed,
+            'has_blind': c_has_blind,
+            'is_ended': c_ended,
+            'in_blind': c_in_blind,
+            'delayed_pending': c_delayed_pending
+        })
         
     return render_template('admin_contests.html', contests=contests, questions=questions)
 
@@ -119,6 +153,8 @@ def create_contest():
     start_time_raw = request.form.get('start_time', '').strip()
     end_time_raw = request.form.get('end_time', '').strip()
     question_ids = request.form.getlist('question_ids')
+    blind_duration_raw = request.form.get('blind_duration_minutes', '0').strip()
+    reveal_mode = request.form.get('reveal_mode', 'immediate').strip().lower()
     
     if not title or not start_time_raw or not end_time_raw:
         flash(_('flash_contest_fields_required'), 'danger')
@@ -131,12 +167,29 @@ def create_contest():
         if end_time <= start_time:
             flash(_('flash_contest_end_after_start'), 'danger')
             return redirect(url_for('admin.admin_contests'))
+
+        try:
+            blind_duration_minutes = int(blind_duration_raw) if blind_duration_raw else 0
+            if blind_duration_minutes < 0:
+                blind_duration_minutes = 0
+        except ValueError:
+            blind_duration_minutes = 0
+
+        contest_duration_mins = int((end_time - start_time).total_seconds() / 60)
+        if blind_duration_minutes > contest_duration_mins:
+            flash(_('flash_contest_blind_duration_too_long'), 'danger')
+            return redirect(url_for('admin.admin_contests'))
+
+        if reveal_mode not in ('immediate', 'delayed'):
+            reveal_mode = 'immediate'
+
+        blind_started_at = end_time - timedelta(minutes=blind_duration_minutes) if blind_duration_minutes > 0 else end_time
             
         with get_main_db() as cur:
             cur.execute("""
-                INSERT INTO contests (title, description, start_time, end_time)
-                VALUES (%s, %s, %s, %s) RETURNING id;
-            """, (title, description, start_time, end_time))
+                INSERT INTO contests (title, description, start_time, end_time, blind_duration_minutes, reveal_mode, blind_started_at, revealed)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, FALSE) RETURNING id;
+            """, (title, description, start_time, end_time, blind_duration_minutes, reveal_mode, blind_started_at))
             contest_id = cur.fetchone()[0]
             
             # Associate selected questions
@@ -163,6 +216,8 @@ def edit_contest(contest_id):
         start_time_raw = request.form.get('start_time', '').strip()
         end_time_raw = request.form.get('end_time', '').strip()
         question_ids = request.form.getlist('question_ids')
+        blind_duration_raw = request.form.get('blind_duration_minutes', '0').strip()
+        reveal_mode = request.form.get('reveal_mode', 'immediate').strip().lower()
         
         if not title or not start_time_raw or not end_time_raw:
             flash(_('flash_contest_fields_required'), 'danger')
@@ -176,12 +231,30 @@ def edit_contest(contest_id):
                 flash(_('flash_contest_end_after_start'), 'danger')
                 return redirect(url_for('admin.edit_contest', contest_id=contest_id))
                 
+            try:
+                blind_duration_minutes = int(blind_duration_raw) if blind_duration_raw else 0
+                if blind_duration_minutes < 0:
+                    blind_duration_minutes = 0
+            except ValueError:
+                blind_duration_minutes = 0
+
+            contest_duration_mins = int((end_time - start_time).total_seconds() / 60)
+            if blind_duration_minutes > contest_duration_mins:
+                flash(_('flash_contest_blind_duration_too_long'), 'danger')
+                return redirect(url_for('admin.edit_contest', contest_id=contest_id))
+
+            if reveal_mode not in ('immediate', 'delayed'):
+                reveal_mode = 'immediate'
+
+            blind_started_at = end_time - timedelta(minutes=blind_duration_minutes) if blind_duration_minutes > 0 else end_time
+
             with get_main_db() as cur:
                 cur.execute("""
                     UPDATE contests 
-                    SET title = %s, description = %s, start_time = %s, end_time = %s
+                    SET title = %s, description = %s, start_time = %s, end_time = %s,
+                        blind_duration_minutes = %s, reveal_mode = %s, blind_started_at = %s
                     WHERE id = %s;
-                """, (title, description, start_time, end_time, contest_id))
+                """, (title, description, start_time, end_time, blind_duration_minutes, reveal_mode, blind_started_at, contest_id))
                 
                 # Update questions association
                 cur.execute("DELETE FROM contest_questions WHERE contest_id = %s;", (contest_id,))
@@ -201,7 +274,14 @@ def edit_contest(contest_id):
             
     # GET request
     with get_main_db() as cur:
-        cur.execute("SELECT id, title, description, start_time, end_time FROM contests WHERE id = %s;", (contest_id,))
+        cur.execute("""
+            SELECT id, title, description, start_time, end_time,
+                   COALESCE(blind_duration_minutes, 0),
+                   COALESCE(reveal_mode, 'immediate'),
+                   blind_started_at,
+                   COALESCE(revealed, FALSE)
+            FROM contests WHERE id = %s;
+        """, (contest_id,))
         contest = cur.fetchone()
         if not contest:
             flash(_('flash_contest_not_found'), "danger")
@@ -220,7 +300,12 @@ def edit_contest(contest_id):
         'title': contest[1],
         'description': contest[2],
         'start_time': contest[3].strftime('%Y-%m-%dT%H:%M'),
-        'end_time': contest[4].strftime('%Y-%m-%dT%H:%M')
+        'end_time': contest[4].strftime('%Y-%m-%dT%H:%M'),
+        'blind_duration_minutes': contest[5],
+        'reveal_mode': contest[6],
+        'blind_started_at': contest[7].strftime('%Y-%m-%dT%H:%M') if contest[7] else '',
+        'revealed': contest[8],
+        'is_ended': datetime.now() >= contest[4]
     }
     
     return render_template(
@@ -229,6 +314,102 @@ def edit_contest(contest_id):
         questions=all_questions,
         associated_ids=associated_ids
     )
+
+@bp.route('/admin/contest/<int:contest_id>/reveal')
+@admin_required
+def contest_reveal(contest_id):
+    now = datetime.now()
+    with get_main_db() as cur:
+        cur.execute("""
+            SELECT id, title, description, start_time, end_time,
+                   COALESCE(blind_duration_minutes, 0),
+                   COALESCE(reveal_mode, 'immediate'),
+                   blind_started_at,
+                   COALESCE(revealed, FALSE)
+            FROM contests WHERE id = %s;
+        """, (contest_id,))
+        contest = cur.fetchone()
+        if not contest:
+            flash(_('flash_contest_not_found'), 'danger')
+            return redirect(url_for('admin.admin_contests'))
+
+        (c_id, title, desc, start_time, end_time,
+         blind_duration, reveal_mode, blind_started_at, revealed) = contest
+
+        # The reveal screen is only accessible after contest ends
+        if now < end_time:
+            flash(_('flash_reveal_only_after_contest'), 'warning')
+            return redirect(url_for('admin.admin_contests'))
+
+        if blind_duration > 0 and not blind_started_at:
+            blind_started_at = end_time - timedelta(minutes=blind_duration)
+        if not blind_started_at:
+            blind_started_at = end_time
+
+        # Compute initial frozen leaderboard as of blind_started_at
+        contest_data, questions, initial_board = compute_contest_leaderboard(contest_id, freeze_override=True)
+        # Compute final leaderboard (ground truth)
+        _, _, final_board = compute_contest_leaderboard(contest_id, freeze_override=False)
+
+        # Query all blind submissions between blind_started_at and end_time
+        cur.execute("""
+            SELECT s.id, s.team_id, t.username, s.question_id, q.title as question_title, s.status, s.submitted_at
+            FROM submissions s
+            JOIN teams t ON s.team_id = t.id
+            JOIN questions q ON s.question_id = q.id
+            WHERE s.contest_id = %s AND s.submitted_at >= %s AND s.submitted_at <= %s
+            ORDER BY s.submitted_at ASC;
+        """, (contest_id, blind_started_at, end_time))
+        blind_rows = cur.fetchall()
+
+    blind_submissions = []
+    for r in blind_rows:
+        sub_id, t_id, username, q_id, q_title, status, sub_time = r
+        is_ac = (status == 'Accepted')
+        elapsed_min = int((sub_time - start_time).total_seconds() / 60)
+        blind_submissions.append({
+            'id': sub_id,
+            'team_id': t_id,
+            'username': username,
+            'question_id': q_id,
+            'question_title': q_title,
+            'status': status,
+            'is_ac': is_ac,
+            'submitted_at': sub_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'elapsed_minutes': elapsed_min
+        })
+
+    return render_template(
+        'admin_reveal.html',
+        contest=contest_data,
+        questions=questions,
+        initial_board=initial_board,
+        final_board=final_board,
+        blind_submissions=blind_submissions
+    )
+
+@bp.route('/admin/contest/<int:contest_id>/publish_reveal', methods=['POST'])
+@admin_required
+def publish_contest_reveal(contest_id):
+    now = datetime.now()
+    with get_main_db() as cur:
+        cur.execute("SELECT id, title, end_time, revealed FROM contests WHERE id = %s;", (contest_id,))
+        contest = cur.fetchone()
+        if not contest:
+            flash(_('flash_contest_not_found'), 'danger')
+            return redirect(url_for('admin.admin_contests'))
+
+        c_id, title, end_time, revealed = contest
+
+        if now < end_time:
+            flash(_('flash_reveal_only_after_contest'), 'warning')
+            return redirect(url_for('admin.admin_contests'))
+
+        cur.execute("UPDATE contests SET revealed = TRUE WHERE id = %s;", (contest_id,))
+
+    log_audit('CONTEST', 'PUBLISH_REVEAL', f"Published final scoreboard for contest '{title}' (ID: {contest_id})", level='INFO', user_id=session.get('team_id'), username=session.get('username'), ip_address=request.remote_addr)
+    flash(_('flash_reveal_published_success'), 'success')
+    return redirect(url_for('leaderboard.show_leaderboard', contest_id=contest_id))
 
 @bp.route('/admin/question/create', methods=['POST'])
 @admin_required

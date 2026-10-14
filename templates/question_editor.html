@@ -29,6 +29,9 @@
                 <a href="{{ url_for('contest.contest_dashboard', contest_id=contest.id) }}" class="back-link">&larr; {{ _('editor_back') }}</a>
                 <div class="contest-timer-small">
                     {{ _('editor_ends_in') }}: <span class="contest-timer" data-endtime="{{ contest.end_time }}" data-starttime="{{ contest.start_time }}">{{ _('loading') }}</span>
+                    {% if contest.is_frozen %}
+                        <span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">❄️ {{ _('admin_blind_frozen_status') }}</span>
+                    {% endif %}
                 </div>
             {% endif %}
         </div>
@@ -140,7 +143,12 @@
                                 {% for sub in submissions %}
                                     <div class="history-item">
                                         <div class="history-item-header">
-                                            <span class="status-badge badge-{{ sub.status | lower }}">{{ sub.status }}</span>
+                                            <div style="display: flex; align-items: center;">
+                                                <span class="status-badge badge-{{ sub.status | lower }}">{{ sub.status }}</span>
+                                                {% if sub.is_blind_submission %}
+                                                    <span class="badge" style="font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); margin-left: 6px;">❄️ Blind</span>
+                                                {% endif %}
+                                            </div>
                                             <span class="history-time">{{ sub.submitted_at }}</span>
                                         </div>
                                         <div class="history-query-box">
